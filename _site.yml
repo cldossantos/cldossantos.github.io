@@ -1,7 +1,0 @@
-name: "my-website"
-output_dir: "."
-navbar:
-  title: "Caio dos Santos"
-  left:
-    - text: "Home"
-      href: index.html
