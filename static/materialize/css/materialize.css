@@ -9076,6 +9076,13 @@ input[type=range]::-ms-thumb {
 }
 
 .tiny-icon {
-  height: 2rem;
+  height: 3rem;
+}
+
+.right-divider{
+
+  border-right-color: gray;
+  border-right-style: solid;
+
 }
 
