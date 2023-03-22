@@ -9093,6 +9093,7 @@ input[type=range]::-ms-thumb {
   border-width: 0.5px;
   border-radius: 10px;
   display: inline-block;
+  overflow: hidden;
   height: 36px;
   line-height: 36px;
   padding: 0 16px;
