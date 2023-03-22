@@ -9079,10 +9079,36 @@ input[type=range]::-ms-thumb {
   height: 3rem;
 }
 
-.right-divider{
+.left-divider{
 
-  border-right-color: gray;
-  border-right-style: solid;
-
+  border-left-color: #e0e0e0;
+  border-left-style: solid;
+  border-left-width: 0.5px;
 }
+
+.button-react{
+  border-color: gray;
+  color:black;
+  border-style: solid;
+  border-width: 0.5px;
+  border-radius: 10px;
+  display: inline-block;
+  height: 36px;
+  line-height: 36px;
+  padding: 0 16px;
+  text-transform: uppercase;
+  vertical-align: middle;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.button-react:hover{
+  color: red;
+  border-color:red;
+  
+}
+
+.round-edges{
+  border-radius: 5%;
+}
+
 
