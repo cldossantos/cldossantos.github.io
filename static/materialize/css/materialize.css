@@ -2740,6 +2740,14 @@ video.responsive-video {
   line-height: 30px;
 }
 
+.pagination a:hover:not(.active) {
+  background-color: #ddd;
+  border-radius: 5px;
+  color: red;
+  text-decoration: underline;
+
+}
+
 .pagination li.active a {
   color: #fff;
 }
@@ -9112,4 +9120,17 @@ input[type=range]::-ms-thumb {
   border-radius: 5%;
 }
 
+
+a.disabled {
+  pointer-events: none;
+}
+
+span.disable-links {
+  pointer-events: none;
+}
+
+
+nav li a.active{
+  color: #fff;
+}
 
