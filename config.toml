@@ -1,0 +1,43 @@
+baseurl = "/"
+languageCode = "en-US"
+title = "Caio dos Santos"
+theme = "hugo-lithium"
+ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_cache$"]
+
+[permalinks]
+    post = "/:year/:month/:day/:slug/"
+
+[[menu.main]]
+    name = "About"
+    url = "/about/"
+[[menu.main]]
+    name = "Blog"
+    url = "/"
+
+[[menu.main]]
+    name = "CV"
+    url = "/cv/"
+    
+[[menu.main]]
+    name = "Publications"
+    url = "/publications/"
+[params]
+    description = "A website built through Hugo and blogdown."
+  
+    # options for highlight.js (version, additional languages, and theme)
+    highlightjsVersion = "9.12.0"
+    highlightjsCDN = "//cdnjs.cloudflare.com/ajax/libs"
+    highlightjsLang = ["r", "yaml"]
+    highlightjsTheme = "github"
+
+    MathJaxCDN = "//cdnjs.cloudflare.com/ajax/libs"
+    MathJaxVersion = "2.7.5"
+
+
+
+[markup]
+  defaultMarkdownHandler = "goldmark"
+  [markup.goldmark.renderer]
+    unsafe = true  # Enable user to embed HTML snippets in Markdown content.
+  [markup.highlight]
+    codeFences = false
