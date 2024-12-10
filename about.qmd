@@ -6,10 +6,10 @@ about:
   links:
     - icon: linkedin
       text: LinkedIn
-      href: https://linkedin.com
+      href: https://www.linkedin.com/in/caio-dos-santos-857375126/
     - icon: github
       text: Github
-      href: https://github.com
+      href: https://github.com/cldossantos
 ---
 
 ## About
