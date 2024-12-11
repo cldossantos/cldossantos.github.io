@@ -32,14 +32,14 @@
     "href": "index.html",
     "title": "Posts",
     "section": "",
-    "text": "Date\n\n\nTitle\n\n\nAuthor\n\n\n\n\n\n\nDec 10, 2024\n\n\nPost section under construction\n\n\nCaio dos Santos\n\n\n\n\n\nNo matching items"
+    "text": "Date\n\n\nTitle\n\n\nAuthor\n\n\n\n\n\n\nDec 10, 2024\n\n\nThe poster section is under construction still\n\n\nCaio dos Santos\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/under-construction/index.html",
     "href": "posts/under-construction/index.html",
-    "title": "Post section under constructin",
+    "title": "The poster section is under construction still",
     "section": "",
-    "text": "This is a post with executable code.\n\n1 + 1\n\n[1] 2"
+    "text": "This section will be used for posting content that I think is relevant such as how to use nonlinear models in agronomy, how to use the pacu package to work with satellite, weather, and yield monitor data, and how to use the apsimx package.\nI like the idea of this blog because it allows for shareable code blocks like the one below.\n\n1 + 1\n\n[1] 2"
   },
   {
     "objectID": "publications.html",

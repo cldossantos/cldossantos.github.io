@@ -1,9 +1,8 @@
 ---
-title: "Post section under construction"
+title: "The poster section is under construction still"
 author: "Caio dos Santos"
 date: "2024-12-10"
-categories: [news, code, analysis]
-image: "image.jpg"
+categories: [news]
 ---
 
 This section will be used for posting content that I think is relevant such as how to use nonlinear models in agronomy, how to use the pacu package to work with satellite, weather, and yield monitor data, and how to use the apsimx package.
