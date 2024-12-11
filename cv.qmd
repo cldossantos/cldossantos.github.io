@@ -4,6 +4,6 @@ title: "CV"
 ---
 
 
-<iframe src="dossantos-cv.pdf" title='SOME_TITLE' width="100%" height="800px" />
+<iframe src="dossantos-cv.pdf" title='SOME_TITLE' width="100%" height="800px" ></iframe>
 
 If you have trouble visualizing the embeded CV, please click <a href="/dossantos-cv.pdf"> here</a> to download the pdf file.
