@@ -7,9 +7,12 @@ about:
     - icon: linkedin
       text: LinkedIn
       href: https://www.linkedin.com/in/caio-dos-santos-857375126/
+    - text: "{{< ai google-scholar >}} Google Scholar"
+      href: https://scholar.google.com/citations?user=0bTowMYAAAAJ&hl
     - icon: github
       text: Github
       href: https://github.com/cldossantos
+      
 ---
 
 ## About
@@ -24,6 +27,6 @@ There are several research areas that fascinate me. A short list of those would 
 
 -   Ph.D. in Crop Production and Physiology Minor in Statistics Iowa State University, 2020 - Dec 2025
 
--   M.Sc. in Crop, Soil, and Environmental Sciences University of Arkansas \| 2018 - 2020
+-   M.Sc. in Crop, Soil, and Environmental Sciences University of Arkansas, 2018 - 2020
 
 -   B.Sc. in Agronomy College of Agriculture "Luiz de Queiroz", University of Sao Paulo, 2013 - 2018
