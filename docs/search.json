@@ -32,26 +32,12 @@
     "href": "index.html",
     "title": "Posts",
     "section": "",
-    "text": "Date\n\n\nTitle\n\n\nAuthor\n\n\n\n\n\n\nDec 10, 2024\n\n\nPost With Code\n\n\nHarlow Malloc\n\n\n\n\nDec 10, 2024\n\n\nPost section under construction\n\n\nCaio dos Santos\n\n\n\n\nDec 7, 2024\n\n\nWelcome To My Blog\n\n\nTristan O’Malley\n\n\n\n\n\nNo matching items"
+    "text": "Date\n\n\nTitle\n\n\nAuthor\n\n\n\n\n\n\nDec 10, 2024\n\n\nPost section under construction\n\n\nCaio dos Santos\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/under-construction/index.html",
     "href": "posts/under-construction/index.html",
     "title": "Post section under constructin",
-    "section": "",
-    "text": "This is a post with executable code.\n\n1 + 1\n\n[1] 2"
-  },
-  {
-    "objectID": "posts/welcome/index.html",
-    "href": "posts/welcome/index.html",
-    "title": "Welcome To My Blog",
-    "section": "",
-    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
-  },
-  {
-    "objectID": "posts/post-with-code/index.html",
-    "href": "posts/post-with-code/index.html",
-    "title": "Post With Code",
     "section": "",
     "text": "This is a post with executable code.\n\n1 + 1\n\n[1] 2"
   },

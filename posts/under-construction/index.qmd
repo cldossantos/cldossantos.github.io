@@ -6,7 +6,9 @@ categories: [news, code, analysis]
 image: "image.jpg"
 ---
 
-This is a post with executable code.
+This section will be used for posting content that I think is relevant such as how to use nonlinear models in agronomy, how to use the pacu package to work with satellite, weather, and yield monitor data, and how to use the apsimx package.
+
+I like the idea of this blog because it allows for shareable code blocks like the one below.
 
 ```{r}
 1 + 1
