@@ -9,20 +9,20 @@ title: Publications
 
 <li>
 
-SoyStage - Online decision support tool for the Midsouthern U.S., 2019.
-
-<a target="_blank" class="button-react" href="https://soystage.uark.edu/"> go to website</a>
-
-</li>
-
-<li>
-
 pacu: Precision Agriculture Computational Utilities, 2024
 
 <a target="_blank" class="button-react" href="https://github.com/cldossantos/pacu"> go to website</a>
 
 </li>
 
+
+<li>
+
+SoyStage - Online decision support tool for the Midsouthern U.S., 2019.
+
+<a target="_blank" class="button-react" href="https://soystage.uark.edu/"> go to website</a>
+
+</li>
 </ol>
 
 ### Peer-reviewed publications
