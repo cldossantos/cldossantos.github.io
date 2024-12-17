@@ -9,12 +9,19 @@ I thought it would be interesting to look at how to retrieve remotely sensed dat
 
 The framework to download, process, and visualize the data for an agricultural field would be nearly identical. The one big difference would be the geographical coordinates. These would have to point to the targeted agricultural field.
 
-First, we can start by loading the libraries we will need for this.
+First, we can start by loading the libraries we will need for this task.
 
 ```{r, message=FALSE}
 library(pacu)
 library(sf)
 ```
+
+If you have not installed these libraries, you can do so by running
+
+```{r, eval=FALSE}
+install.packages("pacu")
+```
+
 
 ```{r, include=FALSE}
 pacu_options(suppress.messages = TRUE,
