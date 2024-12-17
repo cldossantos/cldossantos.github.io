@@ -46,9 +46,9 @@ We can see that there are a total of 21 images the meet our criteria.
 
 ```{r}
 available.images <- pa_browse_dataspace(aoi = central.park,
-                  start.date = '2023-05-01',
-                  end.date = '2023-10-30',
-                  max.cloud.cover = 20)
+                                        start.date = '2023-05-01',
+                                        end.date = '2023-10-30',
+                                        max.cloud.cover = 20)
 available.images
 ```
 
