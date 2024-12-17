@@ -99,6 +99,15 @@ ndre <- pa_compute_vi(downloaded.images,
 pa_plot(ndre)
 ```
 
+We can also take a look at the timeseries plot of the median NDRE over Central Park in 2023. 
+
+```{r, warning=FALSE}
+summ <- summary(ndre, 
+                by = central.park,
+                fun = function(x) median(x, na.rm = TRUE))
+pa_plot(summ, plot.type = 'timeseries')
+```
+
 ## Conclusion
 
 We have seen how *pacu* can help us browse, download, and process satellite images for a non-agricultural setting. The workflow for an agricultural field would be nearly identical. We would only need to replace the **area.of.interest**.
