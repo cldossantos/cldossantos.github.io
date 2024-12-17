@@ -1,0 +1,97 @@
+---
+title: "Remote sensing of NYC Central Park"
+author: "Caio dos Santos"
+date: "2024-12-16"
+categories: [pacu, remote sensing]
+---
+
+I thought it would be interesting to look at how to retrieve remotely sensed data from Sentinel-2 using the [pacu package](https://github.com/cldossantos/pacu). For this example, I decided to take a look at the Central Park in New York city. Although it is not an agricultural setting, it is public large vegetated area.
+
+The framework to download, process, and visualize the data for an agricultural field would be nearly identical. The one big difference would be the geographical coordinates. These would have to point to the targeted agricultural field.
+
+First, we can start by loading the libraries we will need for this.
+
+```{r, message=FALSE}
+library(pacu)
+library(sf)
+```
+
+```{r, include=FALSE}
+pacu_options(suppress.messages = TRUE,
+             suppress.warnings = TRUE)
+```
+
+Now, we can define our area of interest. In this case, we will define the Central Park as our targeted area.
+
+```{r}
+central.park <- read_sf('./central-park.shp', quiet = TRUE)
+```
+
+The first step to retrieve Sentinel-2 data is to register with [Copernicus Data Space](https://dataspace.copernicus.eu/). Please check the package vignettes -more specifically the satellite data vignette- for more information on registering. You can also check the help page for the function *pa_initialize_dataspace()*.
+
+```{r, eval=FALSE}
+?pa_initialize_dataspace
+```
+
+We can browse the Data Space catalog and check how many images will meet our search parameters. In this case, I am searching for images covering the Central Park between May and October, with 20% or less cloud coverage.
+
+We can see that there are a total of 21 images the meet our criteria.
+
+```{r}
+available.images <- pa_browse_dataspace(aoi = central.park,
+                  start.date = '2023-05-01',
+                  end.date = '2023-10-30',
+                  max.cloud.cover = 20)
+available.images
+```
+
+The *summary()* function can be used to tell us how many images we have available for every month.
+
+```{r}
+summary(available.images)
+```
+
+Let us take a look at an image from May, one from July, and one from October.
+
+**ps:** I am setting verbose to FALSE from now on to suppress the progress bar.
+
+```{r}
+downloaded.images <- pa_download_dataspace(available.images[c(3, 11, 21), ],
+                      aoi = central.park,
+                      dir.path = '.',
+                      verbose = FALSE)
+```
+
+We can look at a true color image using the *pa_get_rgb()* function.
+
+```{r}
+true.color <- pa_get_rgb(downloaded.images, 
+                         verbose = FALSE)
+pa_plot(true.color)
+```
+
+Alternatively, we can take a look at vegetation indices, such as the Normalized Difference Vegetation Index (NDVI).
+
+```{r, warning=FALSE, message=FALSE}
+ndvi <- pa_compute_vi(downloaded.images, 
+                      vi = 'ndvi',
+                      aoi = central.park,
+                      check.clouds = TRUE,
+                      verbose = FALSE)
+pa_plot(ndvi)
+```
+
+We cal also look at the Normalized Difference Red Edge (NDRE) index. We can see that the image is at a coarser resolution, when compared to the NDVI image. This is because the Red Edge band in Sentinel-2 is at a 20m resolution, while the bands involved in the NDVI computation are at a 10m resolution.
+
+```{r, warning=FALSE, message=FALSE}
+ndre <- pa_compute_vi(downloaded.images, 
+                      vi = 'ndre',
+                      aoi = central.park,
+                      check.clouds = TRUE,
+                      verbose = FALSE)
+pa_plot(ndre)
+```
+
+## Conclusion
+
+We have seen how *pacu* can help us browse, download, and process satellite images for a non-agricultural setting. The workflow for an agricultural field would be nearly identical. We would only need to replace the **area.of.interest**.
