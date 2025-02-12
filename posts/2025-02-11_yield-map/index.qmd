@@ -11,7 +11,7 @@ Working with yield monitor data can be quite challenging. The data can have seve
 
 I wanted to give you an example of how we can use *pacu* to address some of these challenges. For that, we will use a data set contained in the [agridat](https://kwstat.github.io/agridat/) package.
 
-## Installing and loading the necesary packages
+## Installing and loading the necessary packages
 
 If you have not done so, you can install the *agridat* package using the following line of code:
 
@@ -46,7 +46,7 @@ pacu_options(suppress.messages = TRUE,
 
 ## Working with the data
 
-The *agridat* package contains a data set of yield observations collected from a corn field in Minessota, the data set name is [gartner.corn](https://kwstat.github.io/agridat/reference/gartner.corn.html).\
+The *agridat* package contains a data set of yield observations collected from a corn field in Minnesota, the data set name is [gartner.corn](https://kwstat.github.io/agridat/reference/gartner.corn.html).\
 Here, we load the data set and look at the first rows:
 
 ```{r}
@@ -109,7 +109,7 @@ There is ultimately no magical formula for cleaning yield data. Some of the empi
 
 To produce a yield map using *pacu*, we will use the *pa_yield()* function. The package offers two algorithms: *simple* and *ritas*. In this post I will not go into much detail about the algorithms. There is more information about this in this [paper](https://doi.org/10.1016/j.softx.2024.101971).
 
-In this case, I will go straight to the *ritas* algorithm. The ritas algorithm involves several computationally intensive processes. To accelerate this process, we have enabled paralellization. The user can control this using the *cores* argument. Keep in mind though that paralellization has diminishing returns! 
+In this case, I will go straight to the *ritas* algorithm. The ritas algorithm involves several computationally intensive processes. To accelerate this process, we have enabled parallelization. The user can control this using the *cores* argument. Keep in mind though that parallelization has diminishing returns! 
 
 I did not supply units in this case because the *pa_yield()* function attempts to guess the units and I wanted to demonstrate that functionality. However, this is based on very simple rules and the function can make a mistake. In that case, the user can override the guess by passing the argument *data.units*.
 

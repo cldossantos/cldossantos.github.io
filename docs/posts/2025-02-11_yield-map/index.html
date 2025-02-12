@@ -223,8 +223,8 @@ window.Quarto = {
 <p>Working with yield monitor data can be quite challenging. The data can have several sources of error and accounting for all of them can be hard. For instance, there are instances in which the combine travels through an area that has been previously harvested, artificially recording low yielding points. There can also uncertainties associated with the combine travelling fast or slow, changing the effective harvested area from one observation to the next. There are many other instances in which we can end up with inadequate data when working with yield monitor data but this blog post cannot list all of them.</p>
 <p>I wanted to give you an example of how we can use <em>pacu</em> to address some of these challenges. For that, we will use a data set contained in the <a href="https://kwstat.github.io/agridat/">agridat</a> package.</p>
 </section>
-<section id="installing-and-loading-the-necesary-packages" class="level2">
-<h2 class="anchored" data-anchor-id="installing-and-loading-the-necesary-packages">Installing and loading the necesary packages</h2>
+<section id="installing-and-loading-the-necessary-packages" class="level2">
+<h2 class="anchored" data-anchor-id="installing-and-loading-the-necessary-packages">Installing and loading the necessary packages</h2>
 <p>If you have not done so, you can install the <em>agridat</em> package using the following line of code:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">'agridat'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -246,7 +246,7 @@ window.Quarto = {
 </section>
 <section id="working-with-the-data" class="level2">
 <h2 class="anchored" data-anchor-id="working-with-the-data">Working with the data</h2>
-<p>The <em>agridat</em> package contains a data set of yield observations collected from a corn field in Minessota, the data set name is <a href="https://kwstat.github.io/agridat/reference/gartner.corn.html">gartner.corn</a>.<br>
+<p>The <em>agridat</em> package contains a data set of yield observations collected from a corn field in Minnesota, the data set name is <a href="https://kwstat.github.io/agridat/reference/gartner.corn.html">gartner.corn</a>.<br>
 Here, we load the data set and look at the first rows:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"gartner.corn"</span>)</span>
@@ -327,7 +327,7 @@ Here, we load the data set and look at the first rows:</p>
 <section id="producing-a-yield-map" class="level2">
 <h2 class="anchored" data-anchor-id="producing-a-yield-map">Producing a yield map</h2>
 <p>To produce a yield map using <em>pacu</em>, we will use the <em>pa_yield()</em> function. The package offers two algorithms: <em>simple</em> and <em>ritas</em>. In this post I will not go into much detail about the algorithms. There is more information about this in this <a href="https://doi.org/10.1016/j.softx.2024.101971">paper</a>.</p>
-<p>In this case, I will go straight to the <em>ritas</em> algorithm. The ritas algorithm involves several computationally intensive processes. To accelerate this process, we have enabled paralellization. The user can control this using the <em>cores</em> argument. Keep in mind though that paralellization has diminishing returns!</p>
+<p>In this case, I will go straight to the <em>ritas</em> algorithm. The ritas algorithm involves several computationally intensive processes. To accelerate this process, we have enabled parallelization. The user can control this using the <em>cores</em> argument. Keep in mind though that parallelization has diminishing returns!</p>
 <p>I did not supply units in this case because the <em>pa_yield()</em> function attempts to guess the units and I wanted to demonstrate that functionality. However, this is based on very simple rules and the function can make a mistake. In that case, the user can override the guess by passing the argument <em>data.units</em>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>yld <span class="ot">&lt;-</span> <span class="fu">pa_yield</span>(<span class="at">input =</span> yield.data, </span>
