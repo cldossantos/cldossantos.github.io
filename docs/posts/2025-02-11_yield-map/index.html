@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Caio dos Santos">
-<meta name="dcterms.date" content="2024-12-16">
+<meta name="dcterms.date" content="2025-02-11">
 
-<title>Remote sensing of NYC Central Park</title>
+<title>Working with yield monitor data</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -105,6 +105,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -149,10 +178,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Remote sensing of NYC Central Park</h1>
+      <h1 class="title">Working with yield monitor data</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">pacu</div>
-                <div class="quarto-category">remote sensing</div>
+                <div class="quarto-category">yield monitor</div>
               </div>
                   </div>
   </div>
@@ -170,7 +199,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">December 16, 2024</p>
+        <p class="date">February 11, 2025</p>
       </div>
     </div>
     
@@ -189,75 +218,69 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>I thought it would be interesting to look at how to retrieve remotely sensed data from Sentinel-2 using the <a href="https://github.com/cldossantos/pacu">pacu package</a>. For this example, I decided to take a look at the Central Park in New York city. Although it is not an agricultural setting, it is public large vegetated area.</p>
-<p>The framework to download, process, and visualize the data for an agricultural field would be nearly identical. The one big difference would be the geographical coordinates. These would have to point to the targeted agricultural field.</p>
-<p>First, we can start by loading the libraries we will need for this task.</p>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Working with yield monitor data can be quite challenging. The data can have several sources of error and accounting for all of them can be hard. For instance, there are instances in which the combine travels through an area that has been previously harvested, artificially recording low yielding points. There can also uncertainties associated with the combine travelling fast or slow, changing the effective harvested area from one observation to the next. There are many other instances in which we can end up with inadequate data when working with yield monitor data but this blog post cannot list all of them.</p>
+<p>I wanted to give you an example of how we can use <em>pacu</em> to address some of these challenges. For that, we will use a data set contained in the <a href="https://kwstat.github.io/agridat/">agridat</a> package.</p>
+</section>
+<section id="installing-and-loading-the-necesary-packages" class="level2">
+<h2 class="anchored" data-anchor-id="installing-and-loading-the-necesary-packages">Installing and loading the necesary packages</h2>
+<p>If you have not done so, you can install the <em>agridat</em> package using the following line of code:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pacu)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">'agridat'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>If you have not installed these libraries, you can do so by running</p>
+<p>To install <em>pacu</em>, you can either install the CRAN version:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"pacu"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">'pacu'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now, we can define our area of interest. In this case, we will define the Central Park as our targeted area.</p>
+<p>Or, you can install the development version from GitHub using the <em>remotes</em> package:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>central.park <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(<span class="st">'./central-park.shp'</span>, <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">'cldossantos/pacu'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>The first step to retrieve Sentinel-2 data is to register with <a href="https://dataspace.copernicus.eu/">Copernicus Data Space</a>. Please check the package vignettes -more specifically the satellite data vignette- for more information on registering. You can also check the help page for the function <em>pa_initialize_dataspace()</em>.</p>
+<p>Now that we have installed the necessary packages we can load them and continue with our analysis.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>?pa_initialize_dataspace</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pacu)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(agridat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>We can browse the Data Space catalog and check how many images will meet our search parameters. In this case, I am searching for images covering the Central Park between May and October, with 20% or less cloud coverage.</p>
-<p>We can see that there are a total of 21 images the meet our criteria.</p>
+</section>
+<section id="working-with-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="working-with-the-data">Working with the data</h2>
+<p>The <em>agridat</em> package contains a data set of yield observations collected from a corn field in Minessota, the data set name is <a href="https://kwstat.github.io/agridat/reference/gartner.corn.html">gartner.corn</a>.<br>
+Here, we load the data set and look at the first rows:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>available.images <span class="ot">&lt;-</span> <span class="fu">pa_browse_dataspace</span>(<span class="at">aoi =</span> central.park,</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">start.date =</span> <span class="st">'2023-05-01'</span>,</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">end.date =</span> <span class="st">'2023-10-30'</span>,</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">max.cloud.cover =</span> <span class="dv">20</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>available.images</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"gartner.corn"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(gartner.corn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Search parameters
-Start date: 2023-05-01 
-End date: 2023-10-30 
-Max. cloud cover: 20%
-Collection name:  SENTINEL-2 
-
-Results
-Total:  21 
-Online:  21 </code></pre>
+<pre><code>       long      lat  mass time seconds dist moist    elev
+1 -93.97842 43.92726 16.54    0       3  116  18.5 1030.58
+2 -93.97842 43.92723 22.52    3       3  159  16.7 1030.58
+3 -93.97842 43.92718 27.01    6       3  169  17.2 1029.92
+4 -93.97842 43.92713 30.24    9       3  221  17.2 1029.92
+5 -93.97842 43.92708 30.95   12       3  234  17.3 1029.59
+6 -93.97842 43.92702 33.57   15       3  227  17.5 1029.59</code></pre>
 </div>
 </div>
-<p>The <em>summary()</em> function can be used to tell us how many images we have available for every month.</p>
+<p>There are a couple pieces of information that we need but that are currently not included in the data set. Namely, we need the combine swath and the yield. In the <a href="https://kwstat.github.io/agridat/reference/gartner.corn.html">help page</a> the author provided more information that can come in handy. For instance, he told us that the combine swath is 360 inches and provided a formula to calculate yield from the information in the data set. The yield will be calculated in units of bushel/acre. Let’s follow his formula:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(available.images)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>------------------
-Year  Month  Count 
----   ---    ---   
-2023  5      6     
-2023  6      2     
-2023  7      3     
-2023  8      3     
-2023  9      4     
-2023  10     3     
-------------------
-Total   21 </code></pre>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>gartner.corn<span class="sc">$</span>swath <span class="ot">&lt;-</span> <span class="dv">360</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>gartner.corn<span class="sc">$</span>dry.grain <span class="ot">&lt;-</span>  <span class="fu">with</span>(gartner.corn, (mass <span class="sc">*</span> seconds <span class="sc">*</span> (<span class="dv">100</span><span class="sc">-</span>moist) <span class="sc">/</span> (<span class="dv">100</span><span class="fl">-15.5</span>)) <span class="sc">/</span> <span class="dv">56</span>) </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>gartner.corn<span class="sc">$</span>harvested.area <span class="ot">&lt;-</span>  <span class="fu">with</span>(gartner.corn, (dist <span class="sc">*</span> swath) <span class="sc">/</span> <span class="dv">6272640</span>) </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>gartner.corn<span class="sc">$</span>yield <span class="ot">&lt;-</span> <span class="fu">with</span>(gartner.corn, dry.grain <span class="sc">/</span> harvested.area)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</div>
-<p>Let us take a look at an image from May, one from July, and one from October.</p>
-<p><strong>ps:</strong> I am setting verbose to FALSE from now on to suppress the progress bar.</p>
+</section>
+<section id="renaming-some-of-the-variables" class="level2">
+<h2 class="anchored" data-anchor-id="renaming-some-of-the-variables">Renaming some of the variables</h2>
+<p>Here, I rename some of the variables so that it is easier for me to understand what they represent.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>downloaded.images <span class="ot">&lt;-</span> <span class="fu">pa_download_dataspace</span>(available.images[<span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">11</span>, <span class="dv">21</span>), ],</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">aoi =</span> central.park,</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">dir.path =</span> <span class="st">'.'</span>,</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(gartner.corn) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'long'</span>, <span class="st">'lat'</span>, <span class="st">'flow'</span>, <span class="st">'time'</span>, <span class="st">'interval'</span>, <span class="st">'distance'</span>, <span class="st">'moisture'</span>, <span class="st">'elevation'</span>, <span class="st">'swath'</span>, <span class="st">'dry.grain'</span>, <span class="st">'harvested.area'</span>, <span class="st">'yield'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>We can look at a true color image using the <em>pa_get_rgb()</em> function.</p>
+<p>Now that we have added the necessary columns, we can convert the data frame into a <a href="https://r-spatial.github.io/sf/">sf</a> object. The <em>sf</em> library has several methods for working with spatial data and <em>pacu</em> is heavily built upon those. We can also plot the data to look into the spatial patterns of the variables:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>true.color <span class="ot">&lt;-</span> <span class="fu">pa_get_rgb</span>(downloaded.images, </span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                         <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">pa_plot</span>(true.color)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>yield.data <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(gartner.corn, </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                       <span class="at">coords =</span> <span class="fu">c</span>(<span class="st">'long'</span>, <span class="st">'lat'</span>),</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">crs =</span> <span class="st">'epsg:4326'</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(yield.data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -266,14 +289,12 @@ Total   21 </code></pre>
 </div>
 </div>
 </div>
-<p>Alternatively, we can take a look at vegetation indices, such as the Normalized Difference Vegetation Index (NDVI).</p>
+</section>
+<section id="looking-at-the-yield-data" class="level2">
+<h2 class="anchored" data-anchor-id="looking-at-the-yield-data">Looking at the yield data</h2>
+<p>If we focus on the yield (bu/ac), we can see some interesting features of this field. It seems like there is a waterway in the northern part of the field and there is an area in the mid-lower east part of the field that has lower yields.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ndvi <span class="ot">&lt;-</span> <span class="fu">pa_compute_vi</span>(downloaded.images, </span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">vi =</span> <span class="st">'ndvi'</span>,</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">aoi =</span> central.park,</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">check.clouds =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                      <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">pa_plot</span>(ndvi)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(yield.data[<span class="st">'yield'</span>], <span class="at">pch =</span> <span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -282,14 +303,9 @@ Total   21 </code></pre>
 </div>
 </div>
 </div>
-<p>We cal also look at the Normalized Difference Red Edge (NDRE) index. We can see that the image is at a coarser resolution, when compared to the NDVI image. This is because the Red Edge band in Sentinel-2 is at a 20m resolution, while the bands involved in the NDVI computation are at a 10m resolution.</p>
+<p>Something that can also catch our attention is just how variable this data is. Let’s take a look at the distribution of the data as well. We can see that most of the data is between 100 and 160 bu/ac but the data ranges from 0 to 258 bu/ac.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>ndre <span class="ot">&lt;-</span> <span class="fu">pa_compute_vi</span>(downloaded.images, </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">vi =</span> <span class="st">'ndre'</span>,</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">aoi =</span> central.park,</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">check.clouds =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                      <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu">pa_plot</span>(ndre)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(yield.data<span class="sc">$</span>yield), <span class="at">main =</span> <span class="st">''</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -298,23 +314,59 @@ Total   21 </code></pre>
 </div>
 </div>
 </div>
-<p>We can also take a look at the timeseries plot of the median NDRE over Central Park in 2023.</p>
+</section>
+<section id="considerations-about-cleaning-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="considerations-about-cleaning-the-data">Considerations about cleaning the data</h2>
+<p>This kind of variability can be dealt with a variety of approaches. There are researchers who have proposed that we can remove anything that falls outside of 2 or 3 standard deviations from the mean. This is an empirical rule based on the assumption that the yield data follows a normal distribution. These thresholds represent <span class="math inline">\(\approx95.0\%\)</span> and <span class="math inline">\(\approx99.7\%\)</span> of the probability mass function of a normal distribution, respectively. However, this is based on two assumptions that are violated from the beginning:</p>
+<ol type="1">
+<li><em>Independent samples</em>: these are correlated in space</li>
+<li><em>Normal distribution</em>: there is no guarantee this data will follow a normal distribution. These data are bound to be greater than zero.</li>
+</ol>
+<p>There is ultimately no magical formula for cleaning yield data. Some of the empirical rules can work for some data sets but not for others. <em>pacu</em> offers options that do not rely on these rules but I feel that this is a subject for a different post.</p>
+</section>
+<section id="producing-a-yield-map" class="level2">
+<h2 class="anchored" data-anchor-id="producing-a-yield-map">Producing a yield map</h2>
+<p>To produce a yield map using <em>pacu</em>, we will use the <em>pa_yield()</em> function. The package offers two algorithms: <em>simple</em> and <em>ritas</em>. In this post I will not go into much detail about the algorithms. There is more information about this in this <a href="https://doi.org/10.1016/j.softx.2024.101971">paper</a>.</p>
+<p>In this case, I will go straight to the <em>ritas</em> algorithm. The ritas algorithm involves several computationally intensive processes. To accelerate this process, we have enabled paralellization. The user can control this using the <em>cores</em> argument. Keep in mind though that paralellization has diminishing returns!</p>
+<p>I did not supply units in this case because the <em>pa_yield()</em> function attempts to guess the units and I wanted to demonstrate that functionality. However, this is based on very simple rules and the function can make a mistake. In that case, the user can override the guess by passing the argument <em>data.units</em>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>summ <span class="ot">&lt;-</span> <span class="fu">summary</span>(ndre, </span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">by =</span> central.park,</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">fun =</span> <span class="cf">function</span>(x) <span class="fu">median</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">pa_plot</span>(summ, <span class="at">plot.type =</span> <span class="st">'timeseries'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>yld <span class="ot">&lt;-</span> <span class="fu">pa_yield</span>(<span class="at">input =</span> yield.data, </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">algorithm =</span> <span class="st">'ritas'</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">unit.system =</span> <span class="st">'metric'</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">moisture.adj =</span> <span class="fl">15.5</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">cores =</span> <span class="dv">5</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Guessing units of interval to be s</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Guessing units of moisture to be %</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Guessing units of flow to be lb/s</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Guessing units of width to be in</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Guessing units of distance to be in</code></pre>
+</div>
+</div>
+<p>To look at the yield map, we can use the <em>pa_plot()</em> function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pa_plot</span>(yld, <span class="at">legend.outside =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
+</section>
 <section id="conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
-<p>We have seen how <em>pacu</em> can help us browse, download, and process satellite images for a non-agricultural setting. The workflow for an agricultural field would be nearly identical. We would only need to replace the <strong>area.of.interest</strong>.</p>
+<p>We have looked into how we can build yield maps from raw yield monitor data using <em>pacu</em>. This is a case in which we are processing the data at the field level. In a case in which we are processing data from on-farm experiments, there are a few more considerations we need to make. This is a subject for a future post!</p>
 
 
 </section>

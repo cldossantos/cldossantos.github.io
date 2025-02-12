@@ -1,5 +1,5 @@
 ---
-title: "The poster section is under construction still"
+title: "The post section is under construction still"
 author: "Caio dos Santos"
 date: "2024-12-10"
 categories: [news]

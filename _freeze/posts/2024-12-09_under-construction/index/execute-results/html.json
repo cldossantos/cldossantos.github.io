@@ -1,8 +1,8 @@
 {
-  "hash": "ae74b0ff2e6ea1c5008110a036525a83",
+  "hash": "974f04eee7ed0d1bcdf6753ccd0946a7",
   "result": {
     "engine": "knitr",
-    "markdown": "---\ntitle: \"The poster section is under construction still\"\nauthor: \"Caio dos Santos\"\ndate: \"2024-12-10\"\ncategories: [news]\n---\n\n\nThis section will be used for posting content that I think is relevant such as how to use nonlinear models in agronomy, how to use the pacu package to work with satellite, weather, and yield monitor data, and how to use the apsimx package.\n\nI like the idea of this blog because it allows for shareable code blocks like the one below.\n\n\n::: {.cell}\n\n```{.r .cell-code}\n1 + 1\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 2\n```\n\n\n:::\n:::\n",
+    "markdown": "---\ntitle: \"The post section is under construction still\"\nauthor: \"Caio dos Santos\"\ndate: \"2024-12-10\"\ncategories: [news]\n---\n\n\n\nThis section will be used for posting content that I think is relevant such as how to use nonlinear models in agronomy, how to use the pacu package to work with satellite, weather, and yield monitor data, and how to use the apsimx package.\n\nI like the idea of this blog because it allows for shareable code blocks like the one below.\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\n1 + 1\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 2\n```\n\n\n:::\n:::\n",
     "supporting": [],
     "filters": [
       "rmarkdown/pagebreak.lua"

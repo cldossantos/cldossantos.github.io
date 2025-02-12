@@ -22,7 +22,6 @@ If you have not installed these libraries, you can do so by running
 install.packages("pacu")
 ```
 
-
 ```{r, include=FALSE}
 pacu_options(suppress.messages = TRUE,
              suppress.warnings = TRUE)
@@ -99,7 +98,7 @@ ndre <- pa_compute_vi(downloaded.images,
 pa_plot(ndre)
 ```
 
-We can also take a look at the timeseries plot of the median NDRE over Central Park in 2023. 
+We can also take a look at the timeseries plot of the median NDRE over Central Park in 2023.
 
 ```{r, warning=FALSE}
 summ <- summary(ndre, 
