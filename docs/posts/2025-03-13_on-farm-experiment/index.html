@@ -221,7 +221,7 @@ window.Quarto = {
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
 <p>In a previous post, I have mentioned that <em>pacu</em> provided support for processing data coming from on-farm trials, as well as production fields. In this post, I want to explore and showcase this functionality a little more in depth. The idea is to provide an example of processing these data and make a few considerations that can greatly impact the end result.</p>
-<p>We will look at simulated data from a small on-farm trial. This is made up data and I simulated a relationship between corn yield and nitrogen rate that followed a linear plateau relationship like the image below. The simulated relationship presented an intercept = 7000, slope = 30, and a breakpoint = 180. Let’s process this data and see if we can recover this relationship. You can download the data <a href="./raw-data.zip">here</a></p>
+<p>We will look at simulated data from a small on-farm trial. This is made up data and I simulated a relationship between corn yield and nitrogen rate that followed a linear plateau relationship like the image below. The simulated relationship presented an intercept = 7000, slope = 30, and a breakpoint = 180. Let’s process this data and see if we can recover this relationship. You can download the data <a href="./raw-data.zip">here</a>.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -231,6 +231,9 @@ window.Quarto = {
 </div>
 </div>
 </div>
+</section>
+<section id="working-with-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="working-with-the-data">Working with the data</h2>
 <p>Loading the necessary packages</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pacu)</span>
@@ -238,10 +241,7 @@ window.Quarto = {
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlraa)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section>
-<section id="working-with-the-data" class="level2">
-<h2 class="anchored" data-anchor-id="working-with-the-data">Working with the data</h2>
-<p>Here, we will import the data sets into R. We will use to data sets for this exercise. The first contains made up raw yield data that represents data coming from an on-farm trial. The second contains an example of nitrogen rates applied to each experimental unit.</p>
+<p>Here, we will import the data sets into R. We will use two data sets for this exercise. The first contains made up raw yield data that represents data coming from an on-farm trial. The second contains an example of nitrogen rates applied to each experimental unit.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>raw.yield <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(<span class="st">'./raw-data/example-raw-data.shp'</span>,</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span>
@@ -272,7 +272,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>We can take a look at the raw yield data to see the kind of data we are dealing with. We can see that there is a lot of variability in the yield data, with it ranging from <span class="math inline">\(\approx 200\)</span> to <span class="math inline">\(\approx 12000\)</span> kg/ha. Some of this variability comes from the treatment effect but there’s a part of it that is just random variability. The challenge lies in parsing out the treatment effect.</p>
+<p>We can take a look at the raw yield data to see the kind of data we are dealing with. We can see that there is a lot of variability in the yield data, with it ranging from <span class="math inline">\(\approx 200\)</span> to <span class="math inline">\(\approx 12000\)</span> kg/ha. Some of this variability comes from the treatment effect but there’s a part of it that is just random variability. The challenge lies in identifying the treatment effect.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(raw.yield<span class="sc">$</span>yld_kgh,</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">'Yield (kg/ha)'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -302,7 +302,7 @@ window.Quarto = {
 <section id="cleaning-based-on-standard-deviation" class="level2">
 <h2 class="anchored" data-anchor-id="cleaning-based-on-standard-deviation">Cleaning based on standard deviation</h2>
 <p>Something that is common to do, is to use empirical rules to remove outliers and clean some of the noise inherent to these type of data, let’s see the effect of that.</p>
-<p>A pretty common procedure is to clean anything outside of 2 or 3 standard deviations from the mean (you can read more about it <a href="https://cldossantos.github.io/posts/2025-02-11_yield-map/">here</a>. Let us take a look at this procedure. I will isolate one experimental unit for us to take a closer look. The removed points are marked with a red “X”. For this experimental unit, anything that was smaller tha 5622 or greater than 8139 kg/ha was removed.</p>
+<p>A pretty common procedure is to clean anything outside of 2 or 3 standard deviations from the mean (you can read more about it <a href="https://cldossantos.github.io/posts/2025-02-11_yield-map/">here</a>). Let us take a look at this procedure. I will isolate one experimental unit for us to take a closer look. The removed points are marked with a red “X”. For this experimental unit, anything that was smaller tha 5622 or greater than 8139 kg/ha was removed.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## selecting only experimental unit 5</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>to.keep <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">st_intersects</span>(raw.yield, trial.design[<span class="dv">5</span>, ]))</span>
@@ -420,7 +420,7 @@ window.Quarto = {
 </section>
 <section id="adding-a-buffer-to-the-experimental-units" class="level2">
 <h2 class="anchored" data-anchor-id="adding-a-buffer-to-the-experimental-units">Adding a buffer to the experimental units</h2>
-<p>Another empirical cleaning method that is commonly used is to add a buffer to the experimental units. This in meant to remove some of the border effect or the transition between experimental units. However, adding a buffer needs to be done with caution. You want you buffer to be big enough to remove some of these potentially problematic points, but you do not want your buffer to remove so many points that you will end up estimating the mean with fewer points. This would increase the uncertainty of your estimate. Let’s take a look at different buffer sizes:</p>
+<p>Another empirical cleaning method that is commonly used is to add a buffer to the experimental units. This in meant to remove some of the border effect or the transition between experimental units. However, adding a buffer needs to be done with caution. You want your buffer to be big enough to remove some of these potentially problematic observations, but you do not want your buffer to remove so many points that you will end up estimating the mean with few points. This would increase the uncertainty of your estimate. Let’s take a look at different buffer sizes:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>buffers <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">hcl.colors</span>(<span class="dv">4</span>, <span class="at">palette =</span> <span class="st">'Temps'</span>)</span>
@@ -441,7 +441,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>It seems that a buffer size of about 5 meters is what we want. Let’s go with that and see which observations will be removed from the data set:</p>
+<p>It seems that a buffer size of about 5 meters is what we want for this example. Let’s go with that and see which observations will be removed from the data set:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>buffered.exp.units <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(<span class="fu">st_buffer</span>(trial.design, <span class="sc">-</span><span class="dv">5</span>))</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>raw.yield<span class="sc">$</span>eu <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">st_intersects</span>(raw.yield, buffered.exp.units))</span>
@@ -474,7 +474,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Now, let us remove these data points, and average the yield observations within each experimental unit. We can see that our estimates of the model parameters are a little closer to the true values but still not quite there. Also, the variance has decreased quite a bit.</p>
+<p>Now, let us remove these data points, and average the yield observations within each experimental unit. We can see that our estimates of the model parameters are a little closer to the true values but still not quite there. Also, the variance has decreased quite a bit but let’s see if we can increase the precision of our estimates!</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>yield.filtered.buffer <span class="ot">&lt;-</span> raw.yield[<span class="sc">!</span>to.remove, ]</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>mean.yield.buffer <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(yield.filtered.buffer[<span class="st">'yld_kgh'</span>],</span>
@@ -530,7 +530,7 @@ window.Quarto = {
 </section>
 <section id="using-pa_yield" class="level2">
 <h2 class="anchored" data-anchor-id="using-pa_yield">Using pa_yield</h2>
-<p>The pa_yield function has built-in capabilities to automate these processes without the need for these empirical rules. For instance, by setting <em>remove.crossed.polygons</em> to <em>TRUE</em>, we remove data that could be influenced by adjacent experimental units. You can read more about the <em>ritas</em> algorithm <a href="https://doi.org/10.1016/j.softx.2024.101971">here</a>.</p>
+<p>The pa_yield function has built-in capabilities to automate these processes without the need for these empirical rules. For instance, by setting the argument <em>remove.crossed.polygons</em> to <em>TRUE</em>, we remove data that could be influenced by adjacent experimental units. You can read more about the <em>ritas</em> algorithm <a href="https://doi.org/10.1016/j.softx.2024.101971">here</a>.</p>
 <p>So we can visualize these steps, I will set the option <em>steps</em> to <em>TRUE</em>. This is a new addition to the package and is not yet available on CRAN. Please install the package from <a href="https://github.com/cldossantos/pacu">GitHub</a> to be able to use this.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>yld3 <span class="ot">&lt;-</span> <span class="fu">pa_yield</span>(raw.yield,</span>
@@ -620,7 +620,7 @@ window.Quarto = {
 </section>
 <section id="conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
-<p>In this exercise, we have seen how different decisions about data processing can affect the estimates we get from the data. We have also seen how we can use the <em>pa_yield()</em> function to process the yield data coming from agronomic trials. The differences in the precision of the estimates are really important when we want to estimate confidence intervals or investigate whether a certain covariate has an effect. For instance, let’s say that, in addition to nitrogen rates, we also had nitrogen source. More precise estimates would increase the power of our analysis to find differences.</p>
+<p>In this exercise, we have seen how different decisions about data processing can affect the estimates we get from the yield monitor data. We have also seen how we can use the <em>pa_yield()</em> function to process the yield data coming from agronomic trials. The differences in the precision of the estimates are really important when we want to estimate confidence intervals or investigate whether a certain covariate has an effect. For instance, let’s say that, in addition to nitrogen rates, we also had nitrogen source. More precise estimates would increase the power of our analysis to find differences.</p>
 
 
 </section>

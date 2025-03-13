@@ -9,7 +9,7 @@ categories: [pacu, yield monitor]
 
 In a previous post, I have mentioned that *pacu* provided support for processing data coming from on-farm trials, as well as production fields. In this post, I want to explore and showcase this functionality a little more in depth. The idea is to provide an example of processing these data and make a few considerations that can greatly impact the end result.
 
-We will look at simulated data from a small on-farm trial. This is made up data and I simulated a relationship between corn yield and nitrogen rate that followed a linear plateau relationship like the image below. The simulated relationship presented an intercept = 7000, slope = 30, and a breakpoint = 180. Let's process this data and see if we can recover this relationship. You can download the data [here](./raw-data.zip)
+We will look at simulated data from a small on-farm trial. This is made up data and I simulated a relationship between corn yield and nitrogen rate that followed a linear plateau relationship like the image below. The simulated relationship presented an intercept = 7000, slope = 30, and a breakpoint = 180. Let's process this data and see if we can recover this relationship. You can download the data [here](./raw-data.zip).
 
 ```{r, echo=FALSE}
 x <- 0:300
@@ -20,6 +20,9 @@ plot(x,
      xlab = 'Nitrogen rate (kg/ha)',
      ylab = 'Yield (kg/ha)')
 ```
+
+
+## Working with the data
 
 Loading the necessary packages
 
@@ -35,9 +38,8 @@ pacu_options(suppress.messages = TRUE,
              suppress.warnings = TRUE)
 ```
 
-## Working with the data
 
-Here, we will import the data sets into R. We will use to data sets for this exercise. The first contains made up raw yield data that represents data coming from an on-farm trial. The second contains an example of nitrogen rates applied to each experimental unit.
+Here, we will import the data sets into R. We will use two data sets for this exercise. The first contains made up raw yield data that represents data coming from an on-farm trial. The second contains an example of nitrogen rates applied to each experimental unit.
 
 ```{r}
 raw.yield <- read_sf('./raw-data/example-raw-data.shp',
@@ -63,7 +65,7 @@ Another piece of information that can be extracted from the *trial.design* data 
 plot(trial.design["nrate"], main = 'Nitrogen rate (kg/ha)')
 ```
 
-We can take a look at the raw yield data to see the kind of data we are dealing with. We can see that there is a lot of variability in the yield data, with it ranging from $\approx 200$ to $\approx 12000$ kg/ha. Some of this variability comes from the treatment effect but there's a part of it that is just random variability. The challenge lies in parsing out the treatment effect.
+We can take a look at the raw yield data to see the kind of data we are dealing with. We can see that there is a lot of variability in the yield data, with it ranging from $\approx 200$ to $\approx 12000$ kg/ha. Some of this variability comes from the treatment effect but there's a part of it that is just random variability. The challenge lies in identifying the treatment effect.
 
 ```{r}
 boxplot(raw.yield$yld_kgh,
@@ -83,7 +85,7 @@ plot(st_geometry(trial.design),
 
 Something that is common to do, is to use empirical rules to remove outliers and clean some of the noise inherent to these type of data, let's see the effect of that.
 
-A pretty common procedure is to clean anything outside of 2 or 3 standard deviations from the mean (you can read more about it [here](https://cldossantos.github.io/posts/2025-02-11_yield-map/). Let us take a look at this procedure. I will isolate one experimental unit for us to take a closer look. The removed points are marked with a red "X". For this experimental unit, anything that was smaller tha 5622 or greater than 8139 kg/ha was removed.
+A pretty common procedure is to clean anything outside of 2 or 3 standard deviations from the mean (you can read more about it [here](https://cldossantos.github.io/posts/2025-02-11_yield-map/)). Let us take a look at this procedure. I will isolate one experimental unit for us to take a closer look. The removed points are marked with a red "X". For this experimental unit, anything that was smaller tha 5622 or greater than 8139 kg/ha was removed.
 
 ```{r}
 ## selecting only experimental unit 5
@@ -181,7 +183,7 @@ legend('bottomright',
 
 ## Adding a buffer to the experimental units
 
-Another empirical cleaning method that is commonly used is to add a buffer to the experimental units. This in meant to remove some of the border effect or the transition between experimental units. However, adding a buffer needs to be done with caution. You want you buffer to be big enough to remove some of these potentially problematic points, but you do not want your buffer to remove so many points that you will end up estimating the mean with fewer points. This would increase the uncertainty of your estimate. Let's take a look at different buffer sizes:
+Another empirical cleaning method that is commonly used is to add a buffer to the experimental units. This in meant to remove some of the border effect or the transition between experimental units. However, adding a buffer needs to be done with caution. You want your buffer to be big enough to remove some of these potentially problematic observations, but you do not want your buffer to remove so many points that you will end up estimating the mean with few points. This would increase the uncertainty of your estimate. Let's take a look at different buffer sizes:
 
 ```{r}
 
@@ -199,7 +201,7 @@ legend('topleft',
 
 ```
 
-It seems that a buffer size of about 5 meters is what we want. Let's go with that and see which observations will be removed from the data set:
+It seems that a buffer size of about 5 meters is what we want for this example. Let's go with that and see which observations will be removed from the data set:
 
 ```{r}
 
@@ -228,7 +230,7 @@ plot(st_geometry(raw.yield)[to.remove],
      add = TRUE)
 ```
 
-Now, let us remove these data points, and average the yield observations within each experimental unit. We can see that our estimates of the model parameters are a little closer to the true values but still not quite there. Also, the variance has decreased quite a bit.
+Now, let us remove these data points, and average the yield observations within each experimental unit. We can see that our estimates of the model parameters are a little closer to the true values but still not quite there. Also, the variance has decreased quite a bit but let's see if we can increase the precision of our estimates!
 
 ```{r}
 yield.filtered.buffer <- raw.yield[!to.remove, ]
@@ -275,7 +277,7 @@ We get a little closer to the true value with every layer of processing that we 
 
 ## Using pa_yield
 
-The pa_yield function has built-in capabilities to automate these processes without the need for these empirical rules. For instance, by setting *remove.crossed.polygons* to *TRUE*, we remove data that could be influenced by adjacent experimental units. You can read more about the *ritas* algorithm [here](https://doi.org/10.1016/j.softx.2024.101971).
+The pa_yield function has built-in capabilities to automate these processes without the need for these empirical rules. For instance, by setting the argument *remove.crossed.polygons* to *TRUE*, we remove data that could be influenced by adjacent experimental units. You can read more about the *ritas* algorithm [here](https://doi.org/10.1016/j.softx.2024.101971).
 
 So we can visualize these steps, I will set the option *steps* to *TRUE*. This is a new addition to the package and is not yet available on CRAN. Please install the package from [GitHub](https://github.com/cldossantos/pacu) to be able to use this.
 
@@ -333,6 +335,7 @@ legend('bottomright',
 ```
 
 We can see that the *pa\_yield()* function was able to produce more precise estimates of the model parameters. In part, this is due to the *ritas* algorithm recreating the destructive harvest process and being able to track which harvest polygons have crossed between different experimental units. We can see that in the plot below that demonstrates which polygons were removed:
+
 ```{r}
 with(yld3$steps, {
   plot(adjusted.polygons, border = 'red')
@@ -351,4 +354,4 @@ with(yld3$steps, {
 
 ## Conclusion
 
-In this exercise, we have seen how different decisions about data processing can affect the estimates we get from the data. We have also seen how we can use the *pa_yield()* function to process the yield data coming from agronomic trials. The differences in the precision of the estimates are really important when we want to estimate confidence intervals or investigate whether a certain covariate has an effect. For instance, let's say that, in addition to nitrogen rates, we also had nitrogen source. More precise estimates would increase the power of our analysis to find differences.
+In this exercise, we have seen how different decisions about data processing can affect the estimates we get from the yield monitor data. We have also seen how we can use the *pa_yield()* function to process the yield data coming from agronomic trials. The differences in the precision of the estimates are really important when we want to estimate confidence intervals or investigate whether a certain covariate has an effect. For instance, let's say that, in addition to nitrogen rates, we also had nitrogen source. More precise estimates would increase the power of our analysis to find differences.
