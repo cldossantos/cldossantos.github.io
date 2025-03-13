@@ -9,7 +9,7 @@
 <meta name="author" content="Caio dos Santos">
 <meta name="dcterms.date" content="2025-03-13">
 
-<title>Working with yield monitor data</title>
+<title>Processing an on-farm experiment</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -178,7 +178,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Working with yield monitor data</h1>
+      <h1 class="title">Processing an on-farm experiment</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">pacu</div>
                 <div class="quarto-category">yield monitor</div>
@@ -221,7 +221,7 @@ window.Quarto = {
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
 <p>In a previous post, I have mentioned that <em>pacu</em> provided support for processing data coming from on-farm trials, as well as production fields. In this post, I want to explore and showcase this functionality a little more in depth. The idea is to provide an example of processing these data and make a few considerations that can greatly impact the end result.</p>
-<p>We will look at simulated data from a small on-farm trial. This is made up data and I simulated a relationship between corn yield and nitrogen rate that followed a linear plateau relationship like the image below. The simulated relationship presented an intercept = 7000, slope = 30, and a breakpoint = 180. Let’s process this data and see if we can recover this relationship.</p>
+<p>We will look at simulated data from a small on-farm trial. This is made up data and I simulated a relationship between corn yield and nitrogen rate that followed a linear plateau relationship like the image below. The simulated relationship presented an intercept = 7000, slope = 30, and a breakpoint = 180. Let’s process this data and see if we can recover this relationship. You can download the data <a href="./raw-data.zip">here</a></p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -231,39 +231,51 @@ window.Quarto = {
 </div>
 </div>
 </div>
-</section>
-<section id="installing-and-loading-the-necessary-packages" class="level2">
-<h2 class="anchored" data-anchor-id="installing-and-loading-the-necessary-packages">Installing and loading the necessary packages</h2>
-<p>To install <em>pacu</em>, you can either install the CRAN version:</p>
+<p>Loading the necessary packages</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">'pacu'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Or, you can install the development version from GitHub using the <em>remotes</em> package:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">'cldossantos/pacu'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Now that we have installed the necessary packages we can load them and continue with our analysis.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pacu)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlraa)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pacu)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlraa)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="working-with-the-data" class="level2">
 <h2 class="anchored" data-anchor-id="working-with-the-data">Working with the data</h2>
 <p>Here, we will import the data sets into R. We will use to data sets for this exercise. The first contains made up raw yield data that represents data coming from an on-farm trial. The second contains an example of nitrogen rates applied to each experimental unit.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>raw.yield <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(<span class="st">'./raw-data/example-raw-data.shp'</span>,</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>trial.design <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(<span class="st">'./raw-data/example-trial-design.shp'</span>,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>                     <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>raw.yield <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(<span class="st">'./raw-data/example-raw-data.shp'</span>,</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>trial.design <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(<span class="st">'./raw-data/example-trial-design.shp'</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                     <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Lets take a look at how these two data sets line up in space. In this example, the points represent the yield monitor readings and the red rectangles represent the experimental units. We can see that, in this example, we had about 4 combine passes per experimental unit.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(raw.yield), <span class="at">pch =</span> <span class="dv">1</span>, <span class="at">cex =</span> <span class="fl">0.3</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(trial.design), <span class="at">border =</span> <span class="st">'red'</span>, <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(raw.yield), <span class="at">pch =</span> <span class="dv">1</span>, <span class="at">cex =</span> <span class="fl">0.3</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(trial.design), <span class="at">border =</span> <span class="st">'red'</span>, <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Another piece of information that can be extracted from the <em>trial.design</em> data set is the amount of nitrogen applied to each experimental unit in this example.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(trial.design[<span class="st">"nrate"</span>], <span class="at">main =</span> <span class="st">'Nitrogen rate (kg/ha)'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can take a look at the raw yield data to see the kind of data we are dealing with. We can see that there is a lot of variability in the yield data, with it ranging from <span class="math inline">\(\approx 200\)</span> to <span class="math inline">\(\approx 12000\)</span> kg/ha. Some of this variability comes from the treatment effect but there’s a part of it that is just random variability. The challenge lies in parsing out the treatment effect.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(raw.yield<span class="sc">$</span>yld_kgh,</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">'Yield (kg/ha)'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -271,40 +283,17 @@ window.Quarto = {
 </figure>
 </div>
 </div>
-</div>
-<p>Another piece of information that can be extracted from the <em>trial.design</em> data set is the amount of nitrogen applied to each experimental unit in this example.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(trial.design[<span class="st">"nrate"</span>], <span class="at">main =</span> <span class="st">'Nitrogen rate (kg/ha)'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(raw.yield[<span class="st">"yld_kgh"</span>],</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">16</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">'Yield (kg/ha)'</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">breaks =</span> <span class="st">'quantile'</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">reset =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(trial.design),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>We can take a look at the raw yield data to see the kind of data we are dealing with. We can see that there is a lot of variability in the yield data, with it ranging from <span class="math inline">\(\approx 200\)</span> to <span class="math inline">\(\approx 12000\)</span> kg/ha. Some of this variability comes from the treatment effect but there’s a part of it that is just random variability. The challenge lies in parsing out the treatment effect.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(raw.yield<span class="sc">$</span>yld_kgh,</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">'Yield (kg/ha)'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(raw.yield[<span class="st">"yld_kgh"</span>],</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">16</span>,</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">'Yield (kg/ha)'</span>,</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">breaks =</span> <span class="st">'quantile'</span>,</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">reset =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(trial.design),</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-9-2.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-7-2.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -315,30 +304,111 @@ window.Quarto = {
 <p>Something that is common to do, is to use empirical rules to remove outliers and clean some of the noise inherent to these type of data, let’s see the effect of that.</p>
 <p>A pretty common procedure is to clean anything outside of 2 or 3 standard deviations from the mean (you can read more about it <a href="https://cldossantos.github.io/posts/2025-02-11_yield-map/">here</a>. Let us take a look at this procedure. I will isolate one experimental unit for us to take a closer look. The removed points are marked with a red “X”. For this experimental unit, anything that was smaller tha 5622 or greater than 8139 kg/ha was removed.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## selecting only experimental unit 5</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>to.keep <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">st_intersects</span>(raw.yield, trial.design[<span class="dv">5</span>, ]))</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>one.eu <span class="ot">&lt;-</span> raw.yield[<span class="sc">!</span><span class="fu">is.na</span>(to.keep), <span class="st">'yld_kgh'</span>]</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="do">## calculating the mean and sd</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>eu.mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(one.eu[[<span class="st">'yld_kgh'</span>]])</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>eu.sd <span class="ot">&lt;-</span> <span class="fu">sd</span>(one.eu[[<span class="st">'yld_kgh'</span>]])</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="do">## defining upper and lower boundaries and identifying which</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="do">## data points to remove</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>upper.boundary <span class="ot">&lt;-</span> eu.mean <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> eu.sd</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>lower.boundary <span class="ot">&lt;-</span> eu.mean <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> eu.sd</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>to.remove <span class="ot">&lt;-</span> (one.eu<span class="sc">$</span>yld_kgh <span class="sc">&lt;</span> lower.boundary <span class="sc">|</span> </span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>                one.eu<span class="sc">$</span>yld_kgh <span class="sc">&gt;</span> upper.boundary)</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="do">## showing which points were removed</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(one.eu, <span class="at">reset =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">'Yield (kg/ha)'</span>,</span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">16</span>)</span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(one.eu)[to.remove],</span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>     <span class="at">cex =</span> <span class="dv">2</span>,</span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">'red'</span>,</span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="st">'x'</span>, </span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>     <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## selecting only experimental unit 5</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>to.keep <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">st_intersects</span>(raw.yield, trial.design[<span class="dv">5</span>, ]))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>one.eu <span class="ot">&lt;-</span> raw.yield[<span class="sc">!</span><span class="fu">is.na</span>(to.keep), <span class="st">'yld_kgh'</span>]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="do">## calculating the mean and sd</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>eu.mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(one.eu[[<span class="st">'yld_kgh'</span>]])</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>eu.sd <span class="ot">&lt;-</span> <span class="fu">sd</span>(one.eu[[<span class="st">'yld_kgh'</span>]])</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="do">## defining upper and lower boundaries and identifying which</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="do">## data points to remove</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>upper.boundary <span class="ot">&lt;-</span> eu.mean <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> eu.sd</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>lower.boundary <span class="ot">&lt;-</span> eu.mean <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> eu.sd</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>to.remove <span class="ot">&lt;-</span> (one.eu<span class="sc">$</span>yld_kgh <span class="sc">&lt;</span> lower.boundary <span class="sc">|</span> </span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>                one.eu<span class="sc">$</span>yld_kgh <span class="sc">&gt;</span> upper.boundary)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="do">## showing which points were removed</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(one.eu, <span class="at">reset =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">'Yield (kg/ha)'</span>,</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">16</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(one.eu)[to.remove],</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>     <span class="at">cex =</span> <span class="dv">2</span>,</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">'red'</span>,</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="st">'x'</span>, </span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>     <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can now apply this same methodology to all experimental units and see that, in total, we will remove 60 points from this data set.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>raw.yield<span class="sc">$</span>eu <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">st_intersects</span>(raw.yield, trial.design))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>raw.yield <span class="ot">&lt;-</span> raw.yield[<span class="fu">order</span>(raw.yield<span class="sc">$</span>eu), ]</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>to.remove <span class="ot">&lt;-</span> <span class="fu">ave</span>(raw.yield<span class="sc">$</span>yld_kgh, </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                 raw.yield<span class="sc">$</span>eu,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">FUN =</span> <span class="cf">function</span>(x){</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                   eu.mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(x)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>                   eu.sd <span class="ot">&lt;-</span> <span class="fu">sd</span>(x)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>                   upper.boundary <span class="ot">&lt;-</span> eu.mean <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> eu.sd</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>                   lower.boundary <span class="ot">&lt;-</span> eu.mean <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> eu.sd</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>                    (x <span class="sc">&lt;</span> lower.boundary <span class="sc">|</span> x <span class="sc">&gt;</span> upper.boundary)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>                 })</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>to.remove <span class="ot">&lt;-</span> <span class="fu">as.logical</span>(to.remove)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(raw.yield[<span class="st">'yld_kgh'</span>], </span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">'Yield (kg/ha)'</span>,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>     <span class="at">reset =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">16</span>)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(raw.yield)[to.remove],</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">'red'</span>,</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="st">'x'</span>, </span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>     <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now, let us remove these data points, and average the yield observations within each experimental unit. We can see that our estimates of the model parameters are not quite the same ones that we simulated. In addition, the variance of the parameter estimates is pretty large. This means that we are not very certain of these values.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>yield.filtered.sd <span class="ot">&lt;-</span> raw.yield[<span class="sc">!</span>to.remove, ]</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>mean.yield.sd <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(yield.filtered.sd[<span class="st">'yld_kgh'</span>],</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                           trial.design,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                           <span class="at">FUN =</span> mean)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>mean.yield.sd <span class="ot">&lt;-</span> <span class="fu">st_join</span>(mean.yield.sd, trial.design, <span class="at">join =</span> st_equals)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>fit1 <span class="ot">&lt;-</span> <span class="fu">nls</span>(yld_kgh <span class="sc">~</span> <span class="fu">SSlinp</span>(nrate, a, b, xs),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">data =</span> mean.yield.sd)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># estimates</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         a          b         xs 
+6814.09790   28.01518  168.74310 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># variances</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(<span class="fu">vcov</span>(fit1))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           a            b           xs 
+28833.979455     3.075624    71.175162 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Visualizing the data</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">nrate =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">300</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">cbind</span>(preds,  <span class="fu">predict_nls</span>(fit1,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">interval =</span> <span class="st">'conf'</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">newdata =</span> preds))</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mean.yield.sd<span class="sc">$</span>nrate, mean.yield.sd<span class="sc">$</span>yld_kgh, </span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">'Nitrogen rate (kg/ha)'</span>,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">'Yield (kg/ha)'</span>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="at">x =</span> <span class="fu">c</span>(preds<span class="sc">$</span>nrate, <span class="fu">rev</span>(preds<span class="sc">$</span>nrate)),</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="fu">c</span>(preds<span class="sc">$</span>Q2<span class="fl">.5</span>, <span class="fu">rev</span>(preds<span class="sc">$</span>Q97<span class="fl">.5</span>) ),</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">border =</span> <span class="st">'steelblue'</span>, <span class="at">lty =</span> <span class="dv">2</span>) </span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(preds<span class="sc">$</span>nrate, preds<span class="sc">$</span>Estimate, </span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">col =</span> <span class="st">'blue'</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">'bottomright'</span>,</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">'Estimate'</span>, <span class="st">'CI'</span>),</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">'blue'</span>, <span class="st">'steelblue'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -347,29 +417,22 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>We can now apply this same methodology to all experimental units and see that, in total, we will remove 60 points from this data set.</p>
+</section>
+<section id="adding-a-buffer-to-the-experimental-units" class="level2">
+<h2 class="anchored" data-anchor-id="adding-a-buffer-to-the-experimental-units">Adding a buffer to the experimental units</h2>
+<p>Another empirical cleaning method that is commonly used is to add a buffer to the experimental units. This in meant to remove some of the border effect or the transition between experimental units. However, adding a buffer needs to be done with caution. You want you buffer to be big enough to remove some of these potentially problematic points, but you do not want your buffer to remove so many points that you will end up estimating the mean with fewer points. This would increase the uncertainty of your estimate. Let’s take a look at different buffer sizes:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>raw.yield<span class="sc">$</span>eu <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">st_intersects</span>(raw.yield, trial.design))</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>raw.yield <span class="ot">&lt;-</span> raw.yield[<span class="fu">order</span>(raw.yield<span class="sc">$</span>eu), ]</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>to.remove <span class="ot">&lt;-</span> <span class="fu">ave</span>(raw.yield<span class="sc">$</span>yld_kgh, </span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                 raw.yield<span class="sc">$</span>eu,</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">FUN =</span> <span class="cf">function</span>(x){</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>                   eu.mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(x)</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>                   eu.sd <span class="ot">&lt;-</span> <span class="fu">sd</span>(x)</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>                   upper.boundary <span class="ot">&lt;-</span> eu.mean <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> eu.sd</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>                   lower.boundary <span class="ot">&lt;-</span> eu.mean <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> eu.sd</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>                    (x <span class="sc">&lt;</span> lower.boundary <span class="sc">|</span> x <span class="sc">&gt;</span> upper.boundary)</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>                 })</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>to.remove <span class="ot">&lt;-</span> <span class="fu">as.logical</span>(to.remove)</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(raw.yield[<span class="st">'yld_kgh'</span>], </span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">'Yield (kg/ha)'</span>,</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>     <span class="at">reset =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">16</span>)</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(raw.yield)[to.remove],</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">'red'</span>,</span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="st">'x'</span>, </span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>     <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>buffers <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">hcl.colors</span>(<span class="dv">4</span>, <span class="at">palette =</span> <span class="st">'Temps'</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(raw.yield), <span class="at">cex =</span> <span class="fl">0.5</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(buffers)){</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  buffered.exp.units <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(<span class="fu">st_buffer</span>(trial.design, <span class="sc">-</span>buffers[i]))</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(<span class="fu">st_geometry</span>(buffered.exp.units), <span class="at">border =</span> cols[i], <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">'topleft'</span>, </span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> cols,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> buffers,</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">'Buffer size (m)'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -378,15 +441,31 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Now, let us remove these data points, and average the yield observations within each experimental unit. We can see that our estimates of the model parameters are not quite the same ones that we simulated. In addition, the variance of the parameter estimates is pretty large. This means that we are not very certain of these values.</p>
+<p>It seems that a buffer size of about 5 meters is what we want. Let’s go with that and see which observations will be removed from the data set:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>yield.filtered.sd <span class="ot">&lt;-</span> raw.yield[<span class="sc">!</span>to.remove, ]</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>mean.yield.sd <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(yield.filtered.sd[<span class="st">'yld_kgh'</span>],</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                           trial.design,</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                           <span class="at">FUN =</span> mean)</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>mean.yield.sd <span class="ot">&lt;-</span> <span class="fu">st_join</span>(mean.yield.sd, trial.design, <span class="at">join =</span> st_equals)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mean.yield.sd<span class="sc">$</span>nrate, mean.yield.sd<span class="sc">$</span>yld_kgh, </span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">'Nitrogen rate (kg/ha)'</span>, <span class="at">ylab =</span> <span class="st">'Yield (kg/ha)'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>buffered.exp.units <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(<span class="fu">st_buffer</span>(trial.design, <span class="sc">-</span><span class="dv">5</span>))</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>raw.yield<span class="sc">$</span>eu <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">st_intersects</span>(raw.yield, buffered.exp.units))</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>raw.yield <span class="ot">&lt;-</span> raw.yield[<span class="fu">order</span>(raw.yield<span class="sc">$</span>eu), ]</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>to.remove <span class="ot">&lt;-</span> <span class="fu">ave</span>(raw.yield<span class="sc">$</span>yld_kgh, </span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                 raw.yield<span class="sc">$</span>eu,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">FUN =</span> <span class="cf">function</span>(x){</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>                   eu.mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(x)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>                   eu.sd <span class="ot">&lt;-</span> <span class="fu">sd</span>(x)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>                   upper.boundary <span class="ot">&lt;-</span> eu.mean <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> eu.sd</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>                   lower.boundary <span class="ot">&lt;-</span> eu.mean <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> eu.sd</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>                    (x <span class="sc">&lt;</span> lower.boundary <span class="sc">|</span> x <span class="sc">&gt;</span> upper.boundary)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>                 })</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>to.remove <span class="ot">&lt;-</span> <span class="fu">as.logical</span>(to.remove)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(raw.yield[<span class="st">'yld_kgh'</span>], </span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">'Yield (kg/ha)'</span>,</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>     <span class="at">reset =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">16</span>)</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(raw.yield)[to.remove],</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">'red'</span>,</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="st">'x'</span>, </span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>     <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -394,37 +473,51 @@ window.Quarto = {
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fit1 <span class="ot">&lt;-</span> <span class="fu">nls</span>(yld_kgh <span class="sc">~</span> <span class="fu">SSlinp</span>(nrate, a, b, xs),</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">data =</span> mean.yield.sd)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># estimates</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>         a          b         xs 
-6814.09790   28.01518  168.74310 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># variances</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(<span class="fu">vcov</span>(fit1))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>           a            b           xs 
-28833.979455     3.075624    71.175162 </code></pre>
-</div>
-</div>
-</section>
-<section id="adding-a-buffer-to-the-experimental-units" class="level2">
-<h2 class="anchored" data-anchor-id="adding-a-buffer-to-the-experimental-units">Adding a buffer to the experimental units</h2>
-<p>Another empirical cleaning method that is commonly used is to add a buffer to the experimental units. This in meant to remove some of the border effect or the transition between experimental units. However, adding a buffer needs to be done with caution. You want you buffer to be big enough to remove some of these potentially problematic points, but you do not want your buffer to remove so many points that you will end up estimating the mean with fewer points. This would increase the uncertainty of your estimate. Let’s take a look at different buffer sizes:</p>
+<p>Now, let us remove these data points, and average the yield observations within each experimental unit. We can see that our estimates of the model parameters are a little closer to the true values but still not quite there. Also, the variance has decreased quite a bit.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>buffers <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">hcl.colors</span>(<span class="dv">4</span>, <span class="at">palette =</span> <span class="st">'Temps'</span>)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(raw.yield), <span class="at">cex =</span> <span class="fl">0.5</span>)</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(buffers)){</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  buffered.exp.units <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(<span class="fu">st_buffer</span>(trial.design, <span class="sc">-</span>buffers[i]))</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(<span class="fu">st_geometry</span>(buffered.exp.units), <span class="at">border =</span> cols[i], <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">'topleft'</span>, </span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> cols,</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> buffers,</span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">'Buffer size (m)'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>yield.filtered.buffer <span class="ot">&lt;-</span> raw.yield[<span class="sc">!</span>to.remove, ]</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>mean.yield.buffer <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(yield.filtered.buffer[<span class="st">'yld_kgh'</span>],</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                           trial.design,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>                           <span class="at">FUN =</span> mean)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>mean.yield.buffer <span class="ot">&lt;-</span> <span class="fu">st_join</span>(mean.yield.buffer, trial.design, <span class="at">join =</span> st_equals)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>fit2 <span class="ot">&lt;-</span> <span class="fu">nls</span>(yld_kgh <span class="sc">~</span> <span class="fu">SSlinp</span>(nrate, a, b, xs),</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">data =</span> mean.yield.buffer)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="do">## estimates</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        a         b        xs 
+6659.5802   30.3704  172.9306 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="do">## variances</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(<span class="fu">vcov</span>(fit2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          a           b          xs 
+6649.190326    0.709247   14.583390 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Visualizing the data</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">nrate =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">300</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">cbind</span>(preds,  <span class="fu">predict_nls</span>(fit2,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">interval =</span> <span class="st">'conf'</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">newdata =</span> preds))</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mean.yield.buffer<span class="sc">$</span>nrate, </span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>     mean.yield.buffer<span class="sc">$</span>yld_kgh, </span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">'Nitrogen rate (kg/ha)'</span>,</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">'Yield (kg/ha)'</span>)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="at">x =</span> <span class="fu">c</span>(preds<span class="sc">$</span>nrate, <span class="fu">rev</span>(preds<span class="sc">$</span>nrate)),</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="fu">c</span>(preds<span class="sc">$</span>Q2<span class="fl">.5</span>, <span class="fu">rev</span>(preds<span class="sc">$</span>Q97<span class="fl">.5</span>) ),</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">border =</span> <span class="st">'steelblue'</span>, <span class="at">lty =</span> <span class="dv">2</span>) </span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(preds<span class="sc">$</span>nrate, preds<span class="sc">$</span>Estimate, </span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">col =</span> <span class="st">'blue'</span>)</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">'bottomright'</span>,</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">'Estimate'</span>, <span class="st">'CI'</span>),</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">'blue'</span>, <span class="st">'steelblue'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -433,31 +526,68 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>It seems that a buffer size of about 5 meters is what we want. Let’s go with that and see which observations will be removed from the data set:</p>
+<p>We get a little closer to the true value with every layer of processing that we include in this exercise. However, these layers are empirical and somewhat arbitrary. By adding a buffer zone, we are looking to remove points that have an influence from the adjacent experimental units. This can be done using the <em>ritas</em> algorithm within <em>pacu</em>.</p>
+</section>
+<section id="using-pa_yield" class="level2">
+<h2 class="anchored" data-anchor-id="using-pa_yield">Using pa_yield</h2>
+<p>The pa_yield function has built-in capabilities to automate these processes without the need for these empirical rules. For instance, by setting <em>remove.crossed.polygons</em> to <em>TRUE</em>, we remove data that could be influenced by adjacent experimental units. You can read more about the <em>ritas</em> algorithm <a href="https://doi.org/10.1016/j.softx.2024.101971">here</a>.</p>
+<p>So we can visualize these steps, I will set the option <em>steps</em> to <em>TRUE</em>. This is a new addition to the package and is not yet available on CRAN. Please install the package from <a href="https://github.com/cldossantos/pacu">GitHub</a> to be able to use this.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>buffered.exp.units <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(<span class="fu">st_buffer</span>(trial.design, <span class="sc">-</span><span class="dv">5</span>))</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>raw.yield<span class="sc">$</span>eu <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">st_intersects</span>(raw.yield, buffered.exp.units))</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>raw.yield <span class="ot">&lt;-</span> raw.yield[<span class="fu">order</span>(raw.yield<span class="sc">$</span>eu), ]</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>to.remove <span class="ot">&lt;-</span> <span class="fu">ave</span>(raw.yield<span class="sc">$</span>yld_kgh, </span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>                 raw.yield<span class="sc">$</span>eu,</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">FUN =</span> <span class="cf">function</span>(x){</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>                   eu.mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(x)</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>                   eu.sd <span class="ot">&lt;-</span> <span class="fu">sd</span>(x)</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>                   upper.boundary <span class="ot">&lt;-</span> eu.mean <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> eu.sd</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>                   lower.boundary <span class="ot">&lt;-</span> eu.mean <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> eu.sd</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>                    (x <span class="sc">&lt;</span> lower.boundary <span class="sc">|</span> x <span class="sc">&gt;</span> upper.boundary)</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>                 })</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>to.remove <span class="ot">&lt;-</span> <span class="fu">as.logical</span>(to.remove)</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(raw.yield[<span class="st">'yld_kgh'</span>], </span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">'Yield (kg/ha)'</span>,</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>     <span class="at">reset =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">16</span>)</span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(raw.yield)[to.remove],</span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">'red'</span>,</span>
-<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="st">'x'</span>, </span>
-<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>     <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>yld3 <span class="ot">&lt;-</span> <span class="fu">pa_yield</span>(raw.yield,</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data.columns =</span> <span class="fu">c</span>(<span class="at">mass =</span> <span class="st">'mass_g'</span>,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">interval =</span> <span class="st">'intrvl_'</span>,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">distance =</span> <span class="st">'dstnc_f'</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">width =</span> <span class="st">'swth_ft'</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">angle =</span> <span class="st">'angl_dg'</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">moisture =</span> <span class="st">'moistur'</span>),</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">grid =</span> trial.design,</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>                 <span class="at">steps =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>                 <span class="at">algorithm =</span> <span class="st">'ritas'</span>,</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>                 <span class="at">unit.system =</span> <span class="st">'metric'</span>,</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>                 <span class="at">verbose =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>                 <span class="at">remove.crossed.polygons =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>                 <span class="at">cores =</span> <span class="dv">6</span>)</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>yld4 <span class="ot">&lt;-</span> <span class="fu">st_join</span>(yld3<span class="sc">$</span>yield, trial.design, <span class="at">join =</span> st_equals)</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>yld4<span class="sc">$</span>yield_kgh <span class="ot">&lt;-</span> yld4<span class="sc">$</span>yield <span class="sc">*</span> <span class="dv">1000</span> <span class="do">## converting from t/ha</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>                                    <span class="do">## to kg/ha    </span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>fit3 <span class="ot">&lt;-</span> <span class="fu">nls</span>(yield_kgh <span class="sc">~</span> <span class="fu">SSlinp</span>(nrate, a, b, xs),</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>            <span class="at">data =</span> yld4)</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a><span class="do">## estimates</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         a          b         xs 
+6997.17524   30.40087  176.09137 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="do">## variances</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(<span class="fu">vcov</span>(fit3))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           a            b           xs 
+1401.4136937    0.1494841    3.1692490 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Visualizing the data</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">nrate =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">300</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">cbind</span>(preds,  <span class="fu">predict_nls</span>(fit3,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">interval =</span> <span class="st">'conf'</span>,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">newdata =</span> preds))</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(yld4<span class="sc">$</span>nrate, </span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>     yld4<span class="sc">$</span>yield_kgh, </span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">'Nitrogen rate (kg/ha)'</span>,</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">'Yield (kg/ha)'</span>)</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="at">x =</span> <span class="fu">c</span>(preds<span class="sc">$</span>nrate, <span class="fu">rev</span>(preds<span class="sc">$</span>nrate)),</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="fu">c</span>(preds<span class="sc">$</span>Q2<span class="fl">.5</span>, <span class="fu">rev</span>(preds<span class="sc">$</span>Q97<span class="fl">.5</span>) ),</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">border =</span> <span class="st">'steelblue'</span>, <span class="at">lty =</span> <span class="dv">2</span>) </span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(preds<span class="sc">$</span>nrate, preds<span class="sc">$</span>Estimate, </span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">col =</span> <span class="st">'blue'</span>)</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">'bottomright'</span>,</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,</span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">'Estimate'</span>, <span class="st">'CI'</span>),</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">'blue'</span>, <span class="st">'steelblue'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -466,75 +596,25 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Now, let us remove these data points, and average the yield observations within each experimental unit. We can see that our estimates of the model parameters are a little closer to the true values but still not quite there. Also, the variance has decreased quite a bit.</p>
+<p>We can see that the <em>pa_yield()</em> function was able to produce more precise estimates of the model parameters. In part, this is due to the <em>ritas</em> algorithm recreating the destructive harvest process and being able to track which harvest polygons have crossed between different experimental units. We can see that in the plot below that demonstrates which polygons were removed:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>yield.filtered.buffer <span class="ot">&lt;-</span> raw.yield[<span class="sc">!</span>to.remove, ]</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>mean.yield.buffer <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(yield.filtered.buffer[<span class="st">'yld_kgh'</span>],</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>                           trial.design,</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>                           <span class="at">FUN =</span> mean)</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>mean.yield.buffer <span class="ot">&lt;-</span> <span class="fu">st_join</span>(mean.yield.buffer, trial.design, <span class="at">join =</span> st_equals)</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mean.yield.buffer<span class="sc">$</span>nrate, mean.yield.buffer<span class="sc">$</span>yld_kgh, </span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">'Nitrogen rate (kg/ha)'</span>, <span class="at">ylab =</span> <span class="st">'Yield (kg/ha)'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(yld3<span class="sc">$</span>steps, {</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(adjusted.polygons, <span class="at">border =</span> <span class="st">'red'</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(cleaned.polygons, <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(grid, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">border =</span> <span class="st">'blue'</span>)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">legend</span>(<span class="st">'topleft'</span>,</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">fill =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="dv">3</span>),</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">border =</span> <span class="fu">c</span>(<span class="st">'black'</span>, <span class="st">'red'</span>, <span class="st">'blue'</span>),</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">'harvest polygons'</span>, </span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>                    <span class="st">'removed polygons'</span>,</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>                    <span class="st">'experimental units'</span>))</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
 <p><img src="index_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
-</div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>fit2 <span class="ot">&lt;-</span> <span class="fu">nls</span>(yld_kgh <span class="sc">~</span> <span class="fu">SSlinp</span>(nrate, a, b, xs),</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">data =</span> mean.yield.buffer)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="do">## estimates</span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>        a         b        xs 
-6659.5802   30.3704  172.9306 </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="do">## variances</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(<span class="fu">vcov</span>(fit2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>          a           b          xs 
-6649.190326    0.709247   14.583390 </code></pre>
-</div>
-</div>
-<p>We get a little closer to the true value with every layer of processing that we include in this exercise. However, these layers are empirical and somewhat arbitrary. By adding a buffer zone, we are looking to remove points that have an influence from the adjacent experimental units. This can be done using the <em>ritas</em> algorithm within <em>pacu</em>.</p>
-</section>
-<section id="using-pa_yield" class="level2">
-<h2 class="anchored" data-anchor-id="using-pa_yield">Using pa_yield</h2>
-<p>The pa_yield function has built-in capabilities to automate these processes without the need for these empirical rules. For instance, by setting <em>remove.crossed.polygons</em> to <em>TRUE</em>, we remove data that could be influenced by adjacent experimental units.</p>
-<p>So we can visualize these steps, I will set the option <em>steps</em> to <em>TRUE</em>. This is a new addition to the package and is not yet available on CRAN. Please install the package from <a href="https://github.com/cldossantos/pacu">GitHub</a> to be able to use this.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>yld3 <span class="ot">&lt;-</span> <span class="fu">pa_yield</span>(raw.yield,</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data.columns =</span> <span class="fu">c</span>(<span class="at">mass =</span> <span class="st">'mass_g'</span>,</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">interval =</span> <span class="st">'intrvl_'</span>,</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">distance =</span> <span class="st">'dstnc_f'</span>,</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">width =</span> <span class="st">'swth_ft'</span>,</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">angle =</span> <span class="st">'angl_dg'</span>,</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">moisture =</span> <span class="st">'moistur'</span>),</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">grid =</span> trial.design,</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>                 <span class="at">steps =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>                 <span class="at">algorithm =</span> <span class="st">'ritas'</span>,</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>                 <span class="at">unit.system =</span> <span class="st">'metric'</span>,</span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>                 <span class="at">verbose =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>                 <span class="at">remove.crossed.polygons =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>                 <span class="at">cores =</span> <span class="dv">5</span>)</span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>yld4 <span class="ot">&lt;-</span> <span class="fu">st_join</span>(yld3<span class="sc">$</span>yield, trial.design, <span class="at">join =</span> st_equals)</span>
-<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>yld4<span class="sc">$</span>yield_kgh <span class="ot">&lt;-</span> yld4<span class="sc">$</span>yield <span class="sc">*</span> <span class="dv">1000</span></span>
-<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>fit3 <span class="ot">&lt;-</span> <span class="fu">nls</span>(yield_kgh <span class="sc">~</span> <span class="fu">SSlinp</span>(nrate, a, b, xs),</span>
-<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">data =</span> yld4)</span>
-<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a><span class="do">## estimates</span></span>
-<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>         a          b         xs 
-6997.17524   30.40087  176.09137 </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="do">## variances</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(<span class="fu">vcov</span>(fit3))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>           a            b           xs 
-1401.4136937    0.1494841    3.1692490 </code></pre>
 </div>
 </div>
 </section>
