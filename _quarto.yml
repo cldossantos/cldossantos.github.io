@@ -11,6 +11,7 @@ website:
       - about.qmd
       - cv.qmd
       - publications.qmd
+  google-analytics: "G-XRSH8JDS68"
 format:
   html:
     theme:
