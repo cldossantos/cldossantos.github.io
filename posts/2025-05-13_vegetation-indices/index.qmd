@@ -1,0 +1,112 @@
+---
+title: "Specifying custom vegetation indices"
+author: "Caio dos Santos"
+date: "2025-05-13"
+categories: [pacu, remote sensing]
+---
+
+## Introduction
+
+Part of the motivation for developing **pacu** was to facilitate the access to and the analysis of satellite data. Up until now, users could only use one of the six pre-specified vegetation indices within *pa_compute_vi()*. In an effort to make the package more comprehensive, we have included the option of specifying custom vegetation indices. This gives users the freedom to go beyond the predefined vegetation indices and tailor their analysis to their specific needs! Here, we will go through an example of how to download and process satellite data using **pacu**. Let's get started! 
+
+## Data acquisition and processing
+
+We will use two libraries for this example, [pacu](https://github.com/cldossantos/pacu) and [sf](https://github.com/r-spatial/sf). In case you do not have them installed, you can install them using the following code chunk
+```{r, eval=FALSE}
+install.packages('sf')
+
+## we will install pacu from GitHub because of some newly added features
+## version 0.1.63
+remotes::install_github('cldossantos/pacu')
+```
+
+
+
+Let's load the libraries:
+
+```{r, message=FALSE}
+library(sf)
+library(pacu)
+```
+
+
+In this example, we'll focus on the [Ada Hayden Heritage Park](https://maps.app.goo.gl/235ypmts5sEZzVwWA). I will set up the corners here so you do not have to download any files to be able to reproduce follow along. 
+```{r}
+corners <- matrix( c(-93.639, 42.0758,
+                     -93.6214, 42.0621), 
+                   ncol = 2,
+                   byrow = TRUE)
+
+corners <- st_multipoint(corners)
+
+## defining our area of interest
+aoi <- st_as_sf(st_as_sfc(st_bbox(corners)),
+                crs = 4326)
+
+```
+
+
+We can search for images of the park over a given period and filter them based on cloud coverage. Here, we look for images from May of 2024 and with a maximum cloud coverage of 10%.
+
+*note*: there is a registration step required before you can download images from Copernicus Data Space, please read the [vignette](https://cran.r-project.org/web/packages/pacu/vignettes/pacu_sat.html).
+```{r}
+available.images <- pa_browse_dataspace(aoi, 
+                                        start.date = '2024-05-13',
+                                        end.date = '2024-05-19',
+                                        max.cloud.cover = 10)
+```
+
+We have found one image matching our search parameters:
+
+```{r}
+available.images
+```
+
+
+Downloading the image can take some time. On my machine it took about 7 minutes. Additionally, the image is quite large and can take up a lot of space on the computer. Providing the *aoi* argument ensures that **pacu** will crop the downloaded image to the area of interest. This can save a lot of storage space when working with several images.
+
+```{r, warning=FALSE, message=FALSE}
+downloaded.images <- pa_download_dataspace(available.images,
+                                           dir.path = './raw-data/',
+                                           aoi = aoi,
+                                           verbose = FALSE) ## suppressing the progressbar
+
+```
+
+
+Here, we can take a look at the true color image. It is actually a really pretty lake! 
+```{r}
+rgb <- pa_get_rgb(downloaded.images,
+                  verbose = FALSE)
+pa_plot(rgb)
+```
+
+
+One of the pre-built vegeation indices within **pacu** is the Normalized Difference Vegetation Index (NDVI). This VI is often used as an indicator of crop health but in this case, we can see that it also shows us the lake quite well. 
+```{r}
+ndvi <- pa_compute_vi(downloaded.images,
+                      vi = 'ndvi',
+                      verbose = FALSE)
+
+pa_plot(ndvi)
+```
+
+## Specifying custom vegetation indices
+
+Researchers might be interested in using other vegetation indices to identify water bodies, for example, such as the [Multi-Band Water Index](https://www.sciencedirect.com/science/article/pii/S0303243418300990). 
+This can be done by specifying the mathematical relationship between the Sentinel-2 bands in the *formula* argument of *pa_compute_vi()*. 
+
+It is important to note that there is a mismatch between the resolution of the  bands involved in this computation- some are 10m and others are 20m. The package will recognize that mismatch and resample the finer resolution band to match the coarser resolution ones. This means that the resolution of the output raster is the same as the resolution of the coarsest band involved in the computation.
+
+```{r}
+mbwi <- pa_compute_vi(downloaded.images,
+                      vi = 'other',
+                      formula = mbwi ~ (2 * B03 - B04 - B08 - B11 - B12),
+                      verbose = FALSE)
+pa_plot(mbwi)
+```
+
+
+## Conclusion
+
+We have seen the process of acquiring and processing satellite data from Sentinel-2, and a new feature within **pacu** that allows us to specify custom vegetation indices. This gives the user more power to define and explore different indices that might be useful in a different discipline. We'll be back with more **pacu** news later!
