@@ -103,7 +103,7 @@ mbwi <- pa_compute_vi(downloaded.images,
                       vi = 'other',
                       formula = mbwi ~ (2 * B03 - B04 - B08 - B11 - B12),
                       verbose = FALSE)
-pa_plot(mbwi)
+pa_plot(mbwi, palette = 'Blues') ## blue colors for water!
 ```
 
 
