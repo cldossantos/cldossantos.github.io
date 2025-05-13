@@ -63,7 +63,7 @@ available.images
 ```
 
 
-Downloading the image can take some time. On my machine it took about 7 minutes. Additionally, the image is quite large and can take up a lot of space on the computer. Providing the *aoi* argument ensures that **pacu** will crop the downloaded image to the area of interest. This can save a lot of storage space when working with several images.
+Downloading the image can take some time. On my machine, it took about 7 minutes. Additionally, the image is quite large and can take up a lot of space on the computer. Providing the *aoi* argument ensures that **pacu** will crop the downloaded image to the area of interest. This can save a lot of storage space when working with several images.
 
 ```{r, warning=FALSE, message=FALSE}
 downloaded.images <- pa_download_dataspace(available.images,
