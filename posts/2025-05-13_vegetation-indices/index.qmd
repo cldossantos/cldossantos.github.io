@@ -30,7 +30,7 @@ library(pacu)
 ```
 
 
-In this example, we'll focus on the [Ada Hayden Heritage Park](https://maps.app.goo.gl/235ypmts5sEZzVwWA). I will set up the corners here so you do not have to download any files to be able to reproduce follow along. 
+In this example, we'll focus on the [Ada Hayden Heritage Park](https://maps.app.goo.gl/235ypmts5sEZzVwWA). I will set up the corners here so you do not have to download any files to be able to  follow along. 
 ```{r}
 corners <- matrix( c(-93.639, 42.0758,
                      -93.6214, 42.0621), 
