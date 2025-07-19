@@ -106,7 +106,7 @@ plot(st_geometry(trial.design), add = TRUE)
 
 ## Bringing these datasets together
 
-Now that we have seen each data set separately, we need to bring these data sets together so we can investigate the relationship between our imposed treaments and yield. To do that, we will process both the variable rate and the planter data using **pa_trial**, and then we will process the yield monitor data using **pa_trial**. For all the next steps, we will use the **ritas** algorithm. You can find more information about how we implemented this algorithm in the original publication of [pacu](https://doi.org/10.1016/j.softx.2024.101971).
+Now that we have seen each data set separately, we need to bring these data sets together so we can investigate the relationship between our imposed treatments and yield. To do that, we will process both the variable rate and the planter data using **pa_trial**, and then we will process the yield monitor data using **pa_trial**. For all the next steps, we will use the **ritas** algorithm. You can find more information about how we implemented this algorithm in the original publication of [pacu](https://doi.org/10.1016/j.softx.2024.101971).
 
 
 Before we process these data, I will remove the big bordering area around our experimental plots just to reduce the amount of data we will process. This can be done before or after processing the data but doing it before, saves you some processing time.
@@ -161,7 +161,7 @@ processed.nitrogen <- pa_trial(applied.n,
                                cores = 6)
 ```
 
-Using **pa_trial**, we aggregated the seed data at the level of experimental unit, as can be seen below.
+Using **pa_trial**, we aggregated the nitrogen data at the level of experimental unit, as can be seen below.
 ```{r}
 pa_plot(processed.nitrogen)
 ```
@@ -195,7 +195,7 @@ processed.yield <- pa_yield(raw.yield,
                             cores = 6)
 ```
 
-We can see the procesed yield data below
+We can see the processed yield data below
 
 ```{r}
 pa_plot(processed.yield)
@@ -232,7 +232,7 @@ In this post we saw how the new **pa_trial** function can be used to process as-
 
 By doing so, we can move beyond simply knowing what was intended in an experimental design to understanding what was actually applied in the field—an important distinction when modeling treatment effects in precision agriculture.
 
-If you have to process some of these data, you should definitely give **pacu** a try and let me know how that goes for you! We'll be back with more updates on **pacu** soon! Stay tuned! 
+If you have to process some of these data, you should definitely give **pacu** a try and let me know how it goes! We'll be back with more updates on **pacu** soon! Stay tuned! 
 
 
 

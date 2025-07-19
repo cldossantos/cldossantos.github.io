@@ -329,7 +329,7 @@ window.Quarto = {
 </section>
 <section id="bringing-these-datasets-together" class="level2">
 <h2 class="anchored" data-anchor-id="bringing-these-datasets-together">Bringing these datasets together</h2>
-<p>Now that we have seen each data set separately, we need to bring these data sets together so we can investigate the relationship between our imposed treaments and yield. To do that, we will process both the variable rate and the planter data using <strong>pa_trial</strong>, and then we will process the yield monitor data using <strong>pa_trial</strong>. For all the next steps, we will use the <strong>ritas</strong> algorithm. You can find more information about how we implemented this algorithm in the original publication of <a href="https://doi.org/10.1016/j.softx.2024.101971">pacu</a>.</p>
+<p>Now that we have seen each data set separately, we need to bring these data sets together so we can investigate the relationship between our imposed treatments and yield. To do that, we will process both the variable rate and the planter data using <strong>pa_trial</strong>, and then we will process the yield monitor data using <strong>pa_trial</strong>. For all the next steps, we will use the <strong>ritas</strong> algorithm. You can find more information about how we implemented this algorithm in the original publication of <a href="https://doi.org/10.1016/j.softx.2024.101971">pacu</a>.</p>
 <p>Before we process these data, I will remove the big bordering area around our experimental plots just to reduce the amount of data we will process. This can be done before or after processing the data but doing it before, saves you some processing time.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>trial.design <span class="ot">&lt;-</span> <span class="fu">subset</span>(trial.design, type <span class="sc">==</span> <span class="st">'Trial'</span>)</span>
@@ -398,7 +398,7 @@ window.Quarto = {
 <pre><code>Guessing units of distance to be ft</code></pre>
 </div>
 </div>
-<p>Using <strong>pa_trial</strong>, we aggregated the seed data at the level of experimental unit, as can be seen below.</p>
+<p>Using <strong>pa_trial</strong>, we aggregated the nitrogen data at the level of experimental unit, as can be seen below.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pa_plot</span>(processed.nitrogen)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
@@ -481,7 +481,7 @@ NAs      0         0
 <pre><code>Guessing units of distance to be ft</code></pre>
 </div>
 </div>
-<p>We can see the procesed yield data below</p>
+<p>We can see the processed yield data below</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pa_plot</span>(processed.yield)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
@@ -530,7 +530,7 @@ NAs      0         0
 <h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
 <p>In this post we saw how the new <strong>pa_trial</strong> function can be used to process as-applied data from variable rate technologies in on-farm trials. We showed how to aggregate planting and nitrogen application data to the level of the experimental unit and combine them with yield monitor data for further analysis.</p>
 <p>By doing so, we can move beyond simply knowing what was intended in an experimental design to understanding what was actually applied in the field—an important distinction when modeling treatment effects in precision agriculture.</p>
-<p>If you have to process some of these data, you should definitely give <strong>pacu</strong> a try and let me know how that goes for you! We’ll be back with more updates on <strong>pacu</strong> soon! Stay tuned!</p>
+<p>If you have to process some of these data, you should definitely give <strong>pacu</strong> a try and let me know how it goes! We’ll be back with more updates on <strong>pacu</strong> soon! Stay tuned!</p>
 
 
 </section>
