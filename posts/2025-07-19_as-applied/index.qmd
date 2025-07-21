@@ -106,7 +106,7 @@ plot(st_geometry(trial.design), add = TRUE)
 
 ## Bringing these datasets together
 
-Now that we have seen each data set separately, we need to bring these data sets together so we can investigate the relationship between our imposed treatments and yield. To do that, we will process both the variable rate and the planter data using **pa_trial**, and then we will process the yield monitor data using **pa_trial**. For all the next steps, we will use the **ritas** algorithm. You can find more information about how we implemented this algorithm in the original publication of [pacu](https://doi.org/10.1016/j.softx.2024.101971).
+Now that we have seen each data set separately, we need to bring these data sets together so we can investigate the relationship between our imposed treatments and yield. To do that, we will process both the variable rate and the planter data using **pa_trial**, and then we will process the yield monitor data using **pa_yield**. For all the next steps, we will use the **ritas** algorithm. You can find more information about how we implemented this algorithm in the original publication of [pacu](https://doi.org/10.1016/j.softx.2024.101971).
 
 
 Before we process these data, I will remove the big bordering area around our experimental plots just to reduce the amount of data we will process. This can be done before or after processing the data but doing it before, saves you some processing time.
