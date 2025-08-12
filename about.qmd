@@ -6,7 +6,7 @@ about:
   links:
     - icon: linkedin
       text: LinkedIn
-      href: https://www.linkedin.com/in/caio-dos-santos-857375126/
+      href: https://www.linkedin.com/in/cldossantos/
     - text: "{{< ai google-scholar >}} Google Scholar"
       href: https://scholar.google.com/citations?user=0bTowMYAAAAJ&hl
     - icon: github

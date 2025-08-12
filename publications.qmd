@@ -1,5 +1,5 @@
 ---
-date: "2024-12-10"
+date: "2025-08-12"
 title: Publications
 ---
 
@@ -15,7 +15,6 @@ pacu: Precision Agriculture Computational Utilities, 2024
 
 </li>
 
-
 <li>
 
 SoyStage - Online decision support tool for the Midsouthern U.S., 2019.
@@ -23,11 +22,20 @@ SoyStage - Online decision support tool for the Midsouthern U.S., 2019.
 <a target="_blank" class="button-react" href="https://soystage.uark.edu/"> go to website</a>
 
 </li>
+
 </ol>
 
 ### Peer-reviewed publications
 
 <ol reversed>
+
+<li>
+
+Carvalho-Moore, P., Norsworthy, J., Porri, A., dos Santos, C.L., Barber, T., Sudhakar, S., Meiners, I., & Lerchl, J. (2025). Is glufosinate resitance in Palmer Amaranth spreading in Mississippi County, Arkansas? Weed Science, 73, e62.
+
+<a class="button-react"  target="_blank" href="doi.org/10.1017/wsc.2025.10037"> go to article</a>
+
+</li>
 
 <li>
 
