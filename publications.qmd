@@ -31,6 +31,14 @@ SoyStage - Online decision support tool for the Midsouthern U.S., 2019.
 
 <li>
 
+dos Santos, Caio L.  & Miguez, F. E. (2025). A comparative study of yield monitor data processing methods for on-farm agronomic trials. Agronomy Journal, 117, e70168.
+
+<a class="button-react"  target="_blank" href="https://doi.org/10.1002/agj2.70168"> go to article</a>
+
+</li>
+
+<li>
+
 Carvalho-Moore, P., Norsworthy, J., Porri, A., dos Santos, C.L., Barber, T., Sudhakar, S., Meiners, I., & Lerchl, J. (2025). Is glufosinate resitance in Palmer Amaranth spreading in Mississippi County, Arkansas? Weed Science, 73, e62.
 
 <a class="button-react"  target="_blank" href="doi.org/10.1017/wsc.2025.10037"> go to article</a>
