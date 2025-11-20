@@ -80,9 +80,9 @@ ul.task-list li input[type="checkbox"] {
     }
 
     const options = {
-      valueNames: ['listing-date','listing-title','listing-author',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-title-sort'] }],
+      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
       
-      searchColumns: ["listing-date","listing-title","listing-author"],
+      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
     };
 
     window['quarto-listings'] = window['quarto-listings'] || {};
@@ -156,7 +156,7 @@ window.Quarto = {
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
     <a class="nav-link" href="./"> 
-<span class="menu-text">Home</span></a>
+<span class="menu-text">Posts</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./about.html"> 
@@ -200,7 +200,7 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(6)</span></div><div class="category" data-category="bmV3cw==">news <span class="quarto-category-count">(1)</span></div><div class="category" data-category="cGFjdQ==">pacu <span class="quarto-category-count">(5)</span></div><div class="category" data-category="cmVtb3RlJTIwc2Vuc2luZw==">remote sensing <span class="quarto-category-count">(2)</span></div><div class="category" data-category="eWllbGQlMjBtb25pdG9y">yield monitor <span class="quarto-category-count">(3)</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(5)</span></div><div class="category" data-category="cGFjdQ==">pacu <span class="quarto-category-count">(5)</span></div><div class="category" data-category="cmVtb3RlJTIwc2Vuc2luZw==">remote sensing <span class="quarto-category-count">(2)</span></div><div class="category" data-category="eWllbGQlMjBtb25pdG9y">yield monitor <span class="quarto-category-count">(3)</span></div></div></div>
 <!-- main -->
 <main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
 
@@ -212,90 +212,189 @@ window.Quarto = {
 
 
 
-<div class="quarto-listing quarto-listing-container-table" id="listing-listing">
-<table class="quarto-listing-table table">
-<thead>
-<tr>
-<th>
-Date
-</th>
-<th>
-Title
-</th>
-<th>
-Author
-</th>
-</tr>
-</thead>
-<tbody class="list">
-<tr data-index="0" data-categories="cGFjdSUyQ3lpZWxkJTIwbW9uaXRvcg==" data-listing-date-sort="1752901200000" data-listing-file-modified-sort="1754418586985" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2220" data-listing-title-sort="Processing as-applied and as-planted data in on-farm trials" data-listing-filename-sort="index.qmd">
-<td>
-<span class="listing-date">Jul 19, 2025</span>
-</td>
-<td>
-<a href="./posts/2025-07-19_as-applied/index.html" class="title listing-title">Processing as-applied and as-planted data in on-farm trials</a>
-</td>
-<td>
-<span class="listing-author">Caio dos Santos</span>
-</td>
-</tr>
-<tr data-index="1" data-categories="cGFjdSUyQ3JlbW90ZSUyMHNlbnNpbmc=" data-listing-date-sort="1747112400000" data-listing-file-modified-sort="1754418586983" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1063" data-listing-title-sort="Specifying custom vegetation indices" data-listing-filename-sort="index.qmd">
-<td>
-<span class="listing-date">May 13, 2025</span>
-</td>
-<td>
-<a href="./posts/2025-05-13_vegetation-indices/index.html" class="title listing-title">Specifying custom vegetation indices</a>
-</td>
-<td>
-<span class="listing-author">Caio dos Santos</span>
-</td>
-</tr>
-<tr data-index="2" data-categories="cGFjdSUyQ3lpZWxkJTIwbW9uaXRvcg==" data-listing-date-sort="1741842000000" data-listing-file-modified-sort="1754418586981" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3039" data-listing-title-sort="Processing data from an on-farm experiment" data-listing-filename-sort="index.qmd">
-<td>
-<span class="listing-date">Mar 13, 2025</span>
-</td>
-<td>
-<a href="./posts/2025-03-13_on-farm-experiment/index.html" class="title listing-title">Processing data from an on-farm experiment</a>
-</td>
-<td>
-<span class="listing-author">Caio dos Santos</span>
-</td>
-</tr>
-<tr data-index="3" data-categories="cGFjdSUyQ3lpZWxkJTIwbW9uaXRvcg==" data-listing-date-sort="1741582800000" data-listing-file-modified-sort="1754418586981" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1101" data-listing-title-sort="Working with yield monitor data" data-listing-filename-sort="index.qmd">
-<td>
-<span class="listing-date">Mar 10, 2025</span>
-</td>
-<td>
-<a href="./posts/2025-02-11_yield-map/index.html" class="title listing-title">Working with yield monitor data</a>
-</td>
-<td>
-<span class="listing-author">Caio dos Santos</span>
-</td>
-</tr>
-<tr data-index="4" data-categories="cGFjdSUyQ3JlbW90ZSUyMHNlbnNpbmc=" data-listing-date-sort="1734328800000" data-listing-file-modified-sort="1754418586981" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="917" data-listing-title-sort="Remote sensing of NYC Central Park" data-listing-filename-sort="index.qmd">
-<td>
-<span class="listing-date">Dec 16, 2024</span>
-</td>
-<td>
-<a href="./posts/2024-12-16_central-park/index.html" class="title listing-title">Remote sensing of NYC Central Park</a>
-</td>
-<td>
-<span class="listing-author">Caio dos Santos</span>
-</td>
-</tr>
-<tr data-index="5" data-categories="bmV3cw==" data-listing-date-sort="1733810400000" data-listing-file-modified-sort="1754418586975" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="63" data-listing-title-sort="The post section is under construction still" data-listing-filename-sort="index.qmd">
-<td>
-<span class="listing-date">Dec 10, 2024</span>
-</td>
-<td>
-<a href="./posts/2024-12-09_under-construction/index.html" class="title listing-title">The post section is under construction still</a>
-</td>
-<td>
-<span class="listing-author">Caio dos Santos</span>
-</td>
-</tr>
-</tbody>
-</table>
+<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
+<div class="list quarto-listing-default">
+<div class="quarto-post image-right" data-index="0" data-categories="cGFjdSUyQ3lpZWxkJTIwbW9uaXRvcg==" data-listing-date-sort="1752901200000" data-listing-file-modified-sort="1754418586985" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2220">
+<div class="thumbnail">
+<p><a href="./posts/2025-07-19_as-applied/index.html" class="no-external"></a></p><a href="./posts/2025-07-19_as-applied/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/2025-07-19_as-applied/index_files/figure-html/unnamed-chunk-4-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2025-07-19_as-applied/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2025-07-19_as-applied/index.html" class="no-external">Processing as-applied and as-planted data in on-farm trials</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2025-07-19_as-applied/index.html" class="no-external"></a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('cGFjdQ=='); return false;">
+pacu
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('eWllbGQlMjBtb25pdG9y'); return false;">
+yield monitor
+</div>
+</div>
+<div class="listing-description">
+<a href="./posts/2025-07-19_as-applied/index.html" class="no-external">In the context of on-farm research, we often apply treatments using variable rate applicators to investigate how these different treatments will affect crop yield. An…</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2025-07-19_as-applied/index.html" class="no-external">
+<div class="listing-date">
+Jul 19, 2025
+</div>
+<div class="listing-author">
+Caio dos Santos
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="1" data-categories="cGFjdSUyQ3JlbW90ZSUyMHNlbnNpbmc=" data-listing-date-sort="1747112400000" data-listing-file-modified-sort="1754418586983" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1063">
+<div class="thumbnail">
+<p><a href="./posts/2025-05-13_vegetation-indices/index.html" class="no-external"></a></p><a href="./posts/2025-05-13_vegetation-indices/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/2025-05-13_vegetation-indices/index_files/figure-html/unnamed-chunk-7-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2025-05-13_vegetation-indices/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2025-05-13_vegetation-indices/index.html" class="no-external">Specifying custom vegetation indices</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2025-05-13_vegetation-indices/index.html" class="no-external"></a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('cGFjdQ=='); return false;">
+pacu
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('cmVtb3RlJTIwc2Vuc2luZw=='); return false;">
+remote sensing
+</div>
+</div>
+<div class="listing-description">
+<a href="./posts/2025-05-13_vegetation-indices/index.html" class="no-external">Part of the motivation for developing <strong>pacu</strong> was to facilitate the access to and the analysis of satellite data. Up until now, users could only use one of the six…<em></em><strong></strong></a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2025-05-13_vegetation-indices/index.html" class="no-external">
+<div class="listing-date">
+May 13, 2025
+</div>
+<div class="listing-author">
+Caio dos Santos
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="2" data-categories="cGFjdSUyQ3lpZWxkJTIwbW9uaXRvcg==" data-listing-date-sort="1741842000000" data-listing-file-modified-sort="1754418586981" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3039">
+<div class="thumbnail">
+<p><a href="./posts/2025-03-13_on-farm-experiment/index.html" class="no-external"></a></p><a href="./posts/2025-03-13_on-farm-experiment/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/2025-03-13_on-farm-experiment/index_files/figure-html/unnamed-chunk-1-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2025-03-13_on-farm-experiment/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2025-03-13_on-farm-experiment/index.html" class="no-external">Processing data from an on-farm experiment</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2025-03-13_on-farm-experiment/index.html" class="no-external"></a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('cGFjdQ=='); return false;">
+pacu
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('eWllbGQlMjBtb25pdG9y'); return false;">
+yield monitor
+</div>
+</div>
+<div class="listing-description">
+<a href="./posts/2025-03-13_on-farm-experiment/index.html" class="no-external">In a previous post, I have mentioned that <em>pacu</em> provided support for processing data coming from on-farm trials, as well as production fields. In this post, I want to explore…</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2025-03-13_on-farm-experiment/index.html" class="no-external">
+<div class="listing-date">
+Mar 13, 2025
+</div>
+<div class="listing-author">
+Caio dos Santos
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="3" data-categories="cGFjdSUyQ3lpZWxkJTIwbW9uaXRvcg==" data-listing-date-sort="1741582800000" data-listing-file-modified-sort="1754418586981" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1101">
+<div class="thumbnail">
+<p><a href="./posts/2025-02-11_yield-map/index.html" class="no-external"></a></p><a href="./posts/2025-02-11_yield-map/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/2025-02-11_yield-map/index_files/figure-html/unnamed-chunk-9-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2025-02-11_yield-map/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2025-02-11_yield-map/index.html" class="no-external">Working with yield monitor data</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2025-02-11_yield-map/index.html" class="no-external"></a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('cGFjdQ=='); return false;">
+pacu
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('eWllbGQlMjBtb25pdG9y'); return false;">
+yield monitor
+</div>
+</div>
+<div class="listing-description">
+<a href="./posts/2025-02-11_yield-map/index.html" class="no-external">Working with yield monitor data can be quite challenging. The data can have several sources of error and accounting for all of them can be hard. For instance, there are…</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2025-02-11_yield-map/index.html" class="no-external">
+<div class="listing-date">
+Mar 10, 2025
+</div>
+<div class="listing-author">
+Caio dos Santos
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="4" data-categories="cGFjdSUyQ3JlbW90ZSUyMHNlbnNpbmc=" data-listing-date-sort="1734328800000" data-listing-file-modified-sort="1754418586981" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="917">
+<div class="thumbnail">
+<p><a href="./posts/2024-12-16_central-park/index.html" class="no-external"></a></p><a href="./posts/2024-12-16_central-park/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/2024-12-16_central-park/index_files/figure-html/unnamed-chunk-9-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2024-12-16_central-park/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2024-12-16_central-park/index.html" class="no-external">Remote sensing of NYC Central Park</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2024-12-16_central-park/index.html" class="no-external"></a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('cGFjdQ=='); return false;">
+pacu
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('cmVtb3RlJTIwc2Vuc2luZw=='); return false;">
+remote sensing
+</div>
+</div>
+<div class="listing-description">
+<a href="./posts/2024-12-16_central-park/index.html" class="no-external">I thought it would be interesting to look at how to retrieve remotely sensed data from Sentinel-2 using the pacu package. For this example, I decided to take a look at the…</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2024-12-16_central-park/index.html" class="no-external">
+<div class="listing-date">
+Dec 16, 2024
+</div>
+<div class="listing-author">
+Caio dos Santos
+</div>
+</a>
+</div>
+</div>
+</div>
 <div class="listing-no-matching d-none">
 No matching items
 </div>

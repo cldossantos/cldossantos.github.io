@@ -16,7 +16,15 @@ about:
 
 ## About
 
-I am currently a Ph.D. candidate in the Department of Agronomy at Iowa State University, with an interest in data science, statistics, and process-based model applications in agriculture. Alongside my Ph.D. in Crop Production and Physiology, I am also working toward a Minor in Statistics. My research focuses on using digital tools- such as yield monitors, remotely sensed data, and crop models- to quantify and manage the spatio-temporal variability of cropping systems for efficient crop production.
+I have received my Ph.D. from the Department of Agronomy at Iowa State
+University with a Minor in Statistics. My research integrates crop physiology,
+digital agriculture, and statistical modeling to improve management and
+quantification of spatio- temporal variability in cropping systems. Much of my
+research has centered on physiological responses to nutrient availability,
+photoperiod, temperature, and genotype-by-environment interactions. I have
+worked extensively on tissue analysis, canopy dynamics, and phenological
+development in corn, soybean, and cover crops.
+
 
 ## Research interests
 
@@ -27,7 +35,7 @@ There are several research areas that fascinate me. A short list of those would 
 -   Ph.D. in Crop Production and Physiology
     -   Minor in Statistics
     -   Iowa State University
-    -   2020 - December 2025 (expected graduation date)
+    -   2020 - 2025
 -   M.Sc. in Crop, Soil, and Environmental Sciences
     -   University of Arkansas
     -   2018 - 2020

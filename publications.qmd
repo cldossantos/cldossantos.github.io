@@ -1,5 +1,5 @@
 ---
-date: "2025-08-12"
+date: "2025-11-20"
 title: Publications
 ---
 
@@ -10,15 +10,13 @@ title: Publications
 <li>
 
 pacu: Precision Agriculture Computational Utilities, 2024
-
-<a target="_blank" class="button-react" href="https://github.com/cldossantos/pacu"> go to website</a>
+<a target="_blank" class="button-react" href="https://github.com/cldossantos/pacu"> go to repository</a>
 
 </li>
 
 <li>
 
 SoyStage - Online decision support tool for the Midsouthern U.S., 2019.
-
 <a target="_blank" class="button-react" href="https://soystage.uark.edu/"> go to website</a>
 
 </li>
@@ -31,8 +29,16 @@ SoyStage - Online decision support tool for the Midsouthern U.S., 2019.
 
 <li>
 
-dos Santos, Caio L.  & Miguez, F. E. (2025). A comparative study of yield monitor data processing methods for on-farm agronomic trials. Agronomy Journal, 117, e70168.
+Pessotto, M.V., Roberts, T.L., dos Santos, C.L., Hoegenauer, K., Bertucci, M., Ross, J., & Savin, M. (2025). Use of
+growing degree days to predict aboveground biomass and total nitrogen accumulation of winter cover crops. Agrosys-
+tems, Geosciences & Environment, 8, 4. 
+<a target="_blank" class="button-react" href="https://doi.org/10.1002/agg2.70249"> go to article</a>
 
+</li>
+
+<li>
+
+dos Santos, Caio L. & Miguez, F. E. (2025). A comparative study of yield monitor data processing methods for on-farm agronomic trials. Agronomy Journal, 117, e70168.
 <a class="button-react"  target="_blank" href="https://doi.org/10.1002/agj2.70168"> go to article</a>
 
 </li>
@@ -40,7 +46,6 @@ dos Santos, Caio L.  & Miguez, F. E. (2025). A comparative study of yield monito
 <li>
 
 Carvalho-Moore, P., Norsworthy, J., Porri, A., dos Santos, C.L., Barber, T., Sudhakar, S., Meiners, I., & Lerchl, J. (2025). Is glufosinate resitance in Palmer Amaranth spreading in Mississippi County, Arkansas? Weed Science, 73, e62.
-
 <a class="button-react"  target="_blank" href="doi.org/10.1017/wsc.2025.10037"> go to article</a>
 
 </li>
@@ -48,7 +53,6 @@ Carvalho-Moore, P., Norsworthy, J., Porri, A., dos Santos, C.L., Barber, T., Sud
 <li>
 
 dos santos, C.L., & Miguez, F.E. (2024). PACU: Precision agriculture computational utilities. SoftwareX, 28, 101971.
-
 <a class="button-react"  target="_blank" href="https://authors.elsevier.com/sd/article/S2352-7110(24)00341-8"> go to article</a>
 
 </li>
@@ -56,7 +60,6 @@ dos santos, C.L., & Miguez, F.E. (2024). PACU: Precision agriculture computation
 <li>
 
 Pessotto, M. V., Roberts, T.L., Bertucci, M., dos Santos, C., Ross, J., and Savin, M. (2023). Determining cardinal temperatures for eight cover crop species. Agrosystems, Geosciences & Environment, 6, e20393.
-
 <a class="button-react"  target="_blank" href="https://acsess.onlinelibrary.wiley.com/doi/10.1002/agg2.20393"> go to article</a>
 
 </li>
@@ -64,7 +67,6 @@ Pessotto, M. V., Roberts, T.L., Bertucci, M., dos Santos, C., Ross, J., and Savi
 <li>
 
 dos Santos, C. L., Miguez, F. E., King, K. A., Ruiz, A., Sciarresi, C., Baum, M. E., Danalatos, G. J. N., Stellman, M., Wiley, E., Pico, L.O., Thies, A., Puntel, L. A., Topp, C. N., Trifunovic, S., Eudy, D., Mensah, C., Edwards, J. W., Schnable, P. S., Lamkey, K. R., … , and Archontoulis, S. V. (2023). Accelerated leaf appearance and flowering in maize after four decades of commercial breeding. Crop Science, 1–13.
-
 <a class="button-react"  target="_blank" href="https://acsess.onlinelibrary.wiley.com/doi/full/10.1002/csc2.21044"> go to article</a>
 
 </li>
@@ -72,7 +74,6 @@ dos Santos, C. L., Miguez, F. E., King, K. A., Ruiz, A., Sciarresi, C., Baum, M.
 <li>
 
 Ruiz, A., Trifunovic, S., Eudy, D.M., Sciarresi, S. C., Baum, M., Danalatos, G.J.N., Elli, E.F., Kalogeropoulos,G., King, K., dos Santos, C.L., Thies, A., Pico, L.O., Castellano, M.J., Schnable, P.K., Topp, C., Graham, M., Lamkey, K.R., Vyn, T.J., and Archontoulis, S.V. (2023). Harvest Index has increased over the last 50 years of maize breeding. Field Crops Research, 300, 10900.
-
 <a class="button-react"  target="_blank" href="https://www.sciencedirect.com/science/article/pii/S0378429023001843"> go to article</a>
 
 </li>
@@ -80,7 +81,6 @@ Ruiz, A., Trifunovic, S., Eudy, D.M., Sciarresi, S. C., Baum, M., Danalatos, G.J
 <li>
 
 dos Santos, C.L.; Abendroth, L.J.; Coulter, J.A.; Nafziger, E.D.; Suyker, A.; Yu, J.; Schnable, P.S.; Archontoulis, S.V. (2022). Maize Leaf Appearance Rates: A Synthesis From the United States Corn Belt. Frontiers in Plant Science, 13.
-
 <a class="button-react"  target="_blank" href="https://www.frontiersin.org/articles/10.3389/fpls.2022.872738/full"> go to article</a>
 
 </li>
@@ -90,7 +90,6 @@ dos Santos, C.L.; Abendroth, L.J.; Coulter, J.A.; Nafziger, E.D.; Suyker, A.; Yu
 <p class="light flow-text">
 
 dos Santos C.L., T.L. Roberts, and L.C. Purcell. (2021). Leaf Nitrogen Sufficiency Level Guidelines for Midseason Fertilization in Corn. Agronomy Journal, 113, 1974-1980.
-
 <a class="button-react" target="_blank" href="https://acsess.onlinelibrary.wiley.com/doi/pdf/10.1002/agj2.20526"> go to article</a>
 
 </li>
@@ -98,7 +97,6 @@ dos Santos C.L., T.L. Roberts, and L.C. Purcell. (2021). Leaf Nitrogen Sufficien
 <li>
 
 dos Santos, C.L., T.L. Roberts, L.C. Purcell. (2020). Canopy greenness as a midseason nitrogen management tool in corn production. Agronomy Journal. 112, 5279-5287.
-
 <a class="button-react"  target="_blank" href="https://acsess.onlinelibrary.wiley.com/doi/10.1002/agj2.20443"> go to article</a>
 
 </li>
@@ -106,7 +104,6 @@ dos Santos, C.L., T.L. Roberts, L.C. Purcell. (2020). Canopy greenness as a mids
 <li>
 
 dos Santos, C.L., M. Salmerόn, and L.C. Purcell. (2019). Soybean phenology prediction tool for the Midsouth. Agricultural and Environmental Lettters, 4, 190036.
-
 <a class="button-react" target="_blank" href="https://acsess.onlinelibrary.wiley.com/doi/10.2134/ael2019.09.0036"> go to article</a>
 
 </li>
@@ -114,7 +111,6 @@ dos Santos, C.L., M. Salmerόn, and L.C. Purcell. (2019). Soybean phenology pre
 <li>
 
 dos Santos, C.L., A.F. De Borja Reis, P. Mazzafera, J.L. Favarin. (2018). Determination of the water potential threshold at which rice growth is impacted. Plants 7, 48.
-
 <a class="button-react" target="_blank" href="https://www.mdpi.com/2223-7747/7/3/48"> go to article</a>
 
 </li>

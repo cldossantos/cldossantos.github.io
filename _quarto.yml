@@ -6,7 +6,7 @@ website:
   title: ""
   navbar:
     right:
-      - text: Home
+      - text: Posts
         href: /
       - about.qmd
       - cv.qmd
