@@ -1,5 +1,5 @@
 ---
-title: "Experimental Design"
+title: "Experimental Design - How many controls to include in a factorial experiment?"
 author: "Caio dos Santos"
 date: "2025-12-03"
 categories: [experimental design]
@@ -11,7 +11,9 @@ Recently, I was talking to some friends about experimental design (exciting topi
 
 In many agronomic experiments, this question really hinges on how we conceptualize the “control.” If “control” is simply the 0 rate of a fertilizer, then it is a level of the rate factor, not a separate source. But if we treat “control” as its own fertilizer source, we have implicitly changed the structure of the experiment.
 
-In this post, I will explore some of my ideas on the topic. I do not claim that they are universally valid, but I will explain my train of thought so you can judge whether these ideas apply to your case. Let’s dive into it.
+In this post, I will explore some of my ideas on the topic. I do not claim that they are universally valid, but I will explain my train of thought so you can judge whether these ideas apply to your case. Let's dive into it!
+
+![](conceptual.png)
 
 ## How did this discussion start?
 

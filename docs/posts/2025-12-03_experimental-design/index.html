@@ -9,7 +9,7 @@
 <meta name="author" content="Caio dos Santos">
 <meta name="dcterms.date" content="2025-12-03">
 
-<title>Experimental Design</title>
+<title>Experimental Design - How many controls to include in a factorial experiment?</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -158,7 +158,7 @@ gtag('config', 'G-XRSH8JDS68', { 'anonymize_ip': true});
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Experimental Design</h1>
+      <h1 class="title">Experimental Design - How many controls to include in a factorial experiment?</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">experimental design</div>
               </div>
@@ -199,9 +199,10 @@ gtag('config', 'G-XRSH8JDS68', { 'anonymize_ip': true});
 
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Recently, I was talking to some friends about experimental design (exciting topic, right?!) and we reached a topic that I had not given much thought to before. When we are planning an experiment, how many controls should we include? I guess the answer to that question is often the usual agronomist answer: it depends.</p>
+<p>Recently, I was talking to some friends about experimental design (exciting topic, right?!) and we reached a topic that I had not thought would be a controversy before. When we are planning an experiment, how many controls should we include? I guess the answer to that question is often the usual agronomist answer: it depends.</p>
 <p>In many agronomic experiments, this question really hinges on how we conceptualize the “control.” If “control” is simply the 0 rate of a fertilizer, then it is a level of the rate factor, not a separate source. But if we treat “control” as its own fertilizer source, we have implicitly changed the structure of the experiment.</p>
-<p>In this post, I will explore some of my ideas on the topic. I do not claim that they are universally valid, but I will explain my train of thought so you can judge whether these ideas apply to your case. Let’s dive into it.</p>
+<p>In this post, I will explore some of my ideas on the topic. I do not claim that they are universally valid, but I will explain my train of thought so you can judge whether these ideas apply to your case. Let’s dive into it!</p>
+<p><img src="conceptual.png" class="img-fluid"></p>
 </section>
 <section id="how-did-this-discussion-start" class="level2">
 <h2 class="anchored" data-anchor-id="how-did-this-discussion-start">How did this discussion start?</h2>
@@ -228,7 +229,7 @@ source       0 60 120 180 240 300 Sum
   Sum       12 12  12  12  12  12  72</code></pre>
 </div>
 </div>
-<p>However, that’s not how the experiment was planned. Since the rate “0” means that no nitrogen source was applied, the researchers decided to include a single set of 0-nitrogen experimental units to serve as their control. By doing this, they eliminated 8 experimental units from the design, potentially saving time and resources but, in my view, creating some problems for the analysis. This is not the first time I have seen this—this strategy is common in agronomic experiments. As someone who has collected a lot of data in the field, I understand the urge to save resources. However, let’s take a look at what this means for the analysis.</p>
+<p>However, that’s not how the experiment was planned. Since the rate “0” means that no nitrogen source was applied, the researchers decided to include a single set of 0-nitrogen experimental units to serve as their control. By doing this, they eliminated 8 experimental units from the design, potentially saving time and resources but, in my view, creating some problems for the analysis. This is not the first time I have seen this, as this strategy is common in agronomic experiments. As someone who has collected a lot of data in the field, I understand the urge to save resources. However, let’s take a look at what this means for the analysis.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>experimental.structure2 <span class="ot">&lt;-</span> experimental.structure</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>experimental.structure2 <span class="ot">&lt;-</span> <span class="fu">subset</span>(experimental.structure2,</span>
@@ -329,22 +330,22 @@ lm(formula = emissions ~ rate + source + rate:source, data = experimental.struct
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--5.7436 -1.3800  0.1929  1.8327  4.8022 
+-6.2294 -1.0870 -0.0345  1.3839  3.1044 
 
 Coefficients:
-                      Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)           5.788803   0.807403   7.170 8.08e-10 ***
-rate                  0.011973   0.004445   2.694  0.00895 ** 
-sourcemanure          1.593838   1.141841   1.396  0.16744    
-sourcesynthetic      -0.099181   1.141841  -0.087  0.93105    
-rate:sourcemanure    -0.004823   0.006286  -0.767  0.44563    
-rate:sourcesynthetic  0.047252   0.006286   7.518 1.93e-10 ***
+                       Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)           6.9864257  0.6949355  10.053 6.09e-15 ***
+rate                  0.0080260  0.0038255   2.098   0.0397 *  
+sourcemanure          0.1292932  0.9827872   0.132   0.8957    
+sourcesynthetic      -1.3267799  0.9827872  -1.350   0.1816    
+rate:sourcemanure    -0.0007077  0.0054101  -0.131   0.8963    
+rate:sourcesynthetic  0.0507216  0.0054101   9.375 9.41e-14 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 2.231 on 66 degrees of freedom
-Multiple R-squared:  0.8322,    Adjusted R-squared:  0.8195 
-F-statistic: 65.45 on 5 and 66 DF,  p-value: &lt; 2.2e-16</code></pre>
+Residual standard error: 1.92 on 66 degrees of freedom
+Multiple R-squared:  0.8626,    Adjusted R-squared:  0.8522 
+F-statistic: 82.89 on 5 and 66 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
 <p>This model correctly estimates all main effects and interactions because the design contains every treatment combination. Importantly, the model is assuming linearity with respect to rate, but that choice is independent from the factorial structure. Even nonlinear models would require all treatment combinations to be present to identify source-specific responses.</p>
@@ -398,24 +399,24 @@ lm(formula = emissions ~ rate + source + rate:source, data = experimental.struct
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--3.9262 -1.0534 -0.1088  0.9185  4.6713 
+-3.7437 -0.9386  0.0044  0.9080  3.5050 
 
 Coefficients: (1 not defined because of singularities)
                       Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)           5.279113   0.963527   5.479 1.01e-06 ***
-rate                  0.057687   0.005078  11.360 2.86e-16 ***
-sourcedigestate      -0.080129   1.396284  -0.057    0.954    
-sourcemanure          1.594337   1.396284   1.142    0.258    
-sourcesynthetic       1.043917   1.396284   0.748    0.458    
-rate:sourcedigestate -0.042891   0.007182  -5.972 1.60e-07 ***
-rate:sourcemanure    -0.048135   0.007182  -6.702 9.95e-09 ***
+(Intercept)           6.341195   0.811710   7.812 1.41e-10 ***
+rate                  0.052725   0.004278  12.324  &lt; 2e-16 ***
+sourcedigestate      -1.715206   1.176279  -1.458    0.150    
+sourcemanure         -0.138808   1.176279  -0.118    0.906    
+sourcesynthetic       1.199119   1.176279   1.019    0.312    
+rate:sourcedigestate -0.040361   0.006050  -6.671 1.12e-08 ***
+rate:sourcemanure    -0.045019   0.006050  -7.441 5.86e-10 ***
 rate:sourcesynthetic        NA         NA      NA       NA    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 1.927 on 57 degrees of freedom
-Multiple R-squared:  0.884, Adjusted R-squared:  0.8718 
-F-statistic: 72.39 on 6 and 57 DF,  p-value: &lt; 2.2e-16</code></pre>
+Residual standard error: 1.623 on 57 degrees of freedom
+Multiple R-squared:  0.9223,    Adjusted R-squared:  0.9142 
+F-statistic: 112.8 on 6 and 57 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
 <p>One of the first things we can see is that estimating the interaction terms can be problematic. We are missing some levels, which can be seen as zero counts in this table. This prevents us from estimating the interaction terms.</p>
