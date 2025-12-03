@@ -2,11 +2,12 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/2025-12-03_experimental-design/index.html",
       "/posts/2025-07-19_as-applied/index.html",
+      "/posts/2024-12-16_central-park/index.html",
       "/posts/2025-05-13_vegetation-indices/index.html",
       "/posts/2025-03-13_on-farm-experiment/index.html",
-      "/posts/2025-02-11_yield-map/index.html",
-      "/posts/2024-12-16_central-park/index.html"
+      "/posts/2025-02-11_yield-map/index.html"
     ]
   }
 ]
