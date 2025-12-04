@@ -7,19 +7,38 @@ categories: [experimental design]
 
 ## Introduction
 
-Recently, I was talking to some friends about experimental design (exciting topic, right?!) and we reached a topic that I had not thought would be a controversy before. When we are planning an experiment, how many controls should we include? I guess the answer to that question is often the usual agronomist answer: it depends.
+Recently, I was talking to some friends about experimental design (exciting
+topic, right?!) and we reached a topic that I had not thought would be a
+controversy before. When we are planning an experiment, how many controls should
+we include? I guess the answer to that question is often the usual agronomist
+answer: it depends. 
 
-In many agronomic experiments, this question really hinges on how we conceptualize the “control.” If “control” is simply the 0 rate of a fertilizer, then it is a level of the rate factor, not a separate source. But if we treat “control” as its own fertilizer source, we have implicitly changed the structure of the experiment.
+In many agronomic experiments, this question really hinges on how we
+conceptualize the “control.” If “control” is simply the 0 rate of a fertilizer,
+then it is a level of the rate factor, not a separate source. But if we treat
+“control” as its own fertilizer source, we have implicitly changed the structure
+of the experiment.
 
-In this post, I will explore some of my ideas on the topic. I do not claim that they are universally valid, but I will explain my train of thought so you can judge whether these ideas apply to your case. Let's dive into it!
+In this post, I will explore some of my ideas on the topic. **I do not claim that
+they are universally valid**, but I will explain my train of thought so you can
+judge whether these ideas apply to your case. Let's dive into it!
 
 ![](conceptual.png)
 
 ## How did this discussion start?
 
-We started talking about this when thinking about how to analyze an experiment that had already been conducted in a controlled environment. The experiment was relatively simple, and the researchers wanted to evaluate the effect of fertilizer source (e.g., synthetic fertilizer, manure, digestate) and rate (i.e., how much fertilizer was applied) on nitrogen oxide emissions. In addition, they had four replications of the treatments.
+We started talking about this when thinking about how to analyze an experiment
+that had already been conducted in a controlled environment. The experiment was
+relatively simple, and the researchers wanted to evaluate the effect of
+fertilizer source (e.g., synthetic fertilizer, manure, digestate) and rate
+(i.e., how much fertilizer was applied) on nitrogen oxide emissions. In
+addition, they had four replications of the treatments. 
 
-So, this experiment had two factors: rate and source. If this experiment were planned to follow a factorial design, we would have had all combinations of all levels of both factors. The nitrogen rates ranged from 0 to 300 kg/ha, in 60 kg/ha intervals, and there were 3 sources of nitrogen. The experimental design should look something like this:
+So, this experiment had two factors: rate and source. If this experiment were
+planned to follow a factorial design, we would have had all combinations of all
+levels of both factors. The nitrogen rates ranged from 0 to 300 kg/ha, in 60
+kg/ha intervals, and there were 3 sources of nitrogen. The experimental design
+should look something like this:
 
 ```{r}
 rates <- seq(0, 300, 60)
@@ -38,7 +57,15 @@ with(experimental.structure,addmargins(table(source, rate)))
 ```
 
 
-However, that’s not how the experiment was planned. Since the rate “0” means that no nitrogen source was applied, the researchers decided to include a single set of 0-nitrogen experimental units to serve as their control. By doing this, they eliminated 8 experimental units from the design, potentially saving time and resources but, in my view, creating some problems for the analysis. This is not the first time I have seen this, as this strategy is common in agronomic experiments. As someone who has collected a lot of data in the field, I understand the urge to save resources. However, let’s take a look at what this means for the analysis.
+However, that’s not how the experiment was planned. Since the rate “0” means
+that no nitrogen source was applied, the researchers decided to include a single
+set of 0-nitrogen experimental units to serve as their control. By doing this,
+they eliminated 8 experimental units from the design, potentially saving time
+and resources but, in my view, creating some problems for the analysis. This is
+not the first time I have seen this, as this strategy is common in agronomic
+experiments. As someone who has collected a lot of data in the field, I
+understand the urge to save resources. However, let’s take a look at what this
+means for the analysis.
 
 ```{r}
 experimental.structure2 <- experimental.structure
@@ -204,6 +231,14 @@ with(experimental.structure3, addmargins(table(source, rate)))
 
 ## My two cents :)
 
-I decided to write this text out of a conversation I had with a friend to show how I think about this. I believe there might be people out there with alternative points of view, and I would love to hear more about it. For what it is worth, I believe that experimental design is an important and often overlooked step in the scientific process. I can only imagine how frustrating it would be to run a trial and then not be able to run the analysis correctly.
+I decided to write this text out of a conversation I had with a friend to show
+how I think about this. I believe there might be people out there with
+alternative points of view, and I would love to hear more about it. For what it
+is worth, I believe that experimental design is an important and often
+overlooked step in the scientific process. I can only imagine how frustrating it
+would be to run a trial and then not be able to run the analysis. 
 
-I think the main message here is that statistical identifiability is not something we can recover after the fact. Once certain treatment combinations are missing from the experimental design, we might not be able to answer the scientific questions that we set out to investigate.
+I think the main message here is that statistical identifiability is not
+something we can recover after the fact. Once certain treatment combinations are
+missing from the experimental design, we might not be able to answer the
+scientific questions that we set out to investigate. The bottom line is that the experimental design is intimately linked to the analysis and the research question.
