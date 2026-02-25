@@ -1,9 +1,9 @@
 ---
 title: "Multiple Treatment Trials"
-subtitle: "AGRON 5130 - Module 6"
+subtitle: "Module 6"
 author: "Caio dos Santos"
 date: "2026-02-23"
-catgories: [statistics]
+categories: [statistics]
 ---
 
 ```{r setup, include=FALSE}
