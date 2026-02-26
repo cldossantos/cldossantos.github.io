@@ -207,14 +207,14 @@
     "href": "posts/2026-02-25_multiple-treatments/index.html#mean-square-error",
     "title": "Multiple Treatment Trials",
     "section": "Mean Square Error",
-    "text": "Mean Square Error\nNext, we need to take the ratio between the SS and DF columns. Remember, this will give us an estimate for the variance of each effect. This estimate is called Mean Square Error (MSE).\n\n\n[1] 1479.668\n\n\n[1] 63.6352\n\n\n\n\n\nSource of Variation\nSS\nDF\nMSE\nF\n\n\n\n\nTreatment\n4439\n3\n1479.7\n\n\n\nResiduals (Error)\n1782\n28\n63.6\n\n\n\nTotal\n6220\n31"
+    "text": "Mean Square Error\nNext, we need to take the ratio between the SS and DF columns. Remember, this will give us an estimate for the variance of each effect. This estimate is called Mean Square Error (MSE).\n\nMS_treatment &lt;- SS_treatment/3 # MSE Treatment\nMS_error &lt;- SS_error/28 # MSE Residuals\n\nMS_treatment\n\n[1] 1479.668\n\nMS_error\n\n[1] 63.6352\n\n\n\n\n\nSource of Variation\nSS\nDF\nMSE\nF\n\n\n\n\nTreatment\n4439\n3\n1479.7\n\n\n\nResiduals (Error)\n1782\n28\n63.6\n\n\n\nTotal\n6220\n31"
   },
   {
     "objectID": "posts/2026-02-25_multiple-treatments/index.html#computing-the-f-statistic",
     "href": "posts/2026-02-25_multiple-treatments/index.html#computing-the-f-statistic",
     "title": "Multiple Treatment Trials",
     "section": "Computing the \\(F\\)-statistic",
-    "text": "Computing the \\(F\\)-statistic\nNow, since the \\(F\\)-statistic is computed as the ratio between the treatment and error variances, and we are estimating them using the MSE, \\(F\\) can be computed as follows:\n\\[F = \\frac{\\sigma^2_{treatment}}{\\sigma^2_{error}} = \\frac{MSE_{treatment}}{MSE_{error}}\\]\n\n\n[1] 23.25234\n\n\nIf treatments truly do not differ, both MS terms estimate the same variance, and F should be close to 1. An F-value of 23 means the treatment variance is 23 times larger than the background noise.\nAlright! This concludes our ANOVA table!!\n\n\n\nSource of Variation\nSS\nDF\nMSE\nF\n\n\n\n\nTreatment\n4439\n3\n1479.7\n23.25\n\n\nResiduals (Error)\n1782\n28\n63.6\n\n\n\nTotal\n6220\n31"
+    "text": "Computing the \\(F\\)-statistic\nNow, since the \\(F\\)-statistic is computed as the ratio between the treatment and error variances, and we are estimating them using the MSE, \\(F\\) can be computed as follows:\n\\[F = \\frac{\\sigma^2_{treatment}}{\\sigma^2_{error}} = \\frac{MSE_{treatment}}{MSE_{error}}\\]\n\nMS_treatment / MS_error\n\n[1] 23.25234\n\n\nIf treatments truly do not differ, both MS terms estimate the same variance, and F should be close to 1. An F-value of 23 means the treatment variance is 23 times larger than the background noise.\nAlright! This concludes our ANOVA table!!\n\n\n\nSource of Variation\nSS\nDF\nMSE\nF\n\n\n\n\nTreatment\n4439\n3\n1479.7\n23.25\n\n\nResiduals (Error)\n1782\n28\n63.6\n\n\n\nTotal\n6220\n31"
   },
   {
     "objectID": "posts/2026-02-25_multiple-treatments/index.html#p-value",

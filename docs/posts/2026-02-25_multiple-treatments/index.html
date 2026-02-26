@@ -354,7 +354,7 @@ window.Quarto = {
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
       <h1 class="title">Multiple Treatment Trials</h1>
-            <p class="subtitle lead">AGRON 5130 - Module 6</p>
+            <p class="subtitle lead">Module 6</p>
                                 <div class="quarto-categories">
                 <div class="quarto-category">statistics</div>
               </div>
@@ -801,9 +801,14 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="mean-square-error">Mean Square Error</h2>
 <p>Next, we need to take the ratio between the SS and DF columns. Remember, this will give us an estimate for the variance of each effect. This estimate is called Mean Square Error (MSE).</p>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>MS_treatment <span class="ot">&lt;-</span> SS_treatment<span class="sc">/</span><span class="dv">3</span> <span class="co"># MSE Treatment</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>MS_error <span class="ot">&lt;-</span> SS_error<span class="sc">/</span><span class="dv">28</span> <span class="co"># MSE Residuals</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>MS_treatment</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1479.668</code></pre>
 </div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>MS_error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 63.6352</code></pre>
 </div>
@@ -848,6 +853,7 @@ window.Quarto = {
 <p>Now, since the <span class="math inline">\(F\)</span>-statistic is computed as the ratio between the treatment and error variances, and we are estimating them using the MSE, <span class="math inline">\(F\)</span> can be computed as follows:</p>
 <p><span class="math display">\[F = \frac{\sigma^2_{treatment}}{\sigma^2_{error}} = \frac{MSE_{treatment}}{MSE_{error}}\]</span></p>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>MS_treatment <span class="sc">/</span> MS_error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 23.25234</code></pre>
 </div>
@@ -894,12 +900,12 @@ window.Quarto = {
 <p>Now, like we have done before, we have to compare the <span class="math inline">\(F\)</span>-statistic value we found with the <span class="math inline">\(F\)</span>-distribution and compute the probability of observing a more extreme value given that <span class="math inline">\(H_0\)</span> is true.</p>
 <p>We will use the <code>fastGraph</code> library for that once again:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fastGraph)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">shadeDist</span>(<span class="at">xshade =</span> <span class="fl">23.25</span>,</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">ddist =</span> <span class="st">'df'</span>,</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">parm1 =</span> <span class="dv">3</span>,</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">parm2 =</span> <span class="dv">28</span>,</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>          <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fastGraph)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">shadeDist</span>(<span class="at">xshade =</span> <span class="fl">23.25</span>,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">ddist =</span> <span class="st">'df'</span>,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">parm1 =</span> <span class="dv">3</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">parm2 =</span> <span class="dv">28</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>          <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -915,8 +921,8 @@ window.Quarto = {
 <p>Like before, R has built-in function to run ANOVAs. However, I think it is important for us to build an ANVOA table step-by-step at least once, so we understand what each piece of information represents.</p>
 <p>Let’s run the built-in function:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>model1 <span class="ot">&lt;-</span> <span class="fu">aov</span>(yield <span class="sc">~</span> trt, <span class="at">data =</span> trial)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>model1 <span class="ot">&lt;-</span> <span class="fu">aov</span>(yield <span class="sc">~</span> trt, <span class="at">data =</span> trial)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>            Df Sum Sq Mean Sq F value   Pr(&gt;F)    
 trt          3   4439  1479.7   23.25 9.28e-08 ***

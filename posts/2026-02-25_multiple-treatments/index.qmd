@@ -389,7 +389,7 @@ Our table now becomes:
 
 Next, we need to take the ratio between the SS and DF columns. Remember, this will give us an estimate for the variance of each effect. This estimate is called Mean Square Error (MSE).
 
-```{r}
+```{r, echo=TRUE}
 MS_treatment <- SS_treatment/3 # MSE Treatment
 MS_error <- SS_error/28 # MSE Residuals
 
@@ -409,7 +409,7 @@ Now, since the $F$-statistic is computed as the ratio between the treatment and 
 
 $$F = \frac{\sigma^2_{treatment}}{\sigma^2_{error}} = \frac{MSE_{treatment}}{MSE_{error}}$$
 
-```{r}
+```{r, echo=TRUE}
 MS_treatment / MS_error
 ```
 
