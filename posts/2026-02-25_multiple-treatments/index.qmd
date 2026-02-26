@@ -263,7 +263,9 @@ To do so, we will partition the variance:
 
 $$\sigma^2_{total} = \sigma^2_{treatment} + \sigma^2_{error}$$ In the case of samples, we estimate the variance using the Mean Square Error:
 
-$$MSE = \frac{(Y_i - \bar{Y})^2}{n - 1} = \frac{SS}{df}$$ Where,
+$$MSE = \frac{\sum_{i=1}^n(Y_i - \bar{Y})^2}{n - 1} = \frac{SS}{df}$$
+
+Where,
 
 $Y_i$ is an observed value
 

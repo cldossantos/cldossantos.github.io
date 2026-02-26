@@ -599,7 +599,8 @@ window.Quarto = {
 <p>Once again, since we do not know the population variances, we estimate those using the sample data.</p>
 <p>To do so, we will partition the variance:</p>
 <p><span class="math display">\[\sigma^2_{total} = \sigma^2_{treatment} + \sigma^2_{error}\]</span> In the case of samples, we estimate the variance using the Mean Square Error:</p>
-<p><span class="math display">\[MSE = \frac{(Y_i - \bar{Y})^2}{n - 1} = \frac{SS}{df}\]</span> Where,</p>
+<p><span class="math display">\[MSE = \frac{\sum_{i=1}^n(Y_i - \bar{Y})^2}{n - 1} = \frac{SS}{df}\]</span></p>
+<p>Where,</p>
 <p><span class="math inline">\(Y_i\)</span> is an observed value</p>
 <p><span class="math inline">\(\bar{Y}\)</span> is the mean observed value</p>
 <p><span class="math inline">\(n\)</span> is the number of observations</p>
