@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Caio dos Santos">
+<meta name="dcterms.date" content="2026-03-06">
+
+<title>Multiple Treatment Designs</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-c89800f59a5657e0c177b73a5ff15e5b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-d250243be6510f45ae5a7bad6a98d8fc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-c89800f59a5657e0c177b73a5ff15e5b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-XRSH8JDS68"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XRSH8JDS68', { 'anonymize_ip': true});
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../"> 
+<span class="menu-text">Posts</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../cv.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Multiple Treatment Designs</h1>
+            <p class="subtitle lead">Module 7</p>
+                                <div class="quarto-categories">
+                <div class="quarto-category">statistics</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Caio dos Santos </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">March 6, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>In the last unit, we were introduced to multiple-treatment experiments using an example with which many of you are familiar: a hybrid research or demonstration trial. Recall how the analysis of variance worked: we compared two sources of variation to see how much of that variation each of them explained.</p>
+<p>There were two effects in our original trial: treatment and error</p>
+<p><span class="math display">\[Y_{ij}=\mu + T_i + \epsilon_{ij}\]</span></p>
+<p>The Analysis of Variance (ANOVA) was used to calculate and compare these variances. First, the sums of squares from the treatment means and the error (the summed distributions of observations around each treatment mean) were calculated. By dividing the sum of squares by their degrees of freedom, we obtained the treatment and error mean squares, also known as their variances. The F-value was derived from the ratio of the treatment variance to the error variance. Finally, the probability that the difference among treatments was zero, given the F-value we observed, was calculated using the F-distribution.</p>
+</section>
+<section id="completely-randomized-design-crd" class="level1">
+<h1>Completely Randomized Design (CRD)</h1>
+<p>The <strong>Completely Randomized Design</strong> is the simplest multiple-treatment design we can conduct. That’s precisely what makes it such a good teaching tool.</p>
+<section id="designing-the-trial" class="level2">
+<h2 class="anchored" data-anchor-id="designing-the-trial">Designing the trial</h2>
+<p>When designing a CRD trial, the main consideration is the number of experimental units. All we have to do after that, is to subdivide the field into these experimental units and randomize the treatments within the field.</p>
+<p>Some of the trial characteristics affecting the number of experimental units are:</p>
+<ul>
+<li><em>experimental unit size:</em> the area taken by each experimental unit will limit the number of experimental units within a limited area</li>
+<li><em>number of replications:</em> we’ve been over the importance of this before, right?</li>
+<li><em>number of factors:</em> are we only testing a product, or are we also testing application timing?</li>
+<li><em>uniform environment:</em> are plots in the edge of the field expose to the same environment as the ones in the middle?</li>
+</ul>
+</section>
+<section id="an-example-with-one-factor-only" class="level2">
+<h2 class="anchored" data-anchor-id="an-example-with-one-factor-only">An example with one factor only</h2>
+<p>Let’s take a look at a simple layout in which we only have one factor with 6 treatments. Just like before, we will look at an example. Here, we will work with 6 candidate fungicide treatments and we’re testing whether they affect corn yield.</p>
+<p>We will use the field below to illustrate the different trial designs. This field has 30 experimental units, arranged in a 6 x 5 layout:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple-treatment-designs-lecture_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can simply randomly assign the treatments to our experimental units going from 1 to 30. Fungicide treatments are coded F1 through F6 for.</p>
+<p>One instance of this layout can be seen below:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple-treatment-designs-lecture_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>I could randomize this trial many times and end-up with different randomization, and these would all be considered a <strong>Completely Randomized Design</strong>.</p>
+</section>
+<section id="the-linear-additive-model" class="level2">
+<h2 class="anchored" data-anchor-id="the-linear-additive-model">The linear additive model</h2>
+<p>When we model a completely randomized design, like the one from this example, our linear additive model can is really simple. There are two effects in our original trial: treatment and error</p>
+<p><span class="math display">\[Y_{ij}=\mu + T_i + \epsilon_{ij}\]</span></p>
+<p>Where,</p>
+<p><span class="math inline">\(Y_{ij}\)</span> = observed yield</p>
+<p><span class="math inline">\(\mu\)</span> = overall mean yield</p>
+<p><span class="math inline">\(\tau_i\)</span> = fungicide treatment effect</p>
+<p><span class="math inline">\(\varepsilon_{ij}\)</span> = random error</p>
+</section>
+<section id="model-assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="model-assumptions">Model Assumptions</h2>
+<p>So far, I have avoided talking much about model assumptions because the examples we looked at represented ideal cases. This simplified the modeling framework, allowing us to focus on other important parts of the modeling process.</p>
+<p>As we move away from simpler cases, it is important to think about what assumptions we’re making when are building these models.</p>
+<p>When building these models, we assume:</p>
+<ol type="1">
+<li><p><strong>The functional form is correct:</strong> This means that we assume the formula used to build these models correctly represents the relationship between the variables. For instance, if the relationship is nonlinear, and your formula assumes linearity, this is a problem.</p></li>
+<li><p><strong>Independence of Errors:</strong> This is one of the most important assumptions, and the one that can really be affected by trial design. This means we assume that errors are not correlated. When we ignore correlation between errors, we assume that each observation gives us more information about the population then they actually give, which can cloud the conclusions we draw from our models.</p></li>
+<li><p><strong>Normality of Residuals:</strong> We assume that the residuals (errors) are normally distributed and with mean zero.</p></li>
+<li><p><strong>Equal Variance (Homoscedasticity):</strong> We assume that the residual error is constant in the data. For example, if your residual error increases as your response variable increases, this can also be a problem.</p></li>
+</ol>
+</section>
+<section id="looking-at-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="looking-at-the-data">Looking at the data</h2>
+<p>We can take a look at the structure of this dataset below. We have columns for treatment, rep, and yield.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>   trt rep    yield
+29  F6   4 178.1036
+30  F6   5 180.6479
+25  F5   5 182.8277
+5   F1   5 183.7903
+2   F1   2 187.0709
+23  F5   3 187.7397</code></pre>
+</div>
+</div>
+<p>Let’s plot the data so we can have a better idea of what to expect when we fit a model. Like before, open circles here indicate individual observations, and filled triangles and error bars indicate sample means and standard error.</p>
+<p>It seems like there is quite a bit of variability but maybe fungicide treatment F3 has a different mean? Let’s use a model to figure that out!</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple-treatment-designs-lecture_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="modeling-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="modeling-the-data">Modeling the data</h2>
+<p>Here, we are testing the following hypotheses:</p>
+<p><span class="math display">\[H_0:  \tau_{1}= \tau_{2}= \ldots =  \tau_{6} = 0\]</span></p>
+<p><span class="math display">\[H_a: at~least~one~\tau_i \neq 0\]</span></p>
+<p>We will fit a linear model, like the one we fit before for the ANOVA. We will use the <code>lm()</code> function (<code>l</code>inear <code>m</code>odel):</p>
+<p><strong>note:</strong> this is the same as using <code>aov()</code> and then <code>summary()</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>model1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(yield <span class="sc">~</span> trt, <span class="at">data =</span> fungicide_crd)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(model1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analysis of Variance Table
+
+Response: yield
+          Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+trt        5 2854.9  570.97  7.0165 0.000362 ***
+Residuals 24 1953.0   81.38                     
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>This model provides strong evidence to reject <span class="math inline">\(H_0\)</span> and conclude that at least one treatment has an effect different from zero.</p>
+<p>Great! This works because in this example, the variability is really random, meaning that our errors (<span class="math inline">\(\epsilon_{ij}\)</span>) are really independent from each other and normally distributed.</p>
+<blockquote class="blockquote">
+<p>Now, what happens when that assumption is not true??</p>
+</blockquote>
+</section>
+<section id="systematic-errors" class="level2">
+<h2 class="anchored" data-anchor-id="systematic-errors">Systematic errors</h2>
+<p>To illustrate this problem, let’s go back to our field and look a little closer at a common source of systematic error in agricultural fields.</p>
+<p>Let’s imagine that the first 12 plots are exposed to different soil conditions than the rest of the field. For example, there could be a soil fertility gradient, or this could be a lower part of the field, which is prone to water logging.</p>
+<p>Since the water logging example is a common problem in Iowa, let’s go with that. <strong>Let’s assume that this that this water logging causes a 50 bu/ac yield penalty.</strong></p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple-treatment-designs-lecture_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now, let’s take a look at the experiment results when this waterlogging condition exists. Because I wanted us to be able to compare this dataset with the previous, I included both experimental datasets in the graph below. The black color indicates the previous dataset, when everything was great and this waterlogging condition did not exist. The red colored points indicate the current dataset, when waterlogging decreased the yield of plots 1 through 12 by 50 bu/ac.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple-treatment-designs-lecture_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Ok, it seems like all treatments had a decrease in average yield. Let’s see what that means for our ANOVA.</p>
+<p>We will use <code>lm()</code> again, except that now, I will use the dataset <code>fungicide_crd2</code>, which contains the dataset with this simulated soil effect.</p>
+<p>Now, because of the added variability of the systematic error, we can notice that our p-value is greater than 0.05. While that can be upsetting, let’s take a look at what is happening really.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>model2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(yield <span class="sc">~</span> trt, <span class="at">data =</span> fungicide_crd2)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(model2) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analysis of Variance Table
+
+Response: yield
+          Df  Sum Sq Mean Sq F value Pr(&gt;F)
+trt        5  8069.5 1613.90  1.9696 0.1198
+Residuals 24 19665.5  819.39               </code></pre>
+</div>
+</div>
+<p>Before, the relationship between the variance partitioned for the treatment and the variance partitioned for the residuals was 7.01 (our <span class="math inline">\(F\)</span>-value).</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>          Df   Sum Sq   Mean Sq F value       Pr(&gt;F)
+trt        5 2854.873 570.97466 7.01653 0.0003620031
+Residuals 24 1953.015  81.37564      NA           NA
+Total     29 4807.889 652.35030      NA           NA</code></pre>
+</div>
+</div>
+<p>Now, that ratio is 1.96. This means now that we are a lot less certain that the observed <span class="math inline">\(F\)</span>-value indicates that the treatments differences are not simply a matter of chance.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>          Df    Sum Sq   Mean Sq  F value    Pr(&gt;F)
+trt        5  8069.511 1613.9022 1.969627 0.1198466
+Residuals 24 19665.476  819.3949       NA        NA
+Total     29 27734.987 2433.2970       NA        NA</code></pre>
+</div>
+</div>
+<p>We can see that failing to include this systematic source of variability can be a problem. The question is, how do we deal with it? We can build our experimental designs to account for these sources of variability. Let’s take a look at the <strong>Randomized Complete Block Design</strong>.</p>
+</section>
+</section>
+<section id="randomized-complete-block-design" class="level1">
+<h1>Randomized Complete Block Design</h1>
+<p>Blocking is simply grouping experimental units that are similar to each other.</p>
+<p>Instead of pretending all 30 plots are the same, we acknowledge that:</p>
+<p>Some plots sit in the pothole</p>
+<p>Some plots sit in well-drained soil</p>
+<p>So we create blocks that capture that environmental structure.</p>
+<p>The key idea is this:</p>
+<blockquote class="blockquote">
+<p>We do not eliminate environmental variability. We account for it.</p>
+</blockquote>
+<p>Instead of letting this inflate residual variance, we will model it explicitly as a block effect.</p>
+<p>Since we know that the first two rows of plots sit in a lower area of the field, we can define blocks running horizontally. This will give us 5 blocks, as we can see below:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple-treatment-designs-lecture_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now, we randomize our treatments within each block. This will allow us to parse out the variability inherent to the soil variability from the unexplained variability. Let’s randomize the treaments now:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple-treatment-designs-lecture_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Let’s take a look at the data from the randomized complete block trial. One of the things that stand out is that for every treatment, there are two points below the mean. These two points correspond to to the two water logging-prone blocks.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple-treatment-designs-lecture_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="the-linear-additive-model-1" class="level2">
+<h2 class="anchored" data-anchor-id="the-linear-additive-model-1">The linear additive model</h2>
+<p>One important thing that we can think about is how, by accounting for soil variability using a blocked structure, we explicitly remove the soil variability from the residuals (<span class="math inline">\(\epsilon_ij\)</span>). Our linear additive model now includes a block effect, as we can see below:</p>
+<p><span class="math display">\[Y_{ij}=\mu + \tau_i + B_j + \epsilon_{ij}\]</span></p>
+<p>Where,</p>
+<p><span class="math inline">\(Y_{ij}\)</span> = observed yield</p>
+<p><span class="math inline">\(\mu\)</span> = overall mean yield</p>
+<p><span class="math inline">\(B_j\)</span> = block effect</p>
+<p><span class="math inline">\(\tau_i\)</span> = fungicide treatment effect</p>
+<p><span class="math inline">\(\varepsilon_{ij}\)</span> = random error</p>
+<p>What does this mean for the ANOVA?</p>
+<p>Below, we can see the result of the analysis of variance table. Check how much of the MSE is allocated in the block effect. All of that error, if left unaccounted for, would inflate our residual MSE, which would decrease our <span class="math inline">\(F\)</span>-value.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>lm3 <span class="ot">&lt;-</span> <span class="fu">lm</span>(yield <span class="sc">~</span> trt <span class="sc">+</span> block, <span class="at">data =</span> rcbd_layout)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(lm3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analysis of Variance Table
+
+Response: yield
+          Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+trt        5  1647.3   329.5   4.453  0.006882 ** 
+block      4 19937.3  4984.3  67.368 2.555e-11 ***
+Residuals 20  1479.7    74.0                      
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>We can see that blocking the design is meant to account for pre-existing variability. The main assumption here is that experimental units within a block are exposed to uniform conditions.</p>
+<p>By modeling the block effect explicitly, we prevent environmental variability from inflating the residual error. This increases the sensitivity of the experiment and improves our ability to detect treatment differences.</p>
+</section>
+<section id="a-brief-digression-about-fixed-and-random-effects" class="level2">
+<h2 class="anchored" data-anchor-id="a-brief-digression-about-fixed-and-random-effects">A brief digression about Fixed and Random Effects</h2>
+<p>Before we move forward, it is important to briefly discuss the difference between <strong>fixed effects</strong> and <strong>random effects</strong>. This distinction becomes important when we start working with blocked experiments and, later on, with more complex experimental designs.</p>
+<p>In agricultural experiments, <strong>fixed effects</strong> are factors where we are interested in comparing the specific levels included in the experiment. In other words, the treatments we include are the ones we want to draw conclusions about.</p>
+<p>For example, in the fungicide trial we have been simulating, the treatments are the five fungicides:</p>
+<blockquote class="blockquote">
+<p>F1, F2, F3, F4, F5, and F6</p>
+</blockquote>
+<p>In this case, these fungicides are not a random sample of all possible fungicides in the world. Instead, they are specific products that we intentionally selected because we want to compare their performance. Because of that, fungicide treatment is considered a <strong>fixed effect</strong>.</p>
+<p><strong>Random effects</strong> are different. A <strong>random effect</strong> represents a source of variability where the individual levels themselves are not of primary interest. Instead, the levels are viewed as a sample from a larger population of possible levels.</p>
+<p>When a statistical model includes both <strong>fixed effects</strong> and <strong>random effects</strong>, it is called a mixed model.</p>
+<p>This means that, if I do not intend to make any statements about the effect of block itself, but just want to account for that variability, we can model the block effect as a <strong>random effects</strong> Here, we do not intend to make a statement about how waterlogging will affect yield in this trial, all we want to do is to account for the block variability.</p>
+<p>If we treat blocks as a <strong>random effects</strong> we assume that the blocks in our experiment represent a random sample of possible field conditions.</p>
+<section id="modeling-block-as-a-random-effects" class="level4">
+<h4 class="anchored" data-anchor-id="modeling-block-as-a-random-effects">Modeling block as a <strong>random effects</strong></h4>
+<p>In this case, the linear additive model looks like this:</p>
+<p><span class="math display">\[Y_{ij}=\mu + \tau_i + b_j + \epsilon_{ij}\]</span></p>
+<p><span class="math display">\[b_j \sim N(0, \sigma^2_{block})\]</span></p>
+<p>Where,</p>
+<p><span class="math inline">\(Y_{ij}\)</span> = observed yield</p>
+<p><span class="math inline">\(\mu\)</span> = overall mean yield</p>
+<p><span class="math inline">\(b_j\)</span> = random effect of block</p>
+<p><span class="math inline">\(\tau_i\)</span> = fungicide treatment effect</p>
+<p><span class="math inline">\(\varepsilon_{ij}\)</span> = random error</p>
+<p>To fit mixed effect models in R, we will have to use a package. There’s no way around it. There are two main packages for this <code>lme4</code> and <code>nlme</code>. Here, we will use <code>nlme</code> for simplicity.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>model_mixed <span class="ot">&lt;-</span> <span class="fu">lme</span>(yield <span class="sc">~</span> trt, </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                   <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> block, </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                   <span class="at">data =</span> rcbd_layout)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(model_mixed) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            numDF denDF   F-value p-value
+(Intercept)     1    20 200.72743  &lt;.0001
+trt             5    20   4.45298  0.0069</code></pre>
+</div>
+</div>
+<p>If we want to see how much variability is attributed to the <strong>random effects</strong>, we can examine the variance components estimated by the model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">VarCorr</span>(model_mixed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>block = pdLogChol(1) 
+            Variance StdDev   
+(Intercept) 818.3916 28.607545
+Residual     73.9863  8.601529</code></pre>
+</div>
+</div>
+<p>Plots within the same block tend to experience similar environmental conditions. Because of that, their yields are often more similar to each other than to plots located in other parts of the field. In other words, observations within a block are not completely independent.</p>
+<p>If we ignore this structure and treat every observation as independent, some of that shared block variability ends up inside the residual error term. This inflates the residual variance and can make it harder to detect treatment differences.</p>
+<p>By including block as a random effect, the model explicitly accounts for this shared variability. Instead of being treated as unexplained noise, the block-to-block variation is separated from the residual error.</p>
+</section>
+</section>
+</section>
+<section id="factorial-design" class="level1">
+<h1>Factorial Design</h1>
+<p>Now, in agronomy we are often interested in more than one factor at a time. We have just looked at a simple example that investigated 6 fungicide treatments.</p>
+<p>Let’s now imagine that we have another factor in which we are interested as well. We want to know wether the fungicide treatments behave differently with irrigation. In this case, we are interested in <strong>two</strong> factors.</p>
+<p>Since we want to evaluate the effect of fungicide, the effect of irrigation, and whether the effect of fungicide is different when there is irrigation, we will set up a <strong>factorial design</strong> with two factors.</p>
+<p>From a design perspective, factorial experiments allow us to estimate both the main effects and the interaction between factors, because every combination of the factor levels appears in the experiment. This keeps our assumptions aligned with reality: we model the interactions we observe, maintain independent errors, and can properly test all effects.</p>
+<section id="design-example-with-two-factors" class="level2">
+<h2 class="anchored" data-anchor-id="design-example-with-two-factors">Design example with two factors</h2>
+<p>We will keep using the same trial location, with 30 experimental units. To do so, and still include another level, I will choose fewer fungicide treatments. Let’s pick treatments <strong>F1, F3, and F4</strong>.</p>
+<p>Now, we can include another factor: with or without irrigation.</p>
+<p>Since we have 3 fungicides and 2 irrigation levels, the factorial design produces 3 × 2 = 6 treatment combinations.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fungicide_treatments <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'F1'</span>, <span class="st">'F3'</span>, <span class="st">'F4'</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>irrigation_treatments <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Yes'</span>, <span class="st">'No'</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>factorial_treatments <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">fungicide =</span> fungicide_treatments,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">irrigation =</span> irrigation_treatments)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>factorial_treatments</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  fungicide irrigation
+1        F1        Yes
+2        F3        Yes
+3        F4        Yes
+4        F1         No
+5        F3         No
+6        F4         No</code></pre>
+</div>
+</div>
+<p>Let’s arrange our treatments in 5 blocks, like before, and let’s randomize the treatments within block.</p>
+<p>Below, the graph shows that every block contains a treatment that corresponds to a combination of our factors.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple-treatment-designs-lecture_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Let’s take a look at the data from this experiment. On the Y axis, we have the different fungicide-irrigation combinations.</p>
+<p>Comparing within the same fungicide, it seems like on average, irrigation increased yield as well.</p>
+<p>Now, is the effect of irrigation and fungicide different for the different combinations? That’s what the interaction term of the model will answer.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple-treatment-designs-lecture_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can visualize the relationship between out treatments and yield using what is called an interaction plot.</p>
+<p>Interaction plots provide a useful visual way to detect interactions. If the lines are roughly parallel, it suggests that the effect of one factor is consistent across the levels of the other factor. When the lines are not parallel, this indicates a possible interaction between the factors.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple-treatment-designs-lecture_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="the-linear-additive-model-2" class="level2">
+<h2 class="anchored" data-anchor-id="the-linear-additive-model-2">The linear additive model</h2>
+<p>Now, our model is getting a little more complicated, right? The simple “treatment” effect (<span class="math inline">\(\tau_i\)</span>), has been replaced by <span class="math inline">\(F\)</span> and <span class="math inline">\(I\)</span>, which indicate the effects of our two treatments. In addition, we also have the interaction term (<span class="math inline">\(FI_{ij}\)</span>), which indicates whether fungicide and irrigation treatments affect each other.</p>
+<p>In this case, I kept block as a random effect, but I could just as easily have included block as a <strong>fixed effect</strong>. I made this choice based on the fact that we do not want to make any statements about the two first blocks, which are waterlogging-prone. We want to include block in the model to account for this systematic variability coming from the different soil conditions.</p>
+<p><span class="math display">\[Y_{ijk}=\mu + F_i + I_j + FI_{ij} +  b_k + \epsilon_{ijk}\]</span></p>
+<p><span class="math display">\[b_k \sim N(0, \sigma^2_{block})\]</span></p>
+<p>Where,</p>
+<p><span class="math inline">\(Y_{ijk}\)</span> = observed yield</p>
+<p><span class="math inline">\(\mu\)</span> = overall mean yield</p>
+<p><span class="math inline">\(F_i\)</span> = fungicide treatment effect</p>
+<p><span class="math inline">\(I_j\)</span> = irrigation treatment effect</p>
+<p><span class="math inline">\(FI_{jk}\)</span> = interaction between fungicide and irrigation</p>
+<p><span class="math inline">\(b_k\)</span> = random effect of block</p>
+<p><span class="math inline">\(\varepsilon_{ijk}\)</span> = random error</p>
+</section>
+<section id="fitting-this-model-in-r" class="level2">
+<h2 class="anchored" data-anchor-id="fitting-this-model-in-r">Fitting this model in R</h2>
+<p>Just like before, we will use the <code>lme()</code> function, which is design to fit linear mixed effects models.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>model_fac <span class="ot">&lt;-</span> <span class="fu">lme</span>(yield <span class="sc">~</span> fungicide <span class="sc">*</span> irrigation, </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> block, </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> factorial_layout)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(model_fac)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                     numDF denDF   F-value p-value
+(Intercept)              1    20 252.41707  &lt;.0001
+fungicide                2    20  40.06928  &lt;.0001
+irrigation               1    20 226.75717  &lt;.0001
+fungicide:irrigation     2    20   6.24372  0.0078</code></pre>
+</div>
+</div>
+<p>The ANOVA table output shows us strong evidence that both the fungicide and irrigation treatments have an effect on corn yield. Furthermore, the interaction row (fungicide:irrigation) shows us that our fungicide treatments behave differently whether there’s irrigation or not.</p>
+</section>
+</section>
+<section id="split-plot-design" class="level1">
+<h1>Split-Plot Design</h1>
+<p>Up to this point, we have been assuming that all treatments can be randomized at the <strong>plot level</strong>. In other words, we assumed that each experimental unit can independently receive any treatment.</p>
+<p>However, in real agricultural experiments this is not always practical.</p>
+<p>For example, in the factorial experiment we just constructed, we included an irrigation factor with two levels: <strong>Yes</strong> and <strong>No</strong>. In our simulated design we randomly assigned irrigation treatments to individual plots.</p>
+<p>In practice, however, irrigation is often difficult to apply on a plot-by-plot basis. It may be much easier to irrigate <strong>larger strips of land</strong> rather than individual plots.</p>
+<p>To account for this practical limitation, we can use a <strong>split-plot design</strong>.</p>
+<p>In a split-plot experiment, one factor is applied to <strong>large experimental units</strong> (called <em>main plots</em> or <em>whole plots</em>), while another factor is applied to <strong>smaller units within them</strong> (called <em>subplots</em>).</p>
+<p>In our case:</p>
+<ul>
+<li><strong>Irrigation</strong> will be the <strong>main plot factor</strong></li>
+<li><strong>Fungicide</strong> will be the <strong>split-plot factor</strong></li>
+</ul>
+<section id="constructing-the-split-plot-layout" class="level2">
+<h2 class="anchored" data-anchor-id="constructing-the-split-plot-layout">Constructing the split-plot layout</h2>
+<p>We will keep using our field with <strong>5 blocks</strong> and <strong>30 experimental units</strong>.</p>
+<p>Instead of assigning irrigation at the plot level, we will assign irrigation to <strong>large strips within each block</strong>.</p>
+<p>Each block will contain:</p>
+<ul>
+<li><strong>one irrigated strip</strong></li>
+<li><strong>one non-irrigated strip</strong></li>
+</ul>
+<p>Each strip will contain the three fungicide treatments.</p>
+<p>This means that fungicides will still be randomized, but <strong>only within irrigation strips</strong>.</p>
+<p>The graph below shows that the irrigation strips start at the left side of each block and run to the middle of the block.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple-treatment-designs-lecture_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In the figure below, irrigation treatments form large strips within each block, while fungicides are randomized within those strips.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple-treatment-designs-lecture_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Notice that irrigation treatments are applied to groups of plots, not individual plots. This is what creates the split-plot structure and requires a different statistical model.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple-treatment-designs-lecture_files/figure-html/unnamed-chunk-33-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="the-linear-additive-model-3" class="level2">
+<h2 class="anchored" data-anchor-id="the-linear-additive-model-3">The linear additive model</h2>
+<p>Split-plot experiments introduce multiple sources of variability.</p>
+<p>Because irrigation is applied to large plots, the experimental units receiving irrigation are not independent at the same level as the fungicide subplots.</p>
+<p>We therefore include two sources of random variation:</p>
+<ol type="1">
+<li>Block-to-block variability</li>
+<li>Main-plot variability (irrigation strips within blocks)</li>
+</ol>
+<p>The linear model becomes:</p>
+<p><span class="math display">\[Y_{ijk}=\mu + F_i + I_j + FI_{ij} +  b_k + m_{jk}+ \epsilon_{ijk}\]</span></p>
+<p><span class="math display">\[b_k \sim N(0, \sigma^2_{block})\]</span></p>
+<p><span class="math display">\[m_{jk} \sim N(0, \sigma^2_{strip})\]</span></p>
+<p>Where:</p>
+<p><span class="math inline">\(Y_{ijk}\)</span> = observed yield</p>
+<p><span class="math inline">\(\mu\)</span> = overall mean</p>
+<p><span class="math inline">\(F_i\)</span> = fungicide effect</p>
+<p><span class="math inline">\(I_j\)</span> = irrigation effect</p>
+<p><span class="math inline">\(FI_{ij}\)</span> = interaction</p>
+<p><span class="math inline">\(b_k\)</span> = random block effect</p>
+<p><span class="math inline">\(m_{jk}\)</span> = random main plot effect (irrigation within block)</p>
+<p><span class="math inline">\(\varepsilon_{ijk}\)</span> = subplot error</p>
+<p>Fitting the split-plot model in R</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>model_split <span class="ot">&lt;-</span> <span class="fu">lme</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  yield <span class="sc">~</span> fungicide <span class="sc">*</span> irrigation,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> block<span class="sc">/</span>irrigation,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> splitplot_layout</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(model_split)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                     numDF denDF  F-value p-value
+(Intercept)              1    16 322.8757  &lt;.0001
+fungicide                2    16  23.2324  &lt;.0001
+irrigation               1     4  66.1558  0.0012
+fungicide:irrigation     2    16  11.7133  0.0007</code></pre>
+</div>
+</div>
+<p>The nested random structure</p>
+<p>block / irrigation</p>
+<p>tells the model that irrigation treatments are applied within blocks, and that the fungicide subplots share variability within those main plots.</p>
+<p>This accounts for the fact that irrigation was not randomized at the plot level.</p>
+</section>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>Experimental design of multiple treatment experiments plays a critical role in the quality of our data and the inferences that can be made.</p>
+<p><strong>Randomized Complete Block Design</strong>: In most cases, you will probably run RCBD experiments where blocking will reduce the error among plots within each block, making it easier to detect true treatment differences.</p>
+<p><strong>Factorial Design</strong>: The factorial design allows greater efficiency if you are interested in studying multiple factors simultaneously. It is also the only way to study the interactions between factors – and these interactions are often the most important findings.</p>
+<p><strong>Split-Plot Design</strong>: Where one factor is known to be more subtle (and therefore harder to test for significance) than a second factor, or where differences in equipment size make it more practical to nest one factor inside the other, the split-plot design can be very useful.</p>
+<section id="a-common-thread" class="level2">
+<h2 class="anchored" data-anchor-id="a-common-thread">A Common Thread</h2>
+<p>Behind every experimental design choice lies a single principle: we must <strong>model all known sources of variation</strong> in order to preserve the independence assumption that underlies ANOVA. Whether we are blocking to account for environmental gradients, including interaction terms to model how factors work together, or using separate error terms for nested factors, we are explicitly accounting for systematic patterns so that what remains (error) is truly independent and random.</p>
+<p>When you choose an experimental design, you are essentially asking: what sources of variation exist in my experimental environment and in how I can apply treatments? Model those sources. What remains becomes your error term. If your model is well-designed, errors will be independent, your statistical tests will be valid, and you will have a much better chance of detecting real treatment effects.</p>
+<p>Each design serves a different purpose, and choosing the right design is critical to the success and relevance of your research.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
