@@ -2,6 +2,9 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/2026-04-06_correlation-and-simple-regression/correlation-and-simple-regression-lecture.html",
+      "/posts/2026-03-28_transformation-and-glm/transformation-and-glms-lecture.html",
+      "/posts/2026-03-14_multiple-comparisons/multiple-comparisons-lecture.html",
       "/posts/2026-03-07_multiple-treatment-trial-design/multiple-treatment-designs-lecture.html",
       "/posts/2026-02-25_multiple-treatments/index.html",
       "/posts/2026-02-19_understanding-statistical-tests/index.html",

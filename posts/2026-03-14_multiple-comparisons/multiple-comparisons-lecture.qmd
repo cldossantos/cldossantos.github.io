@@ -1,0 +1,488 @@
+---
+title: "Means Separation and Data Presentation"
+author: "Caio dos Santos"
+date: "2026-03-14"
+subtitle: "Module 8"
+categories: [statistics]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+# Introduction
+
+The previous two units focused on the design and analysis of effects in multiple-treatment trials. Our focus there was to determine whether treatment effects explained more of the variation among individual observations than residual error.
+
+In this unit, we move to the next practical question:
+
+> Once ANOVA indicates evidence that treatments differ, how do we decide which means are different from each other?
+
+# Case Study
+
+In the second example of Module 7, we looked at an example study in which we investigated the effect of 6 candidate fungicide treatments in corn yield. These were coded F1 through F6. This study was conducted as a randomized complete block design with one factor, the fungicide treatment.
+
+Let's recap:
+
+```{r, message=FALSE, warning=FALSE}
+library(sf)
+library(ggplot2)
+set.seed(20260307)
+eus <- st_read('./data/field.geojson', quiet = TRUE)
+eus <- st_as_sf(st_make_grid(eus, n = c(6, 5)))
+rcbd <- read.csv('./data/rcbd-data.csv')
+eus$trt <- rcbd$trt
+```
+
+Going across vertically, we had 5 blocks and, within each block, we randomized the 6 fungicide treatments.
+
+```{r}
+ggplot()+
+  geom_sf(data = eus, aes(fill = trt), col = 'black')+
+  geom_sf_text(data = eus, aes(label = trt))+
+  theme_void()+
+  scale_fill_manual(values = hcl.colors(6, 'Dynamic'))+
+  labs(fill = 'Treatment')
+```
+
+# ANOVA First
+
+Before separating means, we fit the ANOVA model:
+
+$$Y_{ij} = \mu + b_i + T_j + \varepsilon_{ij}$$ $$b_i \sim N(0, \sigma^2_{block})$$
+
+Where:
+
+-   $Y_{ij}$ is observed corn yield
+-   $\mu$ is the overall mean
+-   $b_i$ is the block random effect
+-   $T_j$ is the fungicide treatment effect
+-   $\varepsilon_{ij}$ is the residual error term
+
+Below, we fit the model represented by our linear additive model above. In this case, I chose to fit block as a random effect, partly because we are not interested in the effect of block itself. Block was included here to account for the systematic source of variability that it represents.
+
+```{r, echo=TRUE}
+library(nlme)
+model1 <- lme(yield ~ trt,
+              random = ~ 1 | block,
+              data = rcbd)
+anova(model1)
+```
+
+Our analysis of variance tells us that there is strong evidence that at least one treatment effect ($T_j$) is different from zero. So, next, we will proceed with what's called a means-separation test.
+
+# Fisher's Least Significant Difference
+
+## Relationship with Confidence Intervals
+
+Before introducing **Fisher’s Least Significant Difference (LSD)**, it is helpful to connect the idea to something we already know: **confidence intervals**.
+
+Recall that a confidence interval for the difference between two treatment means is
+
+$$
+(\bar{Y}_i - \bar{Y}_j) \pm t_{\alpha/2,df} \times SE(\bar{Y}_i - \bar{Y}_j)
+$$
+
+where
+
+-   $\bar{Y}_i - \bar{Y}_j$ is the difference between treatment means
+-   $SE(\bar{Y}_i - \bar{Y}_j)$ is the standard error of that difference
+-   $t_{\alpha/2,df}$ is the critical value from the t distribution
+
+This interval represents the range of **plausible values for the true difference between treatments**.
+
+The hypothesis test
+
+$$
+H_0 : \mu_i = \mu_j
+$$
+
+is equivalent to asking whether **0 lies inside the confidence interval**.
+
+-   If **0 is inside the interval**, the treatments are not significantly different.
+-   If **0 is outside the interval**, the treatments are significantly different.
+
+## Flipping the Confidence Interval Logic
+
+Instead of checking whether 0 lies inside the interval, we can rewrite the condition mathematically.
+
+A difference is significant when
+
+$$
+|\bar{Y}_i - \bar{Y}_j|
+>
+t_{\alpha/2,df} \times SE(\bar{Y}_i - \bar{Y}_j)
+$$
+
+In other words, the **absolute difference between the means must exceed the half-width of the confidence interval**.
+
+That half-width is exactly what we call the **Least Significant Difference (LSD)**.
+
+$$
+LSD = t_{\alpha/2,df} \times SE(\bar{Y}_i - \bar{Y}_j)
+$$
+
+So LSD is simply the **minimum difference between two treatment means required to declare them significantly different**.
+
+Let's compute the LSD for our fungicide treatment with an $\alpha = 0.05$:
+
+$$LSD = t_{\alpha/2,df} \times SE(\bar{Y}_i - \bar{Y}_j)$$ $$LSD = t_{0.025,20} \times 5.44$$ $$LSD = 2.09 * 5.44 = 11.35$$
+
+This means that differences between means that are greater than 11.35 bu/ac provide evidence of difference between the treatment populations.
+
+```{r}
+MSE <- sigma(model1)^2
+df <- anova(model1)$denDF[1]
+n   <- 5
+SE_diff <- sqrt(2*MSE/n)
+
+LSD <- qt(.975, df) * SE_diff
+```
+
+## The LSD Procedure
+
+The LSD test is therefore very direct:
+
+1.  Calculate the **Least Significant Difference (LSD)**
+2.  Compare every pair of treatment means
+3.  If the **absolute difference between two means exceeds the LSD**, the treatments are significantly different
+
+Conceptually, LSD is simply **reversing the logic of the confidence interval test** and turning it into a **single comparison threshold**.
+
+## Visualizing the Confidence Intervals for Mean Differences
+
+Following this relationship between confidence intervals and the LSD value, we can visualize the confidence interval for treatment differences for the fungicide experiment we've been working with.
+
+```{r}
+library(emmeans)
+library(ggplot2)
+
+# Estimated marginal means
+emm <- emmeans(model1, ~ trt)
+
+# Pairwise differences with confidence intervals
+pairs_df <- as.data.frame(pairs(emm, infer = TRUE, adjust = "none"))
+```
+
+In the graph below, each point represents the estimated difference between two treatment means, and the error bars represent the confidence interval for the difference. In this case, when a treatment difference confidence interval crosses the dashed vertical line, we fail to reject $H_0$ for that treatment comparison.
+
+The **half-width of each interval** corresponds exactly to the **LSD threshold**.
+
+```{r}
+ggplot(pairs_df, aes(x = estimate, y = contrast)) +
+  geom_point(size = 3) +
+  geom_errorbarh(aes(xmin = lower.CL, xmax = upper.CL), height = 0.2) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  labs(
+    x = "Difference Between Means",
+    y = "Treatment Comparison"
+  ) +
+  theme_linedraw()
+```
+
+# Computing Pairwise Comparisons in R
+
+We can compute pairwise comparisons using **emmeans**.
+
+In R, a great framework to conduct multiple comparisons is based on the combination of the **emmeans** and **multcomp** libraries.
+
+Here, we load these two libraries
+
+```{r, echo=TRUE}
+library(emmeans)
+library(multcomp)
+```
+
+The **emmeans** library computes *estimated marginal means* for each treatment combination. In this case, we only have one factor (fungicide treatment), which is denoted by the variable `trt`.
+
+```{r, echo=TRUE}
+emm <- emmeans(model1, ~ trt)
+emm
+```
+
+Great, now that we have computed the estimated means, we can compare each pair of means. The argument `adjust` determines *p-value* adjustments. The LSD procedure does not have any p-value adjustments, so we will specify `none`.
+
+Below, we have 15 comparisons for our six means. The *estimate* column shows the estimated difference between the means. Note that absolute estimates greater than 11.35 have a p-value lower than 0.05.
+
+```{r, echo=TRUE}
+pairs(emm, adjust = "none")
+```
+
+A different way of showing the same information is by dividing the means in groups that present a difference between them. Letter groupings summarize pairwise comparisons and should be interpreted cautiously when groups overlap.
+
+```{r, echo=TRUE}
+cld(emm, adjust = "none")
+```
+
+Very often, you will see these groups represented by letters, instead of numbers. Here, we can use some pre-built R objects, like the `letters` and `LETTERS` object, for example.
+
+```{r, echo=TRUE}
+letters
+LETTERS
+```
+
+We can pass the `letters` object so that R will use it when naming the groups.
+
+```{r, echo=TRUE}
+cld(emm, 
+    Letters = letters,
+    adjust = "none")
+```
+
+This shows that:
+
+-   treatment *F6* does not differ from *F1*, but differs from all other treatments.
+-   treatment *F1* does not differ from *F6, F4, F5, F2*, but differs from *F3*.
+-   treatments *F4, F5, and F2* only differ from *F6*.
+
+Now, let's see how confident we are that we have not made type I errors.
+
+# Comparisonwise vs Experimentwise Error
+
+Why not always use LSD?
+
+With each pairwise comparison run at significance level $\alpha_C$ (the **comparisonwise error rate**), the probability of at least one false positive across the entire experiment grows. If we approximate the tests as independent, the **experimentwise error rate** can be approximated as
+
+$$\alpha_E \approx 1 - (1 - \alpha_C)^M$$
+
+For $K$ treatment means there are $M = K(K-1)/2$ possible pairs. With $K = 6$ treatments ($M = 15$ pairs) running each at $\alpha_C = 0.05$:
+
+$$\alpha_E \approx 1 - (0.95)^{15} \approx 0.53$$
+
+That is a 53% chance of at least one false positive across the experiment. Conversely, if we fix $\alpha_E = 0.05$ for the same 15 comparisons, the per-comparison error drops to roughly $\alpha_C \approx 0.003$, making it very difficult to detect modest but real differences.
+
+No procedure can keep both error rates small simultaneously at a fixed sample size. The choice of procedure depends on which error matters more in your specific research context.
+
+# Tukey's Honest Significant Difference
+
+Tukey HSD is similar in structure to LSD, but it uses the **studentized range distribution** (`Q`) and adjusts the threshold based on:
+
+-   alpha
+-   residual degrees of freedom
+-   number of treatments
+
+$$
+\text{HSD} =q_{\alpha, K, df}\times SE
+$$
+
+$q$ is the critical value of the studentized range distribution based on $\alpha$, the number of treatments $K$, and the residual degrees of freedom.
+
+So as the number of treatments increases, the minimum significant difference becomes more stringent.
+
+As the code shows below, the function `qtukey()` returns the $Q$-value corresponding to a quantile. The function also takes as arguments, the number of means being compared, and the degrees of freedom.
+
+Below, we can see that as the number of means increases, the $Q$-value also increases, which, in turn, increases the value of the by which two means must differ to provide evidence enough to reject the null hypothesis ($H_0$).
+
+```{r, echo=TRUE}
+qtukey(p = 0.95, nmeans = 3, df = 20)
+qtukey(p = 0.95, nmeans = 6, df = 20)
+qtukey(p = 0.95, nmeans = 12, df = 20)
+```
+
+Luckily, we do not need to compute this by hand. Just like before, we will rely on the **emmeans** and **multcomp** libraries. To conduct the means-comparison test, all we need to do is to specify in the `adjust` argument that we want to use Tukey's HSD.
+
+```{r, echo=TRUE}
+cld(emm, 
+    adjust = "tukey",
+    Letters = letters)
+```
+
+Compared with LSD, Tukey tends to be more conservative, especially when many means are being compared. This is noticeable because we now have fewer distinctions between groups.
+
+# Bonferroni Adjusted t
+
+The Bonferroni procedure also controls $\alpha_E$ but uses the standard t-distribution with an adjusted significance level $\alpha_E / M$. Where $M$ is the number of comparisons we're making.
+
+The resulting critical difference is:
+
+$$
+LSD_\text{bonferroni} =
+t_{\alpha_E/(2M),df} \times
+SE
+$$
+
+Let's compute the Bonferroni-adjusted critical difference for our experiment.
+
+$$LSD_{\text{bonferroni}} = t_{\frac{0.05}{2\times 15},20} \times 5.44 = t_{0.0016,20} \times 5.44$$ $$LSD_{\text{bonferroni}} = 3.35 \times 5.44 = 18.21$$
+
+As when using Tukey's HSD, when we want to use Bonferroni's adjustment, we can simply ask the `cld()` function to adjust for it.
+
+```{r}
+cld(emm, 
+    Letters = letters,
+    adjust = "bonferroni")
+```
+
+Compared to LSD, the Bonferroni critical difference is larger, so fewer pairs will show evidence of a difference. In small experiments (few treatments) Bonferroni and Tukey often give the same groupings. As the number of treatments grows, Tukey HSD is generally preferred because the Bonferroni penalty grows proportionally with $M$ while the studentized range distribution adjusts more efficiently.
+
+# Linear Contrasts
+
+Pairwise comparisons test differences between individual treatments. However, many agronomic questions involve groups of treatments, which motivates the use of linear contrasts.
+
+Sometimes we want to compare **groups** of treatments, for example:
+
+-   low vs high rates
+-   older fungicides vs new fungicides
+
+This is what linear contrasts are for.
+
+## Contrast Example 1
+
+Let's say that fungicide treatments F1 through F3 are a newer line of fungicides that have entered the market more recently than fungicides F4 through F6. You, as an agronomist, might be interested in the question:
+
+> Is there a difference between the effect of new and old fungicides on corn yield?
+
+Coefficients:
+
+-   `F1`: 1/3
+-   `F2`: 1/3
+-   `F3`: 1/3
+-   `F4`: -1/3
+-   `F5`: -1/3
+-   `F6`: -1/3
+
+The coefficients sum to zero, as required.
+
+```{r, echo=TRUE}
+contrast(emm,
+         method = list(
+           new_vs_old = c(1/3, 1/3, 1/3, -1/3, -1/3, -1/3)
+         ))
+```
+
+The results do not provide enough evidence to reject $H_0$, suggesting that the average yield of the two fungicide groups is similar.
+
+## Contrast Example 2
+
+Let's say that fungicide treatment F6 is the cheapest fungicide treatment among all of these six, and the other treatments have a comparable price. You, as an agronomist, might be interested in the question:
+
+> Is there a difference between the cheapest fungicide treatment and the others?
+
+Coefficients:
+
+-   `F1`: -1/6
+-   `F2`: -1/6
+-   `F3`: -1/6
+-   `F4`: -1/6
+-   `F5`: -1/6
+-   `F6`: 5/6
+
+```{r, echo=TRUE}
+contrast(emm,
+         method = list(
+           F6_vs_rest = c(-1/6, -1/6, -1/6, -1/6, -1/6, 5/6)
+         ))
+```
+
+# Means Presentation
+
+Once means are separated, we need to communicate results clearly.
+
+There are two standard formats:
+
+-   Means tables
+-   Means plots
+
+## Means Table
+
+A practical means table in agronomy papers usually looks like this:
+
+```         
+| Fungicide Treatment | n   | Standard Error | Treatment Mean |
+|---------------------|-----|----------------|----------------|
+| F1                  | 5   | 13.35          | 175.6 a        |
+| F2                  | 5   | 13.35          | 185.6 ab       |
+| F3                  | 5   | 13.35          | 194.52 b       |
+| F4                  | 5   | 13.35          | 183.25 ab      |
+| F5                  | 5   | 13.35          | 185.19 ab      |
+| F6                  | 5   | 13.35          | 171.57 a       |
+```
+
+Means followed by the same letter are not significantly different using a Tukey procedure at $\alpha = 0.05$.
+
+## Plotting Means
+
+For categorical treatments, use bar plots or point plots with error bars.
+
+If you are presenting means-comparison groupings, letters can be added above bars to indicate significance groups.
+
+```{r}
+tt <- cld(emm, 
+    adjust = "tukey",
+    Letters = letters,
+    reversed = TRUE)
+
+tt <- as.data.frame(tt)
+tt <- tt[order(tt$trt), ]
+```
+
+```{r, fig.cap="Mean corn yield for the six fungicide treatments (F1–F6) in a randomized complete block experiment. Bars represent treatment means estimated from the mixed-effects model, and error bars show ±1 standard error of the mean. Letters above the bars indicate mean separation groups using a Tukey procedure at α = 0.05; treatments sharing a common letter are not significantly different."}
+ggplot()+
+  geom_col(data = tt, aes(x = trt, y = emmean),
+           fill = 'grey50',
+           col = 'black')+
+  geom_errorbar(data = tt, aes(x = trt, ymin = emmean - SE, ymax = emmean + SE),
+                width = 0.2)+
+  geom_text(data = tt, aes(x = trt, y = 215
+                           , label = .group)) +
+  labs(
+    x = "Fungicide Treatment",
+    y = "Corn Yield (bu/ac)"
+  ) +
+  theme_bw()
+```
+
+------------------------------------------------------------------------
+
+Personally, I like adding the raw data to the graph, in addition to the mean and standard error. I think this is a more transparent representation of the data that led to our conclusions. Here's an example using this experiment.
+
+Also, notice that the figure caption includes all the information needed to interpret the figure results.
+
+```{r, fig.cap="Mean corn yield for the six fungicide treatments (F1–F6) in a randomized complete block experiment. Empty circles represent individual observations, red-filled circles represent treatment means, and error bars show ±1 standard error of the mean. Letters below the points indicate mean separation groups using a Tukey procedure at α = 0.05; treatments sharing a common letter are not significantly different."}
+
+ggplot()+
+  geom_point(data = rcbd, aes(x = trt, y = yield), pch = 21)+
+  geom_errorbar(data = tt, aes(x = trt, ymin = emmean - SE, ymax = emmean + SE),
+                width = 0.2)+
+  geom_point(data = tt, aes(x = trt, y = emmean), pch = 21, fill = 'red')+
+
+  geom_text(data = tt, aes(x = trt, y = 125, label = .group)) +
+  labs(
+    x = "Fungicide Treatment",
+    y = "Corn Yield (bu/ac)"
+  ) +
+  theme_bw()
+```
+
+------------------------------------------------------------------------
+
+From my previous lecture notes, you might have noticed that sometimes I flip the X and Y axis. Here's an example of what the graph would look like if we did that.
+
+```{r, fig.cap="Mean corn yield for the six fungicide treatments (F1–F6) in a randomized complete block experiment. Empty circles represent individual observations, red-filled circles represent treatment means, and error bars show ±1 standard error of the mean. Letters below the points indicate mean separation groups using a Tukey procedure at α = 0.05; treatments sharing a common letter are not significantly different."}
+
+ggplot()+
+  geom_point(data = rcbd, aes(x = trt, y = yield), pch = 21)+
+  geom_errorbar(data = tt, aes(x = trt, ymin = emmean - SE, ymax = emmean + SE),
+                width = 0.2)+
+  geom_point(data = tt, aes(x = trt, y = emmean), pch = 21, fill = 'red')+
+
+  geom_text(data = tt, aes(x = trt, y = 125, label = .group)) +
+  labs(
+    x = "Fungicide Treatment",
+    y = "Corn Yield (bu/ac)"
+  ) +
+  theme_bw()+
+  coord_flip()
+```
+
+------------------------------------------------------------------------
+
+# Conclusion
+
+ANOVA tells us whether treatment effects exist, but it does not tell us *which* treatments differ. Means-comparison procedures extend ANOVA by allowing us to evaluate specific differences between treatments.
+
+Different procedures balance two competing goals: detecting real differences and limiting false positives. Methods such as LSD provide greater power but weaker control of experimentwise error, while procedures like Tukey HSD or Bonferroni adjustments provide stronger error control.
+
+In practice, the appropriate method depends on the research objective and the consequences of statistical errors. Regardless of the method used, results should be presented clearly, with means, measures of uncertainty, and transparent visualizations of the data.
+
+These tools allow us to move from statistical models to interpretable treatment comparisons and, ultimately, to informed agronomic decisions.

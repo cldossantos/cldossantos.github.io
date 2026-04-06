@@ -1,0 +1,661 @@
+---
+title: "Transformations and Generalized Linear Models"
+subtitle: "Module 9"
+date: "2026-03-29"
+author: "Caio dos Santos"
+categories: [statistics]
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+## When things stop looking nice…
+
+Up to this point in the course, I’ve been showing you **nice, well-behaved datasets**.
+
+### Roughly symmetric
+
+In module 2, we looked at an example of soybean yield data. We connected yield data first to the histogram and then we proceeded to overlaying the normal distribution density plot on top of it. This is a case in which the a model that assumes normality of the residuals might be justified.
+
+```{r  fig.show="hold", out.width="50%"}
+library(sf)
+y02 <- st_read('./data/simulated-yield.shp', quiet = TRUE)
+xbar <- mean(y02$sim1)
+s <- sd(y02$sim1)
+
+plot(y02["sim1"], pch = 15, cex = 2.5, main = 'Soybean yield (bu/ac)')
+hist(y02$sim1, main = 'Histogram of Soybean Yield (bu/ac)', xlab = 'Soybean yield (bu/ac)',
+     freq = FALSE)
+lines(60:100, dnorm(60:100, xbar, s), col = 'red', lwd = 2)
+```
+
+### Uniform variance
+
+Later, in modules 6 through 8, we looked at more complex experiments but they all had nice constant variability among treatments. One example is the fungicide treatment experiment below. This example should look familiar to you because we've spent a lot of time on it.
+
+The graph on the left shows us that the variability within each treatment is somewhat similar, as indicated by the width of the error bars.
+
+The graph on the right shows us a different, and perhaps more standard, way of assessing this. We can look at the residuals versus the predicted values. Note how the spread of the data does not increase or decrease as a function of the fitted values (in this case, yield). This is a good indication that our assumption of constant variance is not violated here.
+
+```{r, fig.show="hold", out.width="50%"}
+library(ggplot2)
+rcbd <- read.csv('./data/rcbd-data.csv')
+
+ggplot()+
+  geom_point(data = rcbd, aes(x = trt, y = yield), pch = 21)+
+ stat_summary(data = rcbd, 
+              fun.data = 'mean_se',
+              aes(x = trt, y = yield))+
+  labs(
+    x = "Fungicide Treatment",
+    y = "Corn Yield (bu/ac)"
+  ) +
+  theme_bw()+
+  coord_flip()
+
+library(nlme)
+model1 <- lme(yield ~ trt,
+              random = ~ 1 | block,
+              data = rcbd)
+
+plot(model1)
+```
+
+And because of that, the models we've built worked really well.
+
+But let me ask you something:
+
+> **What happens when the data don't really behave as nicely?**
+
+Because in real agronomic experiments data are *often* messy.
+
+## Let’s think of a few examples:
+
+### Yield monitor data
+
+In contrast to very well behave soybean example I showed you before. You will most likely encounter yield monitor data that looks more like the data below. Note that I have overlaid the normal distribution density cuve to show how it does not fit the data.
+
+We can notice a couple of things:
+
+-   While the normal distribution is unbounded (ranging from $-\infty$ to $\infty$), yield data is obviously bounded to strictly positive values.
+
+-   The yield data distribution is not symmetrical at all. The graph on the right shows that the data is right-skewed.
+
+```{r, fig.show="hold", out.width="50%"}
+bw <- st_read('./data/2020-orbweaver-south.shp', quiet = TRUE)
+xbar <- mean(bw$Yld_Vol_Dr)
+s <- sd(bw$Yld_Vol_Dr)
+plot(bw['Yld_Vol_Dr'], pch = 16, main = 'Maize Yield (bu/ac)')
+hist(bw$Yld_Vol_Dr, breaks = 30, freq = FALSE, xlim = c(-100, 500), main = '', xlab = 'Maize Yield (bu/ac)')
+lines(-100:300, dnorm(-100:300, xbar, s), col = 'red', lwd = 2)
+```
+
+### Counts per plot
+
+Whether we are counting insects, weeds, or disease lesions, count data is extremely common in agricultural experiments. Below is an example of insect counts.
+
+We can immediately notice a few problems:
+
+-   Count data are discrete (0, 1, 2, …), but the normal distribution is continuous.
+-   The normal distribution assigns positive probability to negative values, which is not possible for counts.
+-   The distribution is right-skewed, especially when counts are small.
+
+```{r}
+set.seed(20260326)
+
+counts <- rpois(500, lambda = 5)
+
+xbar <- mean(counts)
+s <- sd(counts)
+
+hist(counts,
+     breaks = 15,
+     freq = FALSE,
+     main = "Insect Counts per Plot",
+     xlab = "Number of insects",
+     xlim = c(-5, 20))
+
+# Overlay normal distribution
+xrange <- seq(-5, 20, 0.1)
+lines(xrange, dnorm(xrange, xbar, s), col = 'red', lwd = 2)
+```
+
+### Proportion data
+
+Proportion data tends to not follow a normal distribution either. Examples of proportion data that we collect in agriculture are:
+
+-   proportion of plants affected by a disease
+-   proportion of weeds that survive a herbicide application
+-   leaf area fraction affected by a disease
+
+Somethings are obviously wrong with the normal distribution model overlaid here:
+
+-   The normal distribution is unbounded ($-\infty$ to $\infty$) but the proportion data is bounded between 0 and 1...
+
+-   In this specific case, the highest density is not concentrated around the mean, like in the normal distribution. This model is not a good representation of this dataset's distribution.
+
+```{r}
+set.seed(20260326)
+treatment <- rep(c("Control", "Treated"), each = 40)
+
+n <- 20  
+
+p <- c(rep(0.2, 40), rep(0.7, 40))
+
+successes <- rbinom(80, size = n, prob = p)
+
+prop <- successes / n
+
+dat_prop <- data.frame(treatment, prop)
+
+xbar <- mean(dat_prop$prop)
+s <- sd(dat_prop$prop)
+
+hist(dat_prop$prop,
+     main = "Distribution of Proportions",
+     xlab = "Proportion",
+     breaks = 10,
+     freq = FALSE,
+     xlim = c(-0.5, 1.5))
+xrange <- seq(-0.5, 1.5, 0.05)
+lines(xrange, dnorm(xrange, xbar, s), col = 'red')
+```
+
+## Exploring Count Data a Little More
+
+Let’s continue with our **insect count** example. In this example, we are analyzing data from a study that aimed to evaluate the effect of two insecticide treatments on the number of caterpillars found in a maize crop. The trial was conducted as a completely randomized experiment with 10 replications and included three treatments: untreated control, insecticide 1, and insecticide 2.
+
+```{r, eval=TRUE}
+set.seed(20260330)
+
+reps <- 10
+treatment <- rep(c("Control", "I1", 'I2'), each = reps)
+## 15 10 9
+counts <- c(rpois(reps, lambda = 25),
+            rpois(reps, lambda = 20),
+            rpois(reps, lambda = 6))
+
+dat <- data.frame(treatment, counts)
+```
+
+### Visualizing the data
+
+When we look at the raw data, we see that the distribution of insect counts does not seem to follow a normal distribution. Instead, the data is pretty skewed.
+
+In addition, the normal distribution model curve using this sampled data's mean and standard deviation seems to places a bit of probability of negative values being observed. Now, have you ever counted -1 insect? Except of course for when you crush one...
+
+```{r}
+library(ggplot2)
+xbar <- mean(dat$counts)
+s <- sd(dat$counts)
+
+ggplot()+
+  geom_histogram(data = dat,
+                 aes(x = counts, y = ..density..), 
+                 bins = 25,
+                 col = 'black',
+                 fill = 'lightgrey')+
+  geom_line(aes(x = -10:40, y = dnorm(-10:40, xbar, s)), col = 'red')+
+  labs(x = 'Caterpillar counts', y = 'Density')+
+  coord_cartesian(xlim = c(-10, 40))+
+  theme_bw()
+
+```
+
+> Would this affect our model?
+
+### Analyzing the data
+
+As I mention often in this class, I like to begin the analysis by visualizing the data. This gives me a good idea of which effect sizes I should expect and helps me to diagnose some potential problems.
+
+Let's begin by visualizing this data, like in the previous modules empty circles represent the raw data, and filled triangles with error bars represent the mean and standard deviation.
+
+A couple of things we can note:
+
+-   It seems like the control treatment has greater values of caterpillar counts
+-   It seems like I2 presents smaller values
+-   The spread of the observations appears to increase as the treatment mean increases
+
+```{r}
+ggplot()+
+  geom_point(data = dat,
+             aes(x = treatment, y = counts),
+             pch = 1)+
+  stat_summary(data = dat,
+               fun.data = 'mean_se',
+               aes(x = treatment, y = counts),
+               pch = 17)+
+  labs(y = 'Caterpillar counts', x = 'Treatment')+
+  coord_flip()+
+  theme_bw()
+```
+
+#### Fitting a model
+
+To find out how important this is, we can proceed to fitting a model ignoring the plot above.
+
+Here, we fit a model in which insect counts (`counts`) is a function (`~`) of insecticide treatment (`treatment`).
+
+The analysis of variance tells us that at least one of the treatments has a non-zero effect. As a researchers, we're often thrilled when this happens! All of the work done to collect this data was finally rewarded, right?
+
+```{r, echo=TRUE}
+mod_counts <- lm(counts ~ treatment, data = dat)
+anova(mod_counts)
+```
+
+Let's take advantage of some of R's pre-built diagnostic plots to assess whether we should trust this model.
+
+First, let's plot the residuals versus the fitted values. From the start, this plot shows us an issue with our model. Can you notice how the variance of the residuals increases as the mean predicted value also increases?
+
+One of our assumptions when building this model was: $\varepsilon_i \sim N(0,\sigma^2)$, which means that we assumed that the errors of the model were normally distributed and with **uniform variance**. This is not looking very **uniform** to me.
+
+```{r, echo=TRUE}
+plot(mod_counts, which = 1)
+```
+
+Second, let's build what is known as Q-Q Plot. This helps us check whether our residuals look like they come from a normal distribution. It works by comparing the values we observe to the values we would expect if the data were perfectly normal. If everything lines up nicely along a straight line, that’s a good sign. If the points bend away from the line or show clear patterns, that’s evidence that the normality assumption may not hold.
+
+Since the points deviate substantially from the diagonal line, this indicated that our residuals do not fit a normal distribution too well. To this point, our assumption of: $\varepsilon_i \sim
+N(0,\sigma^2)$ seems to not hold.
+
+```{r, echo=TRUE}
+plot(mod_counts, which = 2)
+```
+
+So again:
+
+> **Should we trust this model?**
+
+```{r, eval=FALSE}
+library(emmeans)
+
+ccc <- emmeans(mod_counts, ~ treatment)
+ccc
+
+```
+
+## A common fix: transformations
+
+One approach is to **transform the data**.
+
+For count data, a log transformation is commonly used because it can:
+
+-   Make the distribution more symmetric
+-   Stabilize the variance
+-   Reduce the relationship between the mean and variance
+-   It also ensures that when we back-transform, predictions remain positive
+
+Let's take a look at the distribution of skewed data when we apply the log transformation.
+
+The log transformation, due to it's nonlinearity, tends to help assymetry, diminishing the skewness of the data.
+
+```{r  fig.show="hold", out.width="50%"}
+set.seed(20260330)
+
+reps <- 1e5
+treatment <- rep(c("Control"), each = reps)
+
+counts <- round(rgamma(reps, 10, scale = 4), 0)
+
+synth2 <- data.frame(treatment, counts)
+
+
+xbar <- mean(synth2$counts)
+s <- sd(synth2$counts)
+
+ggplot()+
+  geom_histogram(data = synth2,
+                 aes(x = counts, y = ..density..), 
+                 bins = 40,
+                 col = 'black',
+                 fill = 'lightgrey')+
+  geom_line(aes(x = seq(-5, 120, 1), y = dnorm(seq(-5, 120, 1), xbar, s)), col = 'red')+
+  labs(x = 'Counts', y = 'Density', 
+       title = 'Before log transformation')+
+  theme_bw()
+
+
+
+synth2$log_counts <- log1p(synth2$counts)
+xbar <- mean(synth2$log_counts)
+s <- sd(synth2$log_counts)
+
+
+ggplot()+
+  geom_histogram(data = synth2,
+                 aes(x = log_counts, y = ..density..), 
+                 bins = 40,
+                 col = 'black',
+                 fill = 'lightgrey')+
+  geom_line(aes(x = seq(2, 5, 0.05), y = dnorm(seq(2, 5, 0.05), xbar, s)), col = 'red')+
+  labs(x = 'log(counts)', y = 'Density',
+              title = 'After log transformation')+
+  theme_bw()
+
+```
+
+Note that now, we are modeling `log(counts)` as a function of `treatment`. In this case, the ANOVA results are similar, but this is not guaranteed. Transformations can change the conclusions.
+
+```{r,echo=TRUE}
+mod_log_counts <- lm(log(counts) ~ treatment, data = dat)
+anova(mod_log_counts)
+```
+
+Once again, let's look at the residuals of the model. This will tell us if we are closer to avoid violating model assumptions. It seems that the variance is a little more stable between the treatments and residuals are more balanced. Log transformation helps, but it does not completely resolve the problem.
+
+```{r}
+par(mfrow = c(1,2))
+plot(mod_log_counts, which = 1)
+plot(mod_log_counts, which = 2)
+par(mfrow = c(1,1))
+```
+
+Great! So now let's recover treatment means and compare them. It seems like the control treatment has an estimated marginal mean of 2.55 But looking back at the graph from when we first began to analyze the data, this treatment mean looked to be closer to 14...
+
+```{r, echo=TRUE}
+library(emmeans)
+means_log_counts <- emmeans(mod_log_counts, ~treatment)
+means_log_counts
+```
+
+Oh, that's right, the means are at the log scale too! We now need to back-transform the mean. Strictly speaking, exponentiating the mean on the log scale gives something closer to a median on the original scale... but for now, we’ll focus on interpretation. Let's extract the values in the log scale first.
+
+```{r, echo=TRUE}
+log_df <- data.frame(means_log_counts)
+log_means <- log_df$emmean
+log_means
+```
+
+The difference between `I2` and the control is:
+
+```{r,echo=TRUE}
+log_means[3] - log_means[1]
+```
+
+What does this mean in the data scale?
+
+```{r,echo=TRUE}
+exp(log_means[3] - log_means[1])
+```
+
+The key interpretation detail when looking at difference at the log scale, is that those differences represent ratios in the data scale.
+
+The value of $\approx$ 0.20 that we got above is the ratio of the medians of treatments `I2` and `Control`. Which means that treatment `I2` presented an $\approx$ 80% reduction in the number of caterpillars compared to the control.
+
+**note**: I will call is ds_means for `data scale means`.
+
+```{r, echo=TRUE}
+ds_means <- exp(log_means)
+ds_means
+```
+
+To show that, we can take the ratio between the two medians.
+
+```{r,echo=TRUE}
+ds_means[3] / ds_means[1]
+```
+
+### Thinking about transformations
+
+Although very useful, transformations force our data to conform to the assumptions of the model. They can improve model performance, but they also:
+
+-   Change the scale of the data
+-   Change how we interpret the results
+-   Sometimes only partially fix the problem
+
+> In other words, we are modifying the data so that the model works.
+
+But what if we could do the opposite?
+
+> What if we could use a model that is naturally suited for this type of data?
+
+## Generalized linear models
+
+Instead of transforming the data to make it fit a normal model, we can take a different approach:
+
+> We can use a model that is designed for count data from the start.
+
+This is the idea behind **generalized linear models (GLMs)**.
+
+For count data, a common choice is the **Poisson distribution**, which:
+
+-   Only allows non-negative values (0, 1, 2, …)\
+-   Naturally handles right-skewed data\
+-   Models the relationship between the mean and the variance
+
+### Fitting a GLM with a Poisson distribution
+
+Let’s fit a GLM using the same dataset:
+
+```{r, echo=TRUE}
+mod_pois <- glm(counts ~ treatment, 
+                data = dat,
+                family = poisson(link = 'log'))
+
+
+```
+
+Let's then look at the residuals and the Q-Q plot
+
+```{r}
+par(mfrow = c(1,2))
+plot(mod_pois, which = 1)
+
+plot(mod_pois, which = 2)
+par(mfrow = c(1,1))
+```
+
+### What scale are we working on?
+
+The GLM with a Poisson distribution uses a log link function
+
+This means that the logarithm of the expected value (mean) is modeled as a linear function of the predictors.
+
+That means:
+
+-   Model coefficients are in log units
+-   Differences correspond to **ratios** in the original data scale (just like before!!!)
+
+So in a sense, this model may look similar to what we did with a log transformation, but it is not the same thing.
+
+### Extracting treatment means
+
+```{r, echo=TRUE}
+library(emmeans)
+emmeans(mod_pois, ~ treatment)
+```
+
+By default, these are on the link scale (log scale in this case).
+
+Let’s back-transform them:
+
+```{r, echo=TRUE}
+emmeans(mod_pois, ~ treatment, type = 'response') 
+```
+
+## Comparing these two methods
+
+Let's review the results from both models and think about any differences.
+
+Log-transformed data
+
+```{r}
+ds_means
+```
+
+GLM
+
+```{r}
+data.frame(emmeans(mod_pois, ~ treatment, type = 'response'))$rate
+```
+
+Note that treatment values are similar, but not identical. This shows us that although there are similarities between these two approaches, they are not identical.
+
+One important difference is that in the first case, we assumed that once log-transformed, the errors would fit a normal distribution with mean zero and constant variance- $\varepsilon_i \sim
+N(0,\sigma^2)$. In the case of the GLM, the variance is modeled as part of the Poisson distribution (this is a particularity of this distribution both the mean and the variance have the same value).
+
+## A simple formulaic view
+
+To make things concrete, let's compare the two approaches with simple formulas.
+
+### Linear model on log-transformed data
+
+$$
+\log(y_i)  = \mu + \tau_j + \varepsilon_i, \quad \varepsilon_i \sim N(0, \sigma^2)
+$$
+
+-   $y_i$ = observed count\
+-   $\tau_j$ = treatment effect\
+-   $\varepsilon_i$ = normally distributed errors
+
+### GLM
+
+$$
+y_i \sim \text{Poisson}(\lambda_i), \quad \log(\lambda_i) = \mu + \tau_j
+$$
+
+-   $y_i$ = observed count\
+-   $\lambda_i$ = expected mean for treatment $j$\
+-   Variance = mean (Poisson property)
+
+I do not expect you to know all the particularities of all distributions in this class. I mention this so you understand why there are differences between the models.
+
+## Thinking about the workflow
+
+With the log transformation:
+
+-   With transformations, we had to **modify the data**
+-   Then we had to **back-transform results**
+-   And even then, assumptions were only partially satisfied
+
+With the GLM:
+
+-   The distribution is **built for count data**
+-   Predictions are always **non-negative**
+-   The mean–variance relationship is handled **naturally**
+
+> Instead of forcing the data to fit the model, we are now ackowledging the distribution of the data and modeling it appropriately
+
+## A quick but important clarification
+
+Before we wrap up, I want to make an important point.
+
+Throughout this lecture, we looked at several examples of data that were clearly skewed or non-normal, and we saw how this led to problems with our models.
+
+It might be tempting to conclude that:
+
+> "Whenever the data look skewed, we should avoid ANOVA or transform the data."
+
+But that is not quite correct.
+
+The assumptions we are making are not about the raw data, they are about the residuals.
+
+This means that it is entirely possible to have data that look skewed at first glance, but once we account for treatment effects, the residuals behave well and the model assumptions are reasonably satisfied.
+
+In those cases, a linear model may still be appropriate.
+
+> The key is not how the raw data look, but how the residuals behave.
+
+That said, strongly skewed data often lead to problematic residuals, so these two are often related.
+
+So rather than making decisions based only on histograms, we should always:
+
+-   Fit the model\
+-   Check the residuals\
+-   Then decide whether a transformation or a different model is needed
+
+### Let's look at an example
+
+We will look at data from a trial that evaluated a couple of treatments on corn yield. The treatments themselves are irrelevant here so I will keep this a minimal example.
+
+What I want to show here is that the raw data is clearly skewed. One could look at this dataset and immediately start thinking of transformations.
+
+```{r}
+set.seed(20261227)
+reps <- 30
+sigma <- 10
+
+Control <- rnorm(reps, mean = 150, sd = sigma)  
+T1      <- rnorm(reps, mean = 155, sd = sigma)  
+T2      <- rnorm(reps, mean = 164, sd = sigma)  
+T3      <- rnorm(reps, mean = 166, sd = sigma)   
+T4      <- rnorm(reps, mean = 190, sd = sigma)   
+
+syn <- data.frame(
+  rep = 1:reps,
+  Control = Control,
+  T1 = T1,
+  T2 = T2,
+  T3 = T3,
+  T4 = T4
+)
+
+synl <- reshape(syn,
+                   direction = 'long',
+                   varying = c('Control', 'T1', 'T2', 'T3', 'T4'),
+                   v.names = 'yield',
+                   timevar = 'treatment',
+                   times = c('T0', 'T1', 'T2', 'T3', 'T4'),
+                   idvar = 'rep'
+                   )
+
+
+xbar <- mean(synl$yield)
+s <- sd(synl$yield)
+
+hist(synl$yield,
+     main = "Distribution of Yield Data",
+     xlab = "Proportion",
+     breaks = 20,
+     freq = FALSE, 
+     xlim = c(110, 240))
+xrange <- seq(110, 240, 1)
+lines(xrange, dnorm(xrange, xbar, s), col = 'red')
+```
+
+Let's slow down a bit and fit the model:
+
+```{r, echo=TRUE}
+model_example <- lm(yield ~ treatment, data = synl)
+```
+
+and look at the residuals:
+
+```{r}
+par(mfrow = c(1,2))
+plot(model_example, which = 1)
+plot(model_example, which = 2)
+par(mfrow = c(1,1))
+```
+
+There's nothing concerning in the residuals, apparently. But the data seemed to be very skewed. How's that possible?
+
+Let's take a look at the treatment means:
+
+```{r, echo=TRUE}
+emmeans(model_example,  ~ treatment)
+```
+
+Since we have most means grouped around 160 bu/ac give or take, and one mean a little farther, at 190 bu/ac, this the raw data gave us an impression that the residuals could be skewed as well. However, that was an artifact of the treatment effects.
+
+I wanted to include this here because this happens sometimes in agronomic trials. It is important to recognize that our assumptions are about the residuals, and not the raw data.
+
+## Conclusion
+
+In this module, we explored what happens when our data do not behave as nicely as we would like.
+
+We saw that:
+
+-   Real agronomic data are often **skewed, bounded, or discrete**
+-   Standard ANOVA assumptions (normality and constant variance) may not hold
+-   Diagnostics like residual plots and Q–Q plots help us identify these issues
+
+We then explored two different approaches:
+
+-   **Transforming the data**, which can improve model performance but changes interpretation
+-   **Using generalized linear models**, which allow us to model the data more naturally
+
+The key takeaway is:
+
+> When assumptions are violated, we have options. Choosing the right approach depends on both the data and the question we are trying to answer.

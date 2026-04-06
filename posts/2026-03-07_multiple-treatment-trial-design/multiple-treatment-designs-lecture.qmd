@@ -23,7 +23,7 @@ In the last unit, we were introduced to multiple-treatment experiments using an 
 
 There were two effects in our original trial: treatment and error
 
-$$Y_{ij}=\mu + T_i + \epsilon_{ij}$$
+$$Y_{ij}=\mu + \tau_i + \varepsilon_{ij}$$
 
 The Analysis of Variance (ANOVA) was used to calculate and compare these variances. First, the sums of squares from the treatment means and the error (the summed distributions of observations around each treatment mean) were calculated. By dividing the sum of squares by their degrees of freedom, we obtained the treatment and error mean squares, also known as their variances. The F-value was derived from the ratio of the treatment variance to the error variance. Finally, the probability that the difference among treatments was zero, given the F-value we observed, was calculated using the F-distribution.
 
@@ -89,7 +89,7 @@ I could randomize this trial many times and end-up with different randomization,
 
 When we model a completely randomized design, like the one from this example, our linear additive model can is really simple. There are two effects in our original trial: treatment and error
 
-$$Y_{ij}=\mu + T_i + \epsilon_{ij}$$
+$$Y_{ij}=\mu + \tau_i + \varepsilon_{ij}$$
 
 Where,
 
@@ -189,7 +189,7 @@ anova(model1)
 
 This model provides strong evidence to reject $H_0$ and conclude that at least one treatment has an effect different from zero.
 
-Great! This works because in this example, the variability is really random, meaning that our errors ($\epsilon_{ij}$) are really independent from each other and normally distributed.
+Great! This works because in this example, the variability is really random, meaning that our errors ($\varepsilon_{ij}$) are really independent from each other and normally distributed.
 
 > Now, what happens when that assumption is not true??
 
@@ -371,7 +371,7 @@ ggplot()+
 ```{r}
 
 true_means <- c(195, 202, 215, 205, 198, 193)
-mu <- mean(true_means)
+mu_true <- mean(true_means)
 
 
 block_effects <- c(`1` = -50,
@@ -381,7 +381,7 @@ block_effects <- c(`1` = -50,
                    `5` = 0)
 
 rcbd_layout$yield <- 
-  mu +
+  mu_true +
   true_means[rcbd_layout$trt] - mean(true_means) +
   block_effects[rcbd_layout$block] +
   rnorm(30, mean = 0, sd = 8)
@@ -402,9 +402,9 @@ ggplot(rcbd_layout, aes(x = trt, y = yield)) +
 
 ## The linear additive model
 
-One important thing that we can think about is how, by accounting for soil variability using a blocked structure, we explicitly remove the soil variability from the residuals ($\epsilon_ij$). Our linear additive model now includes a block effect, as we can see below:
+One important thing that we can think about is how, by accounting for soil variability using a blocked structure, we explicitly remove the soil variability from the residuals ($\varepsilon_{ij}$). Our linear additive model now includes a block effect, as we can see below:
 
-$$Y_{ij}=\mu + \tau_i + B_j + \epsilon_{ij}$$
+$$Y_{ij}=\mu + \tau_i + B_j + \varepsilon_{ij}$$
 
 Where,
 
@@ -455,7 +455,7 @@ If we treat blocks as a **random effects** we assume that the blocks in our expe
 
 In this case, the linear additive model looks like this:
 
-$$Y_{ij}=\mu + \tau_i + b_j + \epsilon_{ij}$$
+$$Y_{ij}=\mu + \tau_i + b_j + \varepsilon_{ij}$$
 
 $$b_j \sim N(0, \sigma^2_{block})$$
 

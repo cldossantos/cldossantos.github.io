@@ -1,0 +1,929 @@
+---
+title: "Correlation and Simple Regression"
+subtitle: "Module 10"
+author: "Caio dos Santos"
+date: "2026-04-03"
+categories: [statistics]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+# Introduction
+
+In the previous modules, we focused on comparing means across
+qualitative treatments.
+
+-   In modules 4 and 5, we compared two populations.
+-   In modules 6 through 8, we compared multiple qualitative treatments.
+-   In module 9, we discussed what to do when assumptions are not well
+    behaved.
+
+The same assumptions apply in regression. The difference is not in the
+assumptions, but in how we model the mean: instead of a group mean, we
+use a continuous function of $x$. Let's keep that continuity in mind
+throughout this module.
+
+In this module, we move to a different kind of question.
+
+Instead of comparing only treatment groups identified by names (hybrid
+A, fungicide B, treatment C), we now study relationships between
+**quantitative variables**.
+
+This is the big shift for units 10 and 11. In previous modules,
+treatments were categorical: hybrids, fungicides, or herbicides with
+names and labels. Those are different categories, but they are not
+naturally arranged on a numeric scale. Here, we move to variables like
+nitrogen rate, seed population, and canopy temperature. Because those
+are numerical and ordered, we can ask a different question: not just
+"are these groups different," but "how much does $y$ change as $x$
+changes," and what do we predict between observed values?
+
+Examples include:
+
+-   nitrogen rate and yield
+-   plant biomass and fruit count
+-   canopy temperature and grain moisture
+
+This module introduces two related but different tools:
+
+-   **correlation**: measures association
+-   **simple linear regression**: models how one variable changes as
+    another changes
+
+# Correlation versus Regression
+
+When we analyze two quantitative variables, the first practical question
+is:
+
+> Are we only describing association, or are we modeling a directional
+> relationship?
+
+The clearest way to see the difference is visually. Both plots below use
+the same example dataset. In one, we only summarize association. In the
+other, we fit a directional model.
+
+```{r}
+library(ggplot2)
+
+set.seed(99)
+n_demo  <- 40
+x_cd    <- rnorm(n_demo, 50, 12)
+y_cd    <- 0.5 * x_cd + rnorm(n_demo, 0, 8)
+demo_df <- data.frame(x = x_cd, y = y_cd)
+r_cd    <- round(cor(demo_df$x, demo_df$y), 2)
+
+ggplot(demo_df, aes(x, y)) +
+  geom_point(pch = 21, size = 2) +
+  annotate("text", x = min(demo_df$x) + 1, y = max(demo_df$y) - 1,
+           label = paste0("r = ", r_cd),
+           hjust = 0, size = 5, fontface = "bold") +
+  labs(x = "x", y = "y",
+       title = "Correlation: how strong is the association?") +
+  theme_linedraw()
+```
+
+```{r}
+ggplot(demo_df, aes(x, y)) +
+  geom_smooth(method = "lm", se = FALSE, color = "steelblue") +
+  geom_point(pch = 21, size = 2) +
+  labs(x = "x", y = "y",
+       title = "Regression: how does y change as x increases?") +
+  theme_linedraw()
+```
+
+## Correlation
+
+Correlation measures the strength and direction of association between
+variables, usually represented as $r$.
+
+-   $r$ ranges from -1 to 1
+-   values near 1 indicate a strong positive association
+-   values near -1 indicate a strong negative association
+-   values near 0 indicate weak or no linear association
+
+A key point:
+
+> Correlation does not imply causation.
+
+One important limitation: $r$ only measures **linear** association. A
+strong curved relationship can still produce a low correlation
+coefficient because the two halves of the curve partially cancel each
+other out. Similarly, a single outlier can inflate $r$ substantially.
+This means a high $r$ alone is not enough. Always plot the data first.
+
+The example below illustrates this. Despite a strong, clear relationship
+between $x$ and $y$, the correlation coefficient is near zero because
+the curve is symmetric and the linear component cancels out.
+
+```{r}
+set.seed(7)
+x_nl  <- seq(-3, 3, length.out = 50)
+y_nl  <- -(x_nl ^ 2) + rnorm(50, 0, 0.4)
+nl_df <- data.frame(x = x_nl, y = y_nl)
+r_nl  <- round(cor(nl_df$x, nl_df$y), 2)
+
+ggplot(nl_df, aes(x, y)) +
+  geom_point(pch = 21, size = 2) +
+  geom_smooth(method = "lm", se = FALSE, color = "steelblue") +
+  annotate("text", x = -1, y = -6,
+           label = paste0("r = ", r_nl),
+           hjust = 0, size = 4.5, fontface = "bold") +
+  labs(x = "x", y = "y",
+       title = "Strong nonlinear relationship, but r near 0") +
+  theme_linedraw()
+```
+
+## Regression
+
+Simple linear regression is used when we want to model how a response
+variable $y$ changes with an explanatory variable $x$.
+
+In plain terms, regression lets us do three practical things:
+
+-   test whether $x$ is related to $y$
+-   estimate the size of that relationship
+-   predict $y$ for values of $x$ within the observed range
+
+## Case Study 1: Cucumber Traits
+
+An agronomist conducted a greenhouse experiment to understand the
+relationship between plant architecture and early productivity in
+cucumber. She grew 60 plants from the same seed lot under identical
+conditions and, at the flowering stage, harvested and dissected each
+plant to count:
+
+-   number of main stem branches
+-   total number of leaves
+-   number of fruits that had set by the flowering stage ("early
+    fruits")
+
+Her goal was to identify which traits correlate with early fruiting,
+which might help her breed for faster-producing varieties.
+
+Here are the first few rows of the resulting dataset:
+
+```{r, echo=FALSE}
+library(ggplot2)
+library(dplyr)
+
+set.seed(20260403)
+n <- 60
+
+branches <- round(rnorm(n, mean = 65, sd = 18))
+branches[branches < 10] <- 10
+
+leaves <- round(8 * branches + rnorm(n, mean = 0, sd = 90))
+leaves[leaves < 20] <- 20
+
+earlyfruit <- round(0.22 * branches + rnorm(n, mean = 0, sd = 4))
+earlyfruit[earlyfruit < 0] <- 0
+
+cucumber <- data.frame(branches, leaves, earlyfruit)
+head(cucumber)
+```
+
+Let us first visualize branches versus leaves.
+
+```{r}
+ggplot(cucumber, aes(x = branches, y = leaves)) +
+  geom_point(pch = 21, size = 2) +
+  geom_smooth(method = "lm", se = FALSE, color = "steelblue") +
+  labs(x = "Branches per plant",
+       y = "Leaves per plant") +
+  theme_linedraw()
+```
+
+Now branches versus early fruit.
+
+```{r}
+ggplot(cucumber, aes(x = branches, y = earlyfruit)) +
+  geom_point(pch = 21, size = 2) +
+  geom_smooth(method = "lm", se = FALSE, color = "firebrick") +
+  labs(x = "Branches per plant",
+       y = "Early fruit count") +
+  theme_linedraw()
+```
+
+In both plots, we see positive association. But this alone does not tell
+us whether one variable causes the other.
+
+For example, do more branches enable more leaves to form, or does more
+active photosynthesis from abundant leaves fuel branch growth?
+Similarly, in indeterminate crops like tomatoes or soybeans, branches
+and fruits compete for the same carbohydrates, making the causal
+direction ambiguous. It's also possible that a third variable, like
+total plant vigor, drives both branches and fruits upward independently.
+Correlation alone cannot resolve these questions.
+
+## Measuring correlation with $r$
+
+```{r, echo=TRUE}
+cor(cucumber$branches, cucumber$leaves)
+cor(cucumber$branches, cucumber$earlyfruit)
+```
+
+That gives us a quick numerical summary of linear association strength.
+
+## What does $r$ measure?
+
+One way to think about $r$ is that it takes covariance and puts it on a
+common scale.
+
+$$
+r = \frac{\mathrm{cov}(x, y)}{s_x s_y}
+$$
+
+-   $\mathrm{cov}(x, y)$ captures how $x$ and $y$ vary together
+-   $s_x$ and $s_y$ scale by the variability of each variable
+
+That scaling step is why $r$ always stays between -1 and 1.
+
+You do not need to memorize the formula. What matters most is:
+
+-   sign of $r$ gives direction of association
+-   magnitude of $r$ gives strength of linear association
+
+A geometric way to picture this: imagine centering both $x$ and $y$
+around their means so the origin sits at $(\bar{x}, \bar{y})$. If points
+are aligned at approximately a 45-degree angle (northeast to southwest),
+their products accumulate with the same sign, driving $r$ toward
+$\pm 1$. If points scatter randomly across all quadrants, positive and
+negative products cancel out, pushing $r$ toward 0. This is why the
+denominator (which measures the maximum possible alignment) keeps $r$
+bounded between -1 and 1: it is scaling by the theoretical maximum
+covariance.
+
+A natural bridge to regression is:
+
+$$
+\hat{\beta}_1 = r \cdot \frac{s_y}{s_x}
+$$
+
+This tells us that slope depends on both the correlation between $x$ and
+$y$ **and** the scales of the two variables. Two datasets with the same
+$r$ but different standard deviations will produce different slopes.
+Keeping this in mind helps avoid the common mistake of equating
+correlation magnitude with regression effect size.
+
+## A short "by hand" correlation example in R
+
+Up to this point, we have mostly used `cor(x, y)` and taken the result
+at face value. That works perfectly fine, but it can feel a little like
+a black box.
+
+So let’s slow down for a minute and actually see what is going on under
+the hood.
+
+Suppose we have four paired observations:
+
+```{r, echo=TRUE}
+x <- c(2, 4, 5, 7)
+y <- c(3, 6, 7, 10)
+
+xbar <- mean(x)
+ybar <- mean(y)
+
+xbar
+ybar
+```
+
+First step: center both variables by subtracting their means. This just
+moves the data so that everything is measured relative to the average.
+
+```{r, echo=TRUE}
+x_centered <- x - xbar
+y_centered <- y - ybar
+
+data.frame(x, y, x_centered, y_centered)
+```
+
+Now here is the key idea.
+
+-   When $x$ is above average and $y$ is also above average → positive
+    contribution
+-   When $x$ is below average and $y$ is also below average → also
+    positive
+-   When one is above and the other is below → negative contribution
+
+So what we do is multiply these centered values together and add them
+up.
+
+```{r, echo=TRUE}
+numerator <- sum(x_centered * y_centered)
+numerator
+```
+
+That gives us a measure of how the variables move together. But we are
+not done yet, because this value depends on the scale of the data.
+
+To fix that, we divide by the variability in each variable.
+
+```{r, echo=TRUE}
+denominator <- sqrt(sum(x_centered ^ 2) * sum(y_centered ^ 2))
+denominator
+```
+
+Now we put it all together:
+
+```{r, echo=TRUE}
+r_manual <- numerator / denominator
+r_manual
+
+cor(x, y)
+```
+
+So this is all correlation is doing.
+
+It is checking whether observations that are above average in $x$ tend
+to line up with observations that are above average in $y$, and the same
+for below-average values.
+
+Once you see it this way, $r$ stops being “just a number R gives you”
+and becomes a summary of how consistently the two variables move
+together.
+
+# Regression
+
+Now we move from association to modeling a directional relationship.
+
+## Case Study 2: Nitrogen Rate and Corn Yield
+
+A crop consultant evaluated corn's response to nitrogen fertilization on
+a farmer's field. The farmer was considering three fertilizer programs:
+no applied nitrogen (baseline), a moderate rate (about 34 lbs/acre), and
+a high rate (about 67 lbs/acre), each applied to four randomly selected
+plots. At harvest, the consultant measured grain yield (standardized to
+15% moisture) from each plot.
+
+The goal was to estimate the relationship between nitrogen rate and
+yield so the farmer could make an economically informed decision about
+the optimal application rate.
+
+Here are the first few rows of the harvest results:
+
+```{r}
+set.seed(20260403)
+
+nitro <- rep(c(0, 33.6, 67.2), each = 4)
+yield <- 8.5 + 0.05 * nitro + rnorm(length(nitro), sd = 1.1)
+
+nitrogen <- data.frame(nitro, yield)
+nitrogen
+```
+
+First, we always inspect the data.
+
+```{r, echo=TRUE}
+ggplot(nitrogen, aes(x = nitro, y = yield)) +
+  geom_point(pch = 21, size = 2.5) +
+  labs(x = "Nitrogen rate",
+       y = "Yield") +
+  theme_linedraw()
+```
+
+The center of the points appears to increase approximately linearly with
+nitrogen, so a simple linear model is reasonable as a first approach.
+
+## Connecting to previous linear models
+
+This part is important: you have seen this model structure before. Since
+module 6, we have been using the same linear additive framework:
+
+$${Y_{ij} = \mu + \tau_i + \varepsilon_{ij}}$$
+
+where $\tau_i$ is a categorical treatment effect, a fixed shift in the
+mean for each group. When we called `lm(yield ~ trt)`, R was fitting
+exactly this model.
+
+Simple linear regression uses that same framework, with one key change:
+the predictor is **continuous** instead of **categorical**.
+
+$${Y_i = \beta_0 + \beta_1 x_i + \varepsilon_i}$$
+
+Now $\beta_1 x_i$ replaces $\tau_i$: instead of a separate mean shift
+for each group, the mean shifts continuously and proportionally as $x$
+increases. The assumptions, the residual structure, and the hypothesis
+test are structurally identical.
+
+The parallel with previous modules is:
+
+-   previous model: $Y_{ij} = \mu + \tau_i + \varepsilon_{ij}$
+-   current model: $Y_i = \beta_0 + \beta_1 x_i + \varepsilon_i$
+-   previous R call: `lm(yield ~ trt)` and `trt` is a **categorical**
+    variable
+-   current R call: `lm(yield ~ nitro)` and `nitro` is a **continuous**
+    variable
+-   previous null hypothesis: all $\tau_i = 0$
+-   current null hypothesis: $\beta_1 = 0$
+
+So this is not a new statistical world. It is an extension of the one
+you already know.
+
+## Linear equation
+
+The regression equation is:
+
+$${\hat{y} = \hat{\beta}_0 + \hat{\beta}_1x}$$
+
+Where:
+
+-   $\hat{\beta}_0$ is the intercept
+-   $\hat{\beta}_1$ is the slope
+
+Interpretation:
+
+-   intercept: expected $y$ when $x = 0$
+-   slope: expected change in $y$ for each one-unit increase in $x$
+
+The diagram below annotates the fitted line directly to make both terms
+concrete on the plot.
+
+```{r}
+m_ann   <- lm(yield ~ nitro, data = nitrogen)
+a0_ann  <- coef(m_ann)[1]
+a1_ann  <- coef(m_ann)[2]
+y_at_34 <- a0_ann + a1_ann * 33.6
+
+ggplot(nitrogen, aes(x = nitro, y = yield)) +
+  geom_smooth(method = "lm", se = FALSE, color = "steelblue",
+              linewidth = 0.8, fullrange = TRUE) +
+  geom_point(pch = 21, size = 3) +
+  annotate("point", x = 0, y = a0_ann, shape = 18, size = 5,
+           color = "firebrick") +
+  annotate("text", x = 3, y = a0_ann + 0.6,
+           label = paste0("intercept = ", round(a0_ann, 2)),
+           hjust = 0, color = "firebrick", size = 3.5) +
+  annotate("segment", x = 0, xend = 33.6,
+           y = a0_ann, yend = a0_ann,
+           color = "darkgreen", linewidth = 0.7, linetype = "dashed") +
+  annotate("segment", x = 33.6, xend = 33.6,
+           y = a0_ann, yend = y_at_34,
+           color = "darkgreen", linewidth = 0.9) +
+  annotate("text", x = 35, y = (a0_ann + y_at_34) / 2,
+           label = paste0("slope = ", round(a1_ann, 3), " per unit N"),
+           hjust = 0, color = "darkgreen", size = 3.5) +
+  xlim(-5, 80) +
+  labs(x = "Nitrogen rate", y = "Yield") +
+  theme_linedraw()
+```
+
+## Model assumptions
+
+For the usual inference from `summary()` to be reliable, we still need
+the same core assumptions:
+
+-   $x$ is controlled by the researcher or measured with negligible
+    error
+-   the random errors are independent and have a common variance
+-   the random errors are approximately normally distributed
+-   the straight-line model is the correct functional form
+
+These are the same assumptions you already checked with residual plots
+in previous modules. The only difference is what we are modeling:
+instead of asking whether group means differ, we are asking whether a
+straight line captures how mean $y$ changes as $x$ changes.
+
+One practical note on the intercept: interpreting $\hat{\beta}_0$ as the
+expected response when $x = 0$ only makes sense when $x =
+0$ is within or close to the observed range. If no observations were
+taken near zero, the intercept is a mathematical anchor that positions
+the line, not a directly interpretable quantity. In the nitrogen example
+this is not a problem, because zero nitrogen is a real experimental
+condition and within the observed range.
+
+## Fitting the model in R
+
+```{r, echo=TRUE}
+model1 <- lm(yield ~ nitro, data = nitrogen)
+summary(model1)
+```
+
+Worked interpretation example:
+
+Suppose your model output shows an intercept near 8.5 and a slope near
+0.05. A clear way to report that is: with zero nitrogen, expected yield
+is about 8.5 units, and each additional 1 unit of nitrogen is associated
+with an average increase of about 0.05 yield units. This does not mean
+every single observation increases by exactly 0.05. It means the
+*average trend* in the fitted line changes by that amount, while
+individual observations still vary around that trend due to residual
+variation.
+
+Now we can overlay the fitted line.
+
+```{r}
+ggplot(nitrogen, aes(x = nitro, y = yield)) +
+  geom_point(pch = 21, size = 2.5) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(x = "Nitrogen rate",
+       y = "Yield") +
+  theme_linedraw()
+```
+
+## Interpreting coefficients
+
+From the fitted model:
+
+-   the estimated intercept is the expected yield at zero nitrogen
+-   the estimated slope is how much yield changes per unit nitrogen
+
+We can also make predictions for values inside the observed range
+(interpolation).
+
+```{r, echo=TRUE}
+coef(model1)
+
+predict(model1, newdata = data.frame(nitro = c(15, 50)))
+```
+
+## Least-squares idea
+
+The fitted line is chosen by least squares: it minimizes the sum of
+squared residuals.
+
+Residual for each point:
+
+$${residual_i = y_i - \hat{y}_i}$$
+
+Least squares chooses coefficients that minimize:
+
+$${\sum (y_i - \hat{y}_i)^2}$$
+
+The red segments in the plot below show each individual residual. The
+fitted line is the one position that makes the sum of squared segment
+lengths as small as possible.
+
+```{r}
+nitrogen_resid         <- nitrogen
+nitrogen_resid$fitted  <- fitted(model1)
+
+ggplot(nitrogen_resid, aes(x = nitro, y = yield)) +
+  geom_smooth(method = "lm", se = FALSE, color = "steelblue",
+              linewidth = 0.8) +
+  geom_segment(aes(xend = nitro, yend = fitted),
+               color = "firebrick", linewidth = 0.7) +
+  geom_point(pch = 21, size = 3, fill = "white") +
+  labs(x = "Nitrogen rate", y = "Yield",
+       title = "Residuals as vertical segments") +
+  theme_linedraw()
+```
+
+### A quick visualization of Least-squares
+
+This is a useful place to visualize how least squares chooses a slope.
+
+**Important note:** this is not the algorithm R uses internally for
+`lm()`. R solves the normal equations analytically for this model class.
+We are doing this only as a conceptual visualization. In the full
+least-squares problem, both the intercept and slope are estimated
+simultaneously. Here, we fix the intercept only to simplify
+visualization and isolate how the slope affects the error.
+
+From our fitted model, the intercept is about 8.48 and the slope is
+about 0.05. We will keep the intercept fixed at 8.48 and try several
+candidate slope values. For each slope, we compute the sum of squared
+errors (SSE).
+
+Now we plot the SSE for each candidate slope value. This gives the
+characteristic U-shape, with the minimum at the least-squares estimate.
+
+```{r}
+b0_fix <- coef(model1)[1]
+b1_hat <- coef(model1)[2]
+
+b1_vals <- seq(0.01, 0.10, 0.001)
+sse <- sapply(b1_vals, function(b1) {
+  y_hat <- b0_fix + b1 * nitrogen$nitro
+  sum((nitrogen$yield - y_hat)^2)
+})
+
+b1_candidates <- c(0.02, 0.04, 0.06, 0.08)
+candidate_cols <- c("firebrick", "darkorange", "darkgreen", "steelblue")
+
+par(mfrow = c(1, 2))
+plot(nitrogen$nitro, nitrogen$yield,
+     pch = 16, bg = "white",
+     xlab = "Nitrogen rate", ylab = "Yield",
+     main = "Four candidate slopes\n(intercept fixed)")
+
+for (i in seq_along(b1_candidates)) {
+  abline(a = b0_fix, b = b1_candidates[i],
+         col = candidate_cols[i], lwd = 2)
+}
+
+abline(a = b0_fix, b = b1_hat, col = "black", lwd = 2, lty = 2)
+
+legend("topleft",
+       legend = c(paste0("b1 = ", b1_candidates),
+                  paste0("best b1 = ", round(b1_hat, 4))),
+       col = c(candidate_cols, "black"),
+       lwd = 2, lty = c(rep(1, length(b1_candidates)), 2),
+       bty = "n")
+
+plot(b1_vals, sse, type = "l", lwd = 2,
+     xlab = expression(beta[1]),
+     ylab = "Sum of Squared Errors (SSE)",
+     main = "SSE as a function of slope",
+     ylim = c(5, 70))
+
+points(b1_candidates,
+       sapply(b1_candidates, function(b1) {
+         sum((nitrogen$yield - (b0_fix + b1 * nitrogen$nitro))^2)
+       }),
+       pch = 19, col = candidate_cols)
+
+best_idx <- which.min(sse)
+points(b1_vals[best_idx], sse[best_idx], pch = 19, col = "black", cex = 1.2)
+
+abline(v = b1_vals[best_idx], col = "black", lty = 2)
+text(b1_vals[best_idx], 7,
+     labels = paste0(" min at b1 = ", round(b1_vals[best_idx], 4)),
+     pos = 1, cex = 0.9)
+
+par(mfrow = c(1, 1))
+```
+
+## Significance of coefficients
+
+In `anova(model1)`, the p-value for the slope tests:
+
+-   $H_0: \beta_1 = 0$
+-   $H_a: \beta_1 \ne 0$
+
+If the p-value is small (for example, $< 0.05$), we have evidence that
+the slope is not zero, so there is a meaningful linear trend between $x$
+and $y$.
+
+## Analysis of variance for regression
+
+You can also view the same model test through ANOVA.
+
+```{r, echo=TRUE}
+anova(model1)
+```
+
+For simple linear regression, this ANOVA test is equivalent to testing
+whether the slope differs from zero. So the logic is exactly the same as
+previous modules. The predictor changed from categorical to continuous,
+but the variation partition, F-statistic, and p-value interpretation
+follow the same workflow you already know.
+
+## Measuring fit with $R^2$
+
+The model summary also reports $R^2$.
+
+-   $R^2$ is the proportion of variation in $y$ explained by the fitted
+    line
+-   values closer to 1 indicate better fit
+-   values near 0 indicate little explanatory value
+
+A useful decomposition is:
+
+$${SST = SSR + SSE}$$
+
+where:
+
+-   $SST$ = total variation around the mean
+-   $SSR$ = variation explained by the model
+-   $SSE$ = residual (unexplained) variation
+
+So:
+
+$${R^2 = \frac{SSR}{SST}}$$
+
+In simple linear regression, $R^2$ is also equal to the square of the
+Pearson correlation between observed and fitted values.
+
+The short check below verifies this directly in R.
+
+```{r, echo=TRUE}
+y_obs <- nitrogen$yield
+y_hat <- fitted(model1)
+
+SST <- sum((y_obs - mean(y_obs))^2)
+SSR <- sum((y_hat - mean(y_obs))^2)
+
+R2_manual <- SSR / SST
+R2_corr <- cor(y_obs, y_hat)^2
+
+c(R2_manual = R2_manual,
+  R2_corr = R2_corr,
+  R2_summary = summary(model1)$r.squared)
+```
+
+Two cautions are worth keeping in mind:
+
+-   a high $R^2$ does not prove the model is correct
+-   a modest $R^2$ can still be scientifically useful in noisy
+    biological systems if effect estimates are interpretable and
+    diagnostics are acceptable
+
+## Checking model assumptions
+
+Before trusting inferences and predictions, we inspect residuals.
+
+```{r, echo=FALSE}
+par(mfrow = c(1, 2))
+plot(model1, which = 1)
+plot(model1, which = 2)
+par(mfrow = c(1, 1))
+```
+
+What we want to see:
+
+-   no strong curvature in residuals vs fitted
+-   no obvious funnel shape, which would indicate unequal variance
+    across levels of $x$
+-   residuals approximately following a straight line in normal Q-Q plot
+
+In this example, the data are clean and the diagnostics look reasonably
+well-behaved. In real experiments, however, the residual vs. fitted plot
+may reveal curvature (suggesting the relationship is not truly linear)
+or a funnel shape (suggesting unequal variance across $x$). In those
+cases, the transformation and GLM tools from Module 9 apply here exactly
+as they did for ANOVA. The diagnostic workflow is the same.
+
+### Reality check: fitting a line to curved data
+
+To emphasize why diagnostics are not optional, imagine the same
+consultant had tested nine nitrogen rates instead of three. Perhaps a
+research institute encouraged her to run a more detailed trial to better
+characterize the response curve. Here is what a more thorough trial
+might show:
+
+```{r, echo=FALSE}
+set.seed(20260404)
+nitro_full <- rep(seq(0, 160, length.out = 9), each = 4)
+
+yield_full <- nlraa::SSquadp3xs(nitro_full, 8.5, 0.05, 120) + rnorm(length(nitro_full), sd = 0.2)
+
+nitrogen_full <- data.frame(nitro = nitro_full, yield = yield_full)
+
+ggplot(nitrogen_full, aes(x = nitro, y = yield)) +
+  geom_point(pch = 21, size = 2.5) +
+  labs(x = "Nitrogen rate",
+       y = "Yield") +
+  theme_linedraw()
+
+```
+
+```{r, echo=TRUE}
+model_full <- lm(yield ~ nitro, data = nitrogen_full)
+summary(model_full)
+```
+
+The summary looks impressive: a significant slope (p-value near 0) and
+$R^2 \approx 0.82$.
+
+Let's take a look at the fitted line:
+
+```{r}
+ggplot() +
+  geom_point(data = nitrogen_full,
+             aes(x = nitro, y = yield),
+             pch = 21, size = 2.5) +
+  geom_line(aes(x = nitrogen_full$nitro, y = fitted(model_full)),
+            col = 'steelblue')+
+  labs(x = "Nitrogen rate",
+       y = "Yield") +
+  theme_linedraw()
+```
+
+But look at the residuals:
+
+```{r}
+par(mfrow = c(1, 2))
+plot(model_full, which = 1)
+plot(model_full, which = 2)
+par(mfrow = c(1, 1))
+```
+
+The residuals show a strong curved pattern. The line systematically
+underpredicts at low and high nitrogen, but overpredicts in the middle.
+A significant p-value and high $R^2$ do not guarantee the model fits
+correctly. Only by inspecting residuals do we discover the true
+relationship is nonlinear (likely quadratic), and a straight line is
+inappropriate no matter how flat the summary statistics look.
+
+## Anscombe's quartet: why plots matter
+
+A classic reminder of why residual inspection matters comes from
+[Anscombe (1973)](https://doi.org/10.1080/00031305.1973.10478966). He
+constructed four datasets that are, for all practical purposes,
+numerically identical:
+
+-   same means and variances of $x$ and $y$
+-   same fitted line: $\hat{y} = 3 + 0.5x$
+-   same $R^2 = 0.667$
+-   same F-statistic and p-value
+
+But when plotted, only one dataset shows a clean linear relationship.
+The others reveal curvature, a single influential outlier, and a
+perfectly collinear set interrupted by one extreme point.
+
+This dataset is built into base R.
+
+```{r}
+par(mfrow = c(2, 2))
+for (i in 1:4) {
+  xi <- anscombe[[paste0("x", i)]]
+  yi <- anscombe[[paste0("y", i)]]
+  plot(xi, yi,
+       main  = paste("Dataset", i),
+       xlab  = "x", ylab = "y",
+       pch   = 19, xlim = c(4, 19), ylim = c(3, 13))
+  abline(lm(yi ~ xi), col = "steelblue", lwd = 1.5)
+}
+par(mfrow = c(1, 1))
+```
+
+The takeaway is direct: identical numerical summaries can hide very
+different underlying structures. A high $R^2$ and a significant p-value
+do not substitute for looking at the data. This is exactly why we always
+plot before and after fitting, and why the diagnostics in the previous
+section are not optional.
+
+# Extrapolation
+
+Interpolation is prediction **within** the observed range of $x$.
+
+Extrapolation is prediction **outside** that range.
+
+Extrapolation can be risky because the true relationship may change
+outside the sampled region.
+
+In this example, we observed nitrogen rates from 0 to 67.2. Predicting
+at 40 is interpolation. Predicting at 130 is extrapolation.
+
+The shaded region below marks the observed range. The green point is
+within it; the red point is well outside.
+
+```{r}
+a0_ext <- coef(model1)[1]
+a1_ext <- coef(model1)[2]
+
+ggplot(nitrogen, aes(x = nitro, y = yield)) +
+  annotate("rect", xmin = 0, xmax = 67.2,
+           ymin = -Inf, ymax = Inf, fill = "steelblue", alpha = 0.3) +
+  geom_smooth(method = "lm", se = FALSE, color = "steelblue",
+              linewidth = 0.8, fullrange = TRUE) +
+  geom_point(pch = 21, size = 3) +
+  annotate("point", x = 40, y = a0_ext + a1_ext * 40,
+           shape = 17, size = 4, color = "darkgreen") +
+  annotate("text", x = 40, y = a0_ext + a1_ext * 40 + 1.5,
+           label = "x = 40\n(interpolation)",
+           hjust = 0.5, color = "darkgreen", size = 3.2) +
+  annotate("point", x = 130, y = a0_ext + a1_ext * 130,
+           shape = 17, size = 4, color = "firebrick") +
+  annotate("text", x = 130, y = a0_ext + a1_ext * 130 - 1,
+           label = "x = 130\n(extrapolation)",
+           hjust = 0.5, color = "firebrick", size = 3.2) +
+  annotate("text", x = 33, y = 7.6,
+           label = "observed range", color = "steelblue", size = 3.2) +
+  xlim(-10, 175) +
+  labs(x = "Nitrogen rate", y = "Yield") +
+  theme_linedraw()
+```
+
+# Common mistakes to avoid
+
+-   Treating correlation as proof of causation.
+-   Reporting a significant p-value without interpreting effect size.
+-   Interpreting a high $R^2$ as proof the model is correct.
+-   Ignoring residual patterns because the slope is significant.
+-   Concluding the relationship **is** linear just because the slope is
+    significant: a curved trend can produce a non-zero linear component
+    and a significant p-value even when the straight-line model is
+    wrong.
+-   Concluding there is **no** relationship just because the slope is
+    non-significant: a curved relationship with zero linear slope will
+    yield a non-significant p-value even though a real relationship
+    exists. Always look at the scatter plot.
+-   Extrapolating far outside sampled values as if uncertainty stayed
+    the same.
+
+In practice, good interpretation combines all pieces of evidence: effect
+size, uncertainty, residual diagnostics, and biological plausibility.
+
+# Summary
+
+In this module, we learned:
+
+-   Correlation quantifies association, not causation.
+-   Regression models directional relationships and supports prediction.
+-   The slope is the expected change in $y$ per unit change in $x$.
+-   Least squares fits the line by minimizing squared residuals.
+-   Significance of the slope can be tested with coefficient tests or
+    ANOVA.
+-   $R^2$ summarizes model fit.
+-   Diagnostics are essential to check whether a linear model is
+    appropriate.
+-   Extrapolation should be approached cautiously.
+
+The key conceptual shift in this module is moving from comparing groups
+to modeling relationships. This allows us not only to detect
+differences, but to quantify how variables change together in
+biologically meaningful ways, and to make calibrated predictions for
+values we did not directly observe.

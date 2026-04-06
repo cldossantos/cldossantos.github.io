@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Caio dos Santos">
+<meta name="dcterms.date" content="2026-03-14">
+
+<title>Means Separation and Data Presentation</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-c89800f59a5657e0c177b73a5ff15e5b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-d250243be6510f45ae5a7bad6a98d8fc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-c89800f59a5657e0c177b73a5ff15e5b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-XRSH8JDS68"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XRSH8JDS68', { 'anonymize_ip': true});
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../"> 
+<span class="menu-text">Posts</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../cv.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Means Separation and Data Presentation</h1>
+            <p class="subtitle lead">Module 8</p>
+                                <div class="quarto-categories">
+                <div class="quarto-category">statistics</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Caio dos Santos </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">March 14, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>The previous two units focused on the design and analysis of effects in multiple-treatment trials. Our focus there was to determine whether treatment effects explained more of the variation among individual observations than residual error.</p>
+<p>In this unit, we move to the next practical question:</p>
+<blockquote class="blockquote">
+<p>Once ANOVA indicates evidence that treatments differ, how do we decide which means are different from each other?</p>
+</blockquote>
+</section>
+<section id="case-study" class="level1">
+<h1>Case Study</h1>
+<p>In the second example of Module 7, we looked at an example study in which we investigated the effect of 6 candidate fungicide treatments in corn yield. These were coded F1 through F6. This study was conducted as a randomized complete block design with one factor, the fungicide treatment.</p>
+<p>Let’s recap:</p>
+<p>Going across vertically, we had 5 blocks and, within each block, we randomized the 6 fungicide treatments.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple-comparisons-lecture_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="anova-first" class="level1">
+<h1>ANOVA First</h1>
+<p>Before separating means, we fit the ANOVA model:</p>
+<p><span class="math display">\[Y_{ij} = \mu + b_i + T_j + \varepsilon_{ij}\]</span> <span class="math display">\[b_i \sim N(0, \sigma^2_{block})\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(Y_{ij}\)</span> is observed corn yield</li>
+<li><span class="math inline">\(\mu\)</span> is the overall mean</li>
+<li><span class="math inline">\(b_i\)</span> is the block random effect</li>
+<li><span class="math inline">\(T_j\)</span> is the fungicide treatment effect</li>
+<li><span class="math inline">\(\varepsilon_{ij}\)</span> is the residual error term</li>
+</ul>
+<p>Below, we fit the model represented by our linear additive model above. In this case, I chose to fit block as a random effect, partly because we are not interested in the effect of block itself. Block was included here to account for the systematic source of variability that it represents.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>model1 <span class="ot">&lt;-</span> <span class="fu">lme</span>(yield <span class="sc">~</span> trt,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> block,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">data =</span> rcbd)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(model1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            numDF denDF   F-value p-value
+(Intercept)     1    20 200.72743  &lt;.0001
+trt             5    20   4.45298  0.0069</code></pre>
+</div>
+</div>
+<p>Our analysis of variance tells us that there is strong evidence that at least one treatment effect (<span class="math inline">\(T_j\)</span>) is different from zero. So, next, we will proceed with what’s called a means-separation test.</p>
+</section>
+<section id="fishers-least-significant-difference" class="level1">
+<h1>Fisher’s Least Significant Difference</h1>
+<section id="relationship-with-confidence-intervals" class="level2">
+<h2 class="anchored" data-anchor-id="relationship-with-confidence-intervals">Relationship with Confidence Intervals</h2>
+<p>Before introducing <strong>Fisher’s Least Significant Difference (LSD)</strong>, it is helpful to connect the idea to something we already know: <strong>confidence intervals</strong>.</p>
+<p>Recall that a confidence interval for the difference between two treatment means is</p>
+<p><span class="math display">\[
+(\bar{Y}_i - \bar{Y}_j) \pm t_{\alpha/2,df} \times SE(\bar{Y}_i - \bar{Y}_j)
+\]</span></p>
+<p>where</p>
+<ul>
+<li><span class="math inline">\(\bar{Y}_i - \bar{Y}_j\)</span> is the difference between treatment means</li>
+<li><span class="math inline">\(SE(\bar{Y}_i - \bar{Y}_j)\)</span> is the standard error of that difference</li>
+<li><span class="math inline">\(t_{\alpha/2,df}\)</span> is the critical value from the t distribution</li>
+</ul>
+<p>This interval represents the range of <strong>plausible values for the true difference between treatments</strong>.</p>
+<p>The hypothesis test</p>
+<p><span class="math display">\[
+H_0 : \mu_i = \mu_j
+\]</span></p>
+<p>is equivalent to asking whether <strong>0 lies inside the confidence interval</strong>.</p>
+<ul>
+<li>If <strong>0 is inside the interval</strong>, the treatments are not significantly different.</li>
+<li>If <strong>0 is outside the interval</strong>, the treatments are significantly different.</li>
+</ul>
+</section>
+<section id="flipping-the-confidence-interval-logic" class="level2">
+<h2 class="anchored" data-anchor-id="flipping-the-confidence-interval-logic">Flipping the Confidence Interval Logic</h2>
+<p>Instead of checking whether 0 lies inside the interval, we can rewrite the condition mathematically.</p>
+<p>A difference is significant when</p>
+<p><span class="math display">\[
+|\bar{Y}_i - \bar{Y}_j|
+&gt;
+t_{\alpha/2,df} \times SE(\bar{Y}_i - \bar{Y}_j)
+\]</span></p>
+<p>In other words, the <strong>absolute difference between the means must exceed the half-width of the confidence interval</strong>.</p>
+<p>That half-width is exactly what we call the <strong>Least Significant Difference (LSD)</strong>.</p>
+<p><span class="math display">\[
+LSD = t_{\alpha/2,df} \times SE(\bar{Y}_i - \bar{Y}_j)
+\]</span></p>
+<p>So LSD is simply the <strong>minimum difference between two treatment means required to declare them significantly different</strong>.</p>
+<p>Let’s compute the LSD for our fungicide treatment with an <span class="math inline">\(\alpha = 0.05\)</span>:</p>
+<p><span class="math display">\[LSD = t_{\alpha/2,df} \times SE(\bar{Y}_i - \bar{Y}_j)\]</span> <span class="math display">\[LSD = t_{0.025,20} \times 5.44\]</span> <span class="math display">\[LSD = 2.09 * 5.44 = 11.35\]</span></p>
+<p>This means that differences between means that are greater than 11.35 bu/ac provide evidence of difference between the treatment populations.</p>
+</section>
+<section id="the-lsd-procedure" class="level2">
+<h2 class="anchored" data-anchor-id="the-lsd-procedure">The LSD Procedure</h2>
+<p>The LSD test is therefore very direct:</p>
+<ol type="1">
+<li>Calculate the <strong>Least Significant Difference (LSD)</strong></li>
+<li>Compare every pair of treatment means</li>
+<li>If the <strong>absolute difference between two means exceeds the LSD</strong>, the treatments are significantly different</li>
+</ol>
+<p>Conceptually, LSD is simply <strong>reversing the logic of the confidence interval test</strong> and turning it into a <strong>single comparison threshold</strong>.</p>
+</section>
+<section id="visualizing-the-confidence-intervals-for-mean-differences" class="level2">
+<h2 class="anchored" data-anchor-id="visualizing-the-confidence-intervals-for-mean-differences">Visualizing the Confidence Intervals for Mean Differences</h2>
+<p>Following this relationship between confidence intervals and the LSD value, we can visualize the confidence interval for treatment differences for the fungicide experiment we’ve been working with.</p>
+<p>In the graph below, each point represents the estimated difference between two treatment means, and the error bars represent the confidence interval for the difference. In this case, when a treatment difference confidence interval crosses the dashed vertical line, we fail to reject <span class="math inline">\(H_0\)</span> for that treatment comparison.</p>
+<p>The <strong>half-width of each interval</strong> corresponds exactly to the <strong>LSD threshold</strong>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple-comparisons-lecture_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="computing-pairwise-comparisons-in-r" class="level1">
+<h1>Computing Pairwise Comparisons in R</h1>
+<p>We can compute pairwise comparisons using <strong>emmeans</strong>.</p>
+<p>In R, a great framework to conduct multiple comparisons is based on the combination of the <strong>emmeans</strong> and <strong>multcomp</strong> libraries.</p>
+<p>Here, we load these two libraries</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(multcomp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The <strong>emmeans</strong> library computes <em>estimated marginal means</em> for each treatment combination. In this case, we only have one factor (fungicide treatment), which is denoted by the variable <code>trt</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(model1, <span class="sc">~</span> trt)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>emm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> trt emmean   SE df lower.CL upper.CL
+ F1     176 13.4  4      138      213
+ F2     186 13.4  4      149      223
+ F3     195 13.4  4      157      232
+ F4     183 13.4  4      146      220
+ F5     185 13.4  4      148      222
+ F6     172 13.4  4      134      209
+
+Degrees-of-freedom method: containment 
+Confidence level used: 0.95 </code></pre>
+</div>
+</div>
+<p>Great, now that we have computed the estimated means, we can compare each pair of means. The argument <code>adjust</code> determines <em>p-value</em> adjustments. The LSD procedure does not have any p-value adjustments, so we will specify <code>none</code>.</p>
+<p>Below, we have 15 comparisons for our six means. The <em>estimate</em> column shows the estimated difference between the means. Note that absolute estimates greater than 11.35 have a p-value lower than 0.05.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pairs</span>(emm, <span class="at">adjust =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast estimate   SE df t.ratio p.value
+ F1 - F2    -10.06 5.44 20  -1.850  0.0792
+ F1 - F3    -18.96 5.44 20  -3.485  0.0023
+ F1 - F4     -7.69 5.44 20  -1.414  0.1727
+ F1 - F5     -9.63 5.44 20  -1.771  0.0919
+ F1 - F6      3.98 5.44 20   0.732  0.4726
+ F2 - F3     -8.90 5.44 20  -1.636  0.1175
+ F2 - F4      2.37 5.44 20   0.435  0.6679
+ F2 - F5      0.43 5.44 20   0.079  0.9378
+ F2 - F6     14.04 5.44 20   2.582  0.0178
+ F3 - F4     11.27 5.44 20   2.071  0.0515
+ F3 - F5      9.33 5.44 20   1.715  0.1018
+ F3 - F6     22.94 5.44 20   4.218  0.0004
+ F4 - F5     -1.94 5.44 20  -0.356  0.7252
+ F4 - F6     11.68 5.44 20   2.146  0.0443
+ F5 - F6     13.62 5.44 20   2.503  0.0211
+
+Degrees-of-freedom method: containment </code></pre>
+</div>
+</div>
+<p>A different way of showing the same information is by dividing the means in groups that present a difference between them. Letter groupings summarize pairwise comparisons and should be interpreted cautiously when groups overlap.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cld</span>(emm, <span class="at">adjust =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> trt emmean   SE df lower.CL upper.CL .group
+ F6     172 13.4  4      134      209  1    
+ F1     176 13.4  4      138      213  12   
+ F4     183 13.4  4      146      220   23  
+ F5     185 13.4  4      148      222   23  
+ F2     186 13.4  4      149      223   23  
+ F3     195 13.4  4      157      232    3  
+
+Degrees-of-freedom method: containment 
+Confidence level used: 0.95 
+significance level used: alpha = 0.05 
+NOTE: If two or more means share the same grouping symbol,
+      then we cannot show them to be different.
+      But we also did not show them to be the same. </code></pre>
+</div>
+</div>
+<p>Very often, you will see these groups represented by letters, instead of numbers. Here, we can use some pre-built R objects, like the <code>letters</code> and <code>LETTERS</code> object, for example.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>letters</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "s"
+[20] "t" "u" "v" "w" "x" "y" "z"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>LETTERS</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S"
+[20] "T" "U" "V" "W" "X" "Y" "Z"</code></pre>
+</div>
+</div>
+<p>We can pass the <code>letters</code> object so that R will use it when naming the groups.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cld</span>(emm, </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">Letters =</span> letters,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">adjust =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> trt emmean   SE df lower.CL upper.CL .group
+ F6     172 13.4  4      134      209  a    
+ F1     176 13.4  4      138      213  ab   
+ F4     183 13.4  4      146      220   bc  
+ F5     185 13.4  4      148      222   bc  
+ F2     186 13.4  4      149      223   bc  
+ F3     195 13.4  4      157      232    c  
+
+Degrees-of-freedom method: containment 
+Confidence level used: 0.95 
+significance level used: alpha = 0.05 
+NOTE: If two or more means share the same grouping symbol,
+      then we cannot show them to be different.
+      But we also did not show them to be the same. </code></pre>
+</div>
+</div>
+<p>This shows that:</p>
+<ul>
+<li>treatment <em>F6</em> does not differ from <em>F1</em>, but differs from all other treatments.</li>
+<li>treatment <em>F1</em> does not differ from <em>F6, F4, F5, F2</em>, but differs from <em>F3</em>.</li>
+<li>treatments <em>F4, F5, and F2</em> only differ from <em>F6</em>.</li>
+</ul>
+<p>Now, let’s see how confident we are that we have not made type I errors.</p>
+</section>
+<section id="comparisonwise-vs-experimentwise-error" class="level1">
+<h1>Comparisonwise vs Experimentwise Error</h1>
+<p>Why not always use LSD?</p>
+<p>With each pairwise comparison run at significance level <span class="math inline">\(\alpha_C\)</span> (the <strong>comparisonwise error rate</strong>), the probability of at least one false positive across the entire experiment grows. If we approximate the tests as independent, the <strong>experimentwise error rate</strong> can be approximated as</p>
+<p><span class="math display">\[\alpha_E \approx 1 - (1 - \alpha_C)^M\]</span></p>
+<p>For <span class="math inline">\(K\)</span> treatment means there are <span class="math inline">\(M = K(K-1)/2\)</span> possible pairs. With <span class="math inline">\(K = 6\)</span> treatments (<span class="math inline">\(M = 15\)</span> pairs) running each at <span class="math inline">\(\alpha_C = 0.05\)</span>:</p>
+<p><span class="math display">\[\alpha_E \approx 1 - (0.95)^{15} \approx 0.53\]</span></p>
+<p>That is a 53% chance of at least one false positive across the experiment. Conversely, if we fix <span class="math inline">\(\alpha_E = 0.05\)</span> for the same 15 comparisons, the per-comparison error drops to roughly <span class="math inline">\(\alpha_C \approx 0.003\)</span>, making it very difficult to detect modest but real differences.</p>
+<p>No procedure can keep both error rates small simultaneously at a fixed sample size. The choice of procedure depends on which error matters more in your specific research context.</p>
+</section>
+<section id="tukeys-honest-significant-difference" class="level1">
+<h1>Tukey’s Honest Significant Difference</h1>
+<p>Tukey HSD is similar in structure to LSD, but it uses the <strong>studentized range distribution</strong> (<code>Q</code>) and adjusts the threshold based on:</p>
+<ul>
+<li>alpha</li>
+<li>residual degrees of freedom</li>
+<li>number of treatments</li>
+</ul>
+<p><span class="math display">\[
+\text{HSD} =q_{\alpha, K, df}\times SE
+\]</span></p>
+<p><span class="math inline">\(q\)</span> is the critical value of the studentized range distribution based on <span class="math inline">\(\alpha\)</span>, the number of treatments <span class="math inline">\(K\)</span>, and the residual degrees of freedom.</p>
+<p>So as the number of treatments increases, the minimum significant difference becomes more stringent.</p>
+<p>As the code shows below, the function <code>qtukey()</code> returns the <span class="math inline">\(Q\)</span>-value corresponding to a quantile. The function also takes as arguments, the number of means being compared, and the degrees of freedom.</p>
+<p>Below, we can see that as the number of means increases, the <span class="math inline">\(Q\)</span>-value also increases, which, in turn, increases the value of the by which two means must differ to provide evidence enough to reject the null hypothesis (<span class="math inline">\(H_0\)</span>).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qtukey</span>(<span class="at">p =</span> <span class="fl">0.95</span>, <span class="at">nmeans =</span> <span class="dv">3</span>, <span class="at">df =</span> <span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.577935</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qtukey</span>(<span class="at">p =</span> <span class="fl">0.95</span>, <span class="at">nmeans =</span> <span class="dv">6</span>, <span class="at">df =</span> <span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 4.445237</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qtukey</span>(<span class="at">p =</span> <span class="fl">0.95</span>, <span class="at">nmeans =</span> <span class="dv">12</span>, <span class="at">df =</span> <span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 5.198977</code></pre>
+</div>
+</div>
+<p>Luckily, we do not need to compute this by hand. Just like before, we will rely on the <strong>emmeans</strong> and <strong>multcomp</strong> libraries. To conduct the means-comparison test, all we need to do is to specify in the <code>adjust</code> argument that we want to use Tukey’s HSD.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cld</span>(emm, </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">adjust =</span> <span class="st">"tukey"</span>,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">Letters =</span> letters)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> trt emmean   SE df lower.CL upper.CL .group
+ F6     172 13.4  4      107      236  a    
+ F1     176 13.4  4      111      240  a    
+ F4     183 13.4  4      119      248  ab   
+ F5     185 13.4  4      121      250  ab   
+ F2     186 13.4  4      121      250  ab   
+ F3     195 13.4  4      130      259   b   
+
+Degrees-of-freedom method: containment 
+Confidence level used: 0.95 
+Conf-level adjustment: sidak method for 6 estimates 
+P value adjustment: tukey method for comparing a family of 6 estimates 
+significance level used: alpha = 0.05 
+NOTE: If two or more means share the same grouping symbol,
+      then we cannot show them to be different.
+      But we also did not show them to be the same. </code></pre>
+</div>
+</div>
+<p>Compared with LSD, Tukey tends to be more conservative, especially when many means are being compared. This is noticeable because we now have fewer distinctions between groups.</p>
+</section>
+<section id="bonferroni-adjusted-t" class="level1">
+<h1>Bonferroni Adjusted t</h1>
+<p>The Bonferroni procedure also controls <span class="math inline">\(\alpha_E\)</span> but uses the standard t-distribution with an adjusted significance level <span class="math inline">\(\alpha_E / M\)</span>. Where <span class="math inline">\(M\)</span> is the number of comparisons we’re making.</p>
+<p>The resulting critical difference is:</p>
+<p><span class="math display">\[
+LSD_\text{bonferroni} =
+t_{\alpha_E/(2M),df} \times
+SE
+\]</span></p>
+<p>Let’s compute the Bonferroni-adjusted critical difference for our experiment.</p>
+<p><span class="math display">\[LSD_{\text{bonferroni}} = t_{\frac{0.05}{2\times 15},20} \times 5.44 = t_{0.0016,20} \times 5.44\]</span> <span class="math display">\[LSD_{\text{bonferroni}} = 3.35 \times 5.44 = 18.21\]</span></p>
+<p>As when using Tukey’s HSD, when we want to use Bonferroni’s adjustment, we can simply ask the <code>cld()</code> function to adjust for it.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code> trt emmean   SE df lower.CL upper.CL .group
+ F6     172 13.4  4      107      236  a    
+ F1     176 13.4  4      111      240  a    
+ F4     183 13.4  4      118      248  ab   
+ F5     185 13.4  4      120      250  ab   
+ F2     186 13.4  4      121      250  ab   
+ F3     195 13.4  4      130      259   b   
+
+Degrees-of-freedom method: containment 
+Confidence level used: 0.95 
+Conf-level adjustment: bonferroni method for 6 estimates 
+P value adjustment: bonferroni method for 15 tests 
+significance level used: alpha = 0.05 
+NOTE: If two or more means share the same grouping symbol,
+      then we cannot show them to be different.
+      But we also did not show them to be the same. </code></pre>
+</div>
+</div>
+<p>Compared to LSD, the Bonferroni critical difference is larger, so fewer pairs will show evidence of a difference. In small experiments (few treatments) Bonferroni and Tukey often give the same groupings. As the number of treatments grows, Tukey HSD is generally preferred because the Bonferroni penalty grows proportionally with <span class="math inline">\(M\)</span> while the studentized range distribution adjusts more efficiently.</p>
+</section>
+<section id="linear-contrasts" class="level1">
+<h1>Linear Contrasts</h1>
+<p>Pairwise comparisons test differences between individual treatments. However, many agronomic questions involve groups of treatments, which motivates the use of linear contrasts.</p>
+<p>Sometimes we want to compare <strong>groups</strong> of treatments, for example:</p>
+<ul>
+<li>low vs high rates</li>
+<li>older fungicides vs new fungicides</li>
+</ul>
+<p>This is what linear contrasts are for.</p>
+<section id="contrast-example-1" class="level2">
+<h2 class="anchored" data-anchor-id="contrast-example-1">Contrast Example 1</h2>
+<p>Let’s say that fungicide treatments F1 through F3 are a newer line of fungicides that have entered the market more recently than fungicides F4 through F6. You, as an agronomist, might be interested in the question:</p>
+<blockquote class="blockquote">
+<p>Is there a difference between the effect of new and old fungicides on corn yield?</p>
+</blockquote>
+<p>Coefficients:</p>
+<ul>
+<li><code>F1</code>: 1/3</li>
+<li><code>F2</code>: 1/3</li>
+<li><code>F3</code>: 1/3</li>
+<li><code>F4</code>: -1/3</li>
+<li><code>F5</code>: -1/3</li>
+<li><code>F6</code>: -1/3</li>
+</ul>
+<p>The coefficients sum to zero, as required.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">contrast</span>(emm,</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">method =</span> <span class="fu">list</span>(</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">new_vs_old =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="sc">-</span><span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="sc">-</span><span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="sc">-</span><span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>         ))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast   estimate   SE df t.ratio p.value
+ new_vs_old     5.23 3.14 20   1.664  0.1117
+
+Degrees-of-freedom method: containment </code></pre>
+</div>
+</div>
+<p>The results do not provide enough evidence to reject <span class="math inline">\(H_0\)</span>, suggesting that the average yield of the two fungicide groups is similar.</p>
+</section>
+<section id="contrast-example-2" class="level2">
+<h2 class="anchored" data-anchor-id="contrast-example-2">Contrast Example 2</h2>
+<p>Let’s say that fungicide treatment F6 is the cheapest fungicide treatment among all of these six, and the other treatments have a comparable price. You, as an agronomist, might be interested in the question:</p>
+<blockquote class="blockquote">
+<p>Is there a difference between the cheapest fungicide treatment and the others?</p>
+</blockquote>
+<p>Coefficients:</p>
+<ul>
+<li><code>F1</code>: -1/6</li>
+<li><code>F2</code>: -1/6</li>
+<li><code>F3</code>: -1/6</li>
+<li><code>F4</code>: -1/6</li>
+<li><code>F5</code>: -1/6</li>
+<li><code>F6</code>: 5/6</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">contrast</span>(emm,</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">method =</span> <span class="fu">list</span>(</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">F6_vs_rest =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span><span class="sc">/</span><span class="dv">6</span>, <span class="sc">-</span><span class="dv">1</span><span class="sc">/</span><span class="dv">6</span>, <span class="sc">-</span><span class="dv">1</span><span class="sc">/</span><span class="dv">6</span>, <span class="sc">-</span><span class="dv">1</span><span class="sc">/</span><span class="dv">6</span>, <span class="sc">-</span><span class="dv">1</span><span class="sc">/</span><span class="dv">6</span>, <span class="dv">5</span><span class="sc">/</span><span class="dv">6</span>)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>         ))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast   estimate   SE df t.ratio p.value
+ F6_vs_rest      -11 3.51 20  -3.145  0.0051
+
+Degrees-of-freedom method: containment </code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="means-presentation" class="level1">
+<h1>Means Presentation</h1>
+<p>Once means are separated, we need to communicate results clearly.</p>
+<p>There are two standard formats:</p>
+<ul>
+<li>Means tables</li>
+<li>Means plots</li>
+</ul>
+<section id="means-table" class="level2">
+<h2 class="anchored" data-anchor-id="means-table">Means Table</h2>
+<p>A practical means table in agronomy papers usually looks like this:</p>
+<pre><code>| Fungicide Treatment | n   | Standard Error | Treatment Mean |
+|---------------------|-----|----------------|----------------|
+| F1                  | 5   | 13.35          | 175.6 a        |
+| F2                  | 5   | 13.35          | 185.6 ab       |
+| F3                  | 5   | 13.35          | 194.52 b       |
+| F4                  | 5   | 13.35          | 183.25 ab      |
+| F5                  | 5   | 13.35          | 185.19 ab      |
+| F6                  | 5   | 13.35          | 171.57 a       |</code></pre>
+<p>Means followed by the same letter are not significantly different using a Tukey procedure at <span class="math inline">\(\alpha = 0.05\)</span>.</p>
+</section>
+<section id="plotting-means" class="level2">
+<h2 class="anchored" data-anchor-id="plotting-means">Plotting Means</h2>
+<p>For categorical treatments, use bar plots or point plots with error bars.</p>
+<p>If you are presenting means-comparison groupings, letters can be added above bars to indicate significance groups.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="multiple-comparisons-lecture_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Mean corn yield for the six fungicide treatments (F1–F6) in a randomized complete block experiment. Bars represent treatment means estimated from the mixed-effects model, and error bars show ±1 standard error of the mean. Letters above the bars indicate mean separation groups using a Tukey procedure at α = 0.05; treatments sharing a common letter are not significantly different.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p>Personally, I like adding the raw data to the graph, in addition to the mean and standard error. I think this is a more transparent representation of the data that led to our conclusions. Here’s an example using this experiment.</p>
+<p>Also, notice that the figure caption includes all the information needed to interpret the figure results.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="multiple-comparisons-lecture_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Mean corn yield for the six fungicide treatments (F1–F6) in a randomized complete block experiment. Empty circles represent individual observations, red-filled circles represent treatment means, and error bars show ±1 standard error of the mean. Letters below the points indicate mean separation groups using a Tukey procedure at α = 0.05; treatments sharing a common letter are not significantly different.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p>From my previous lecture notes, you might have noticed that sometimes I flip the X and Y axis. Here’s an example of what the graph would look like if we did that.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="multiple-comparisons-lecture_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Mean corn yield for the six fungicide treatments (F1–F6) in a randomized complete block experiment. Empty circles represent individual observations, red-filled circles represent treatment means, and error bars show ±1 standard error of the mean. Letters below the points indicate mean separation groups using a Tukey procedure at α = 0.05; treatments sharing a common letter are not significantly different.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>ANOVA tells us whether treatment effects exist, but it does not tell us <em>which</em> treatments differ. Means-comparison procedures extend ANOVA by allowing us to evaluate specific differences between treatments.</p>
+<p>Different procedures balance two competing goals: detecting real differences and limiting false positives. Methods such as LSD provide greater power but weaker control of experimentwise error, while procedures like Tukey HSD or Bonferroni adjustments provide stronger error control.</p>
+<p>In practice, the appropriate method depends on the research objective and the consequences of statistical errors. Regardless of the method used, results should be presented clearly, with means, measures of uncertainty, and transparent visualizations of the data.</p>
+<p>These tools allow us to move from statistical models to interpretable treatment comparisons and, ultimately, to informed agronomic decisions.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

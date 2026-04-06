@@ -57,8 +57,9 @@ Now that we talked about the research question, I think it would be productive f
 
 From the research question, we can draw the following competing statements.
 
-$$H_0: \mu_{rye} = \mu_{no~rye} \newline  
-H_a: \mu_{rye} \neq \mu_{no~rye} $$
+$$H_0: \mu_{rye} = \mu_{no~rye}$$
+
+$$H_a: \mu_{rye} \neq \mu_{no~rye}$$
 
 A statistical test does not prove Ha. It evaluates whether the data are compatible with $H_0$
 
@@ -72,7 +73,7 @@ Up to this point, we have written hypotheses using symbols. But underneath every
 
 For the rye example, the paired $t$-test can be written as a linear additive model:
 
-$$Y_{ij} = \mu + \tau_i + \epsilon_{ij}$$ Where $i$ indexes the treatment (rye, no rye), and $j$ indexes the observation for that treatment (every strip).
+$$Y_{ij} = \mu + \tau_i + \varepsilon_{ij}$$ Where $i$ indexes the treatment (rye, no rye), and $j$ indexes the observation for that treatment (every strip).
 
 Let’s slow down and unpack this.
 
@@ -128,10 +129,11 @@ ggplot()+
 
 Remember, we are testing for differences among the treatments. In summary, we are testing whether our difference is zero. Because we are analyzing paired differences, the overall mean cancels out, and the model simplifies to:
 
-$$\Delta Y_{ij} =  \tau_i + \epsilon_{ij}$$ And the hypothesis we are testing is:
+$$\Delta Y_{ij} =  \tau_i + \varepsilon_{ij}$$ And the hypothesis we are testing is:
 
-$$H_0: \tau_i = 0 \newline  
-H_a:  \tau_i \neq 0$$
+$$H_0: \tau_i = 0$$
+
+$$H_a:  \tau_i \neq 0$$
 
 Let's start with identifying $\tau_i$ first. Since $\tau_i$ is the mean difference between the treatments:
 
@@ -148,7 +150,7 @@ ggplot()+
         axis.text.y = element_blank())
 ```
 
-Ok, we were able to identify $\tau_i$ in the graph. So it's easier to see, let's spread the individual observations along the y-axis and identify the errors ($\epsilon_{ij}$). The distance between the points and the $\tau_i$ line are the errors for each plot.
+Ok, we were able to identify $\tau_i$ in the graph. So it's easier to see, let's spread the individual observations along the y-axis and identify the errors ($\varepsilon_{ij}$). The distance between the points and the $\tau_i$ line are the errors for each plot.
 
 ```{r}
 ryew$epsilon <- ryew$diff - xbar
@@ -175,8 +177,6 @@ $$T = \frac{\bar{x} − \mu}{\frac{s}{\sqrt{n}}} = \frac{mean~difference − 0}{
 
 Notice:
 
--   Numerator = signal\
--   Denominator = noise
 
 Statistical tests measure signal relative to variability.
 
@@ -203,15 +203,11 @@ Rounding that p-value to 0.04, what does 0.04 actually mean?
 
 It does **NOT** mean:
 
--   There is a 4% chance rye reduces yield\
--   There is a 4% chance the null hypothesis is true\
--   There is a 96% chance rye hurts yield
 
 It means:
 
 > If there were truly no difference in yield between rye and no rye, we would observe a $t$-statistic this or more extreme only about 4% of the time due to random sampling variability.
 
-------------------------------------------------------------------------
 
 # Errors of Statistical Tests
 
@@ -230,19 +226,12 @@ Since we are dealing with randomness, each of these error sources have their own
 
 Type I Error:
 
--   Rejecting $H_0$ when it is true.
--   This is a threshold we set when conducting the test.
--   Probability = α (often 0.05).
 
 Type II Error:
 
--   Failing to reject $H_0$ when it is false.\
--   This is how often do we fail to identify a true effect.
--   Probability = β.
 
 These errors reflect uncertainty in decision-making.
 
-------------------------------------------------------------------------
 
 # Statistical Power
 
@@ -266,8 +255,6 @@ shadeDist(t01, 'dt', parm2 = 29)
 
 In agronomy, low power means:
 
--   Real treatment effects may go undetected\
--   Management recommendations may be based on insufficient replication
 
 Power depends on:
 
@@ -278,7 +265,6 @@ Power depends on:
 
 More replication → smaller standard error → greater power.
 
-------------------------------------------------------------------------
 
 # One-sided hypothesis
 
@@ -286,8 +272,9 @@ So far, we have explored two-sided hypotheses extensively. The majority of our w
 
 For example, this was the hypothesis for the rye trial we have been exploring:
 
-$$H_0: \mu_{rye} = \mu_{no~rye} \newline  
-H_a: \mu_{rye} \neq \mu_{no~rye} $$
+$$H_0: \mu_{rye} = \mu_{no~rye}$$
+
+$$H_a: \mu_{rye} \neq \mu_{no~rye}$$
 
 Now, imagine that you do not just want to test whether there a difference, let's say you research question as stated as:
 
@@ -295,8 +282,9 @@ Now, imagine that you do not just want to test whether there a difference, let's
 
 Then, your hypothesis would change accordingly to:
 
-$$H_0: \mu_{rye} \geq \mu_{no~rye} \newline  
-H_a: \mu_{rye} < \mu_{no~rye} $$
+$$H_0: \mu_{rye} \geq \mu_{no~rye}$$
+
+$$H_a: \mu_{rye} < \mu_{no~rye}$$
 
 The difference is subtle but important. Let's take a look at what this means for our $t$-test. I will paste the $t$-test output here again for us:
 

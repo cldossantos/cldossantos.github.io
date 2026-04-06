@@ -52,7 +52,7 @@ To establish an easy way to compare the next steps, let's draw a red line repres
 ```{r}
 library(ggplot2)
 set.seed(20260128)
-mu <- mean(yield$yield_buac)
+mu_pop <- mean(yield$yield_buac)
 sample.id <- sample(1:nrow(yield), 
                     1)
 
@@ -60,7 +60,7 @@ xvar <- yield$yield_buac[sample.id]
 xbar <- mean(xvar)
 
 ggplot()+
-  geom_vline(aes(xintercept = mu, col = 'Population mean'))+
+  geom_vline(aes(xintercept = mu_pop, col = 'Population mean'))+
   geom_vline(aes(xintercept = xvar, col = 'Sample mean'))+
   geom_point(aes(x = xvar, y = 1, col = 'Sample data point'), cex = 1.5)+
   scale_color_manual(values = c('Population mean' = 'red',
@@ -79,7 +79,7 @@ By chance, with one sample, we would end up with a sample average of 71.74 bu/ac
 
 ```{r}
 set.seed(222013)
-mu <- mean(yield$yield_buac)
+mu_pop <- mean(yield$yield_buac)
 sample.id <- sample(1:nrow(yield), 
                     1)
 
@@ -87,7 +87,7 @@ xvar <- yield$yield_buac[sample.id]
 xbar <- mean(xvar)
 
 ggplot()+
-  geom_vline(aes(xintercept = mu, col = 'Population mean'))+
+  geom_vline(aes(xintercept = mu_pop, col = 'Population mean'))+
   geom_vline(aes(xintercept = xvar, col = 'Sample mean'))+
   geom_point(aes(x = xvar, y = 1, col = 'Sample data point'), cex = 1.5)+
   scale_color_manual(values = c('Population mean' = 'red',
@@ -110,7 +110,7 @@ We can see that with 10 samples, we were able to get closer to the true mean on 
 
 ```{r}
 set.seed(222013)
-mu <- mean(yield$yield_buac)
+mu_pop <- mean(yield$yield_buac)
 sample.id <- sample(1:nrow(yield), 
                     10)
 
@@ -118,7 +118,7 @@ xvar <- yield$yield_buac[sample.id]
 xbar <- mean(xvar)
 
 ggplot()+
-  geom_vline(aes(xintercept = mu, col = 'Population mean'))+
+  geom_vline(aes(xintercept = mu_pop, col = 'Population mean'))+
   geom_vline(aes(xintercept = xbar, col = 'Sample mean'))+
   geom_point(aes(x = xvar, y = 1, col = 'Sample data point'), cex = 1.5)+
   scale_color_manual(values = c('Population mean' = 'red',
@@ -137,7 +137,7 @@ If we had sampled ten times in other parts of the field, the result would be the
 
 ```{r}
 set.seed(028719)
-mu <- mean(yield$yield_buac)
+mu_pop <- mean(yield$yield_buac)
 sample.id <- sample(1:nrow(yield), 
                     10)
 
@@ -145,7 +145,7 @@ xvar <- yield$yield_buac[sample.id]
 xbar <- mean(xvar)
 
 ggplot()+
-  geom_vline(aes(xintercept = mu, col = 'Population mean'))+
+  geom_vline(aes(xintercept = mu_pop, col = 'Population mean'))+
   geom_vline(aes(xintercept = xbar, col = 'Sample mean'))+
   geom_point(aes(x = xvar, y = 1, col = 'Sample data point'), cex = 1.5)+
   scale_color_manual(values = c('Population mean' = 'red',
@@ -173,7 +173,7 @@ k = 1
 
 for (i in 1:10){
   for (j in 1:length(sample.sizes)){
-    mu <- mean(yield$yield_buac)
+    mu_pop <- mean(yield$yield_buac)
     sample.id <- sample(1:nrow(yield), 
                         sample.sizes[j])
     xvar <- yield$yield_buac[sample.id]
@@ -193,7 +193,7 @@ res <- do.call(rbind, res)
 ggplot(res)+
   geom_point(aes(x = obs, y = iteration, col = 'Sample data point'),  cex = 1.5)+
   geom_vline(aes(xintercept = xbar, col = 'Sample mean'))+
-  geom_vline(aes(xintercept = mu, col = 'Population mean'))+
+  geom_vline(aes(xintercept = mu_pop, col = 'Population mean'))+
   scale_color_manual(values = c('Population mean' = 'red',
                                 'Sample mean' = 'blue',
                                 'Sample data point' = 'black'))+

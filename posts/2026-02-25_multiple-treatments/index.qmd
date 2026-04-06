@@ -142,7 +142,7 @@ Note that the alternative hypothesis does not tell us which of the means is diff
 
 The linear additive model is the same as before, just with more treatments:
 
-$$Y_{ij} = \mu + \tau_i + \epsilon_{ij}$$
+$$Y_{ij} = \mu + \tau_i + \varepsilon_{ij}$$
 
 Where $i$ indexes the treatment (control, insecticide only, fungicide only, insecticide + fungicide), and $j$ indexes the observation for that treatment (replication).
 
@@ -281,30 +281,30 @@ Like we did before, let's decompose these into the linear additive model terms (
 seed_trial <- trial
 ```
 
-Let's compute first $\mu$. This is an easy one:
+Let's compute first $\hat{\mu}$. This is an easy one:
 
 ```{r, echo=TRUE}
-mu <- mean(seed_trial$yield)
-mu
+mu_hat <- mean(seed_trial$yield)
+mu_hat
 ```
 
-Next, let's compute the treatment means and extract $tau_i$.
+Next, let's compute the treatment means and extract $\hat{\tau}_i$.
 
 ```{r, echo=TRUE}
 taus <- aggregate(seed_trial$yield,
                   seed_trial['trt'],
                   mean)
 names(taus) <- c('trt', 'trt_means')
-taus$mu <- mu
-taus$tau <- taus$trt_means - taus$mu
+taus$mu_hat <- mu_hat
+taus$tau_hat <- taus$trt_means - taus$mu_hat
 taus
 ```
 
-Ok! We are much closer to computing all effects, we just need the errors ($\epsilon$) now. To do that, let's merge the dataset that contains the two effects we've computed so far ($\tau_i, \mu$), with the dataset containing all observations, as the errors ($\epsilon_i$) are computed for every observation.
+Ok! We are much closer to computing all effects, we just need the errors ($\epsilon$) now. To do that, let's merge the dataset that contains the two estimated effects we've computed so far ($\hat{\tau}_i, \hat{\mu}$), with the dataset containing all observations, as the errors ($\epsilon_i$) are computed for every observation.
 
 ```{r, echo=TRUE}
 seed_trial_eff <- merge(seed_trial, taus)
-seed_trial_eff$epsilon <- with(seed_trial_eff, yield - mu - tau)
+seed_trial_eff$epsilon <- with(seed_trial_eff, yield - mu_hat - tau_hat)
 head(seed_trial_eff)
 ```
 
@@ -314,8 +314,8 @@ To make it easier for us to visualize these effects, let's plot them:
 seed_trial_eff$rep <- ave(seed_trial_eff$yield, seed_trial_eff$trt, FUN = seq_along)
 
 ggplot(data = seed_trial_eff)+
-  geom_vline(aes(xintercept = mu, col = 'mu'), linetype = 1)+
-  geom_segment(aes(x = mu, xend = trt_means, y = rep, yend = rep, col = 'tau'), linetype = 1)+
+  geom_vline(aes(xintercept = mu_hat, col = 'mu_hat'), linetype = 1)+
+  geom_segment(aes(x = mu_hat, xend = trt_means, y = rep, yend = rep, col = 'tau_hat'), linetype = 1)+
   geom_segment(aes(x = trt_means, xend = yield, y = rep, yend = rep, col = 'epsilon'), linetype = 1)+
   geom_point(aes(x = yield, y = rep))+
   labs(x = 'Yield (bu/ac)', y = 'Replication', col = 'Additive Effect')+
@@ -344,9 +344,9 @@ I will set up a table for us to keep track of these numbers and we will populate
 Let's compute the Sums of Squares for all three rows
 
 ```{r, echo=TRUE}
-SS_treatment <- sum(seed_trial_eff$tau ^ 2) ## Treatment
+SS_treatment <- sum(seed_trial_eff$tau_hat ^ 2) ## Treatment
 SS_error <- sum(seed_trial_eff$epsilon ^ 2) ## Error
-SS_total <- sum((seed_trial_eff$yield - seed_trial_eff$mu)^2) ## Total
+SS_total <- sum((seed_trial_eff$yield - seed_trial_eff$mu_hat)^2) ## Total
 
 SS_treatment
 SS_error

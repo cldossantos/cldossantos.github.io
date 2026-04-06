@@ -37,10 +37,11 @@ In the graph below, you can see an example with corn yield values for two popula
 
 So, when we compare these two populations, we are really asking:
 
-$$H_0: \mu_1 = \mu_2 \newline 
-or \newline
-H_a: \mu_1 \ne \mu_2
-$$
+$$H_0: \mu_1 = \mu_2$$
+
+or
+
+$$H_a: \mu_1 \ne \mu_2$$
 
 And this is a **hypothesis testing** problem.
 
@@ -80,8 +81,9 @@ There are hundreds of tests that can be used to test hypotheses. Here, we will f
 
 One way of looking for the difference in two populations is to look at the distribution of that difference. Translating this to the hypothesis testing framework, this becomes:
 
-$$H_0: \mu_1 = \mu_2 \rightarrow \mu_1 - \mu_2  =0 \newline 
-H_a: \mu_1 \ne \mu_2\rightarrow \mu_1 - \mu_2   \ne 0$$
+$$H_0: \mu_1 = \mu_2 \rightarrow \mu_1 - \mu_2 = 0$$
+
+$$H_a: \mu_1 \ne \mu_2 \rightarrow \mu_1 - \mu_2 \ne 0$$
 
 ### Case study
 
