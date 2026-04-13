@@ -1,0 +1,895 @@
+---
+title: "Multiple Linear and Nonlinear Regression"
+subtitle: "Module 11"
+author: "Caio dos Santos"
+date: "2026-04-12"
+categories: [statistics]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+# Introduction
+
+In Module 10, we kept things simple by design: one predictor, one
+response, and a straight line. That simplicity was intentional. It let
+us focus on the core habits that actually matter: starting with a
+biological question, checking whether the model shape makes sense, and
+separating statistical significance from practical reality.
+
+But real agronomy is seldom that simple.
+
+Think about corn yield for a moment. How much does it depend on rainfall
+alone? Maybe some. But yield also responds to many factors, like soil
+texture, organic matter, pH, temperature, and management choices. All of
+these act together.
+
+And here's the thing: many of those relationships are not straight
+lines. They curve. They plateau. They follow S-shaped patterns.
+
+So Module 11 takes the habits from Module 10 and extends them to handle
+two real-world challenges:
+
+-   **Multiple regression**: When you have several predictors, not just
+    one
+-   **Nonlinear modeling**: When the relationship is curved, not
+    straight
+
+The core question doesn't change:
+
+> What model structure gives interpretable, biologically reasonable, and
+> practically useful predictions?
+
+We're just using better tools to answer it.
+
+# Part 1: Multiple Linear Regression
+
+## The Model: From One Predictor to Many
+
+**Here's the key idea**: We're going to keep the same basic model
+structure, but expand it from one predictor to many.
+
+In Module 10, we looked at this simple model:
+
+$$Y = \beta_0 + \beta_1 X + \varepsilon$$
+
+Now we add more predictors:
+
+$$
+Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p + \varepsilon
+$$
+
+The algebra looks the same. But here's where things get interesting: the
+interpretation changes fundamentally.
+
+**In simple regression**, $\beta_1$ is straightforward:
+
+> "For every one-unit increase in $X$, $Y$ changes by $\beta_1$ units"
+
+**In multiple regression**, each coefficient tells a different story:
+
+> "For every one-unit increase in $X_j$, $Y$ changes by $\beta_j$ units
+> *after accounting for all the other predictors.*"
+
+Let me say that again because it's crucial: **after accounting for all
+the other predictors.** This is what makes multiple regression powerful
+and also what makes it tricky to interpret.
+
+When you have multiple predictors, each coefficient is what we call a
+**partial effect**. It's the association between one predictor and the
+response after adjusting for the other predictors in the model.
+
+This is a conditional association, not automatically a causal effect.
+
+Here is a concrete illustration to make this real:
+
+Suppose two counties in Minnesota receive exactly the same amount of
+rainfall. But one has higher organic matter in its soil than the other.
+If the model gives $\beta_{om} = 0.8$, here's what that means:
+
+> Holding rainfall (and all other variables) constant, yield increases
+> by 0.8 units for each one-unit increase in OM
+
+Notice what we're doing here: we're comparing two counties that are
+**similar in everything except organic matter**.
+
+We're not comparing "all high-OM counties" vs "all low-OM counties"
+(because those would differ in rainfall too, and a thousand other
+things).
+
+That's the whole point. This is what makes it a **partial** effect.
+
+**This does NOT mean**: We have created a controlled experiment. We
+didn't go out and manipulate organic matter while holding rainfall
+steady. We're just using the model to statistically adjust for the
+differences.
+
+This adjusted interpretation is why multiple regression matters. Without
+it, the key question can't be answered: "Is this factor actually
+important, or is it just correlated with something else that matters?"
+
+## Case Study: Which Soil and Climate Factors Actually Drive Corn Yield?
+
+Here's a concrete scenario that makes this necessary. Imagine you're a
+soil scientist working with a cooperative extension office. A farmer
+walks in and asks:
+
+> "I know rainfall matters for yield, but in this region, which soil
+> properties matter most? Is it organic matter? Texture? pH?"
+
+That's a great question. But here's why you can't just run three
+separate regressions:
+
+Across counties, rainfall, organic matter, and soil texture are all
+correlated. Areas with high organic matter typically also have better
+rainfall. If you regressed yield on OM alone, you'd see a big positive
+effect. But is that really because of OM, or is it just because those
+counties happen to have better rainfall too?
+
+**This is where multiple regression helps.** Instead of asking "Does OM
+matter?" ask the real question: "After accounting for rainfall, does OM
+still explain variation in yield?"
+
+Let's work through it with county-level data from Minnesota and
+Wisconsin.
+
+```{r}
+library(ggplot2)
+
+counties <- read.csv("data/county_environments.csv")
+head(counties)
+```
+
+For this example, the analysis focuses on Minnesota and Wisconsin.
+
+```{r}
+counties_mn_wi <- subset(counties, state %in% c("MN", "WI"))
+
+vars <- c("corn", "ppt", "sand", "clay", "om", "sph")
+model_data <- na.omit(counties_mn_wi[, vars])
+
+dim(model_data)
+summary(model_data)
+```
+
+## Plot the Data First
+
+Before fitting anything, inspect the data. No exceptions.
+
+```{r}
+plot(model_data, pch = 20, cex = 0.7)
+```
+
+A scatterplot matrix isn't pretty, but it's honest. You'll see which
+variables move together, which relationships look straight or curved,
+and how much your predictors are correlating with each other. Your eyes
+will catch patterns that a test will miss.
+
+## Start with a Simple Model (Two Predictors)
+
+Let's start with a simple model using only rainfall and organic matter
+to predict corn yield. This might feel like a stripped-down model, but
+that's exactly the point. Simplicity helps us see the core logic before
+we add complexity.
+
+```{r, echo=TRUE}
+model_simple <- lm(corn ~ ppt + om, data = model_data)
+summary(model_simple)
+```
+
+So you've got the output. Now what? Here's what NOT to do: don't just
+scan for low p-values and move on.
+
+Instead, scrutinize each coefficient carefully. First, the **sign**:
+does it match biology? Does more rainfall increase yield? That makes
+sense. If rainfall decreases yield, that's a red flag unless we're
+talking about poorly drained soils.
+
+Then check **uncertainty**. Is the p-value small, and do the confidence
+intervals exclude zero? Wide confidence intervals mean the model doesn't
+really know where the effect lives. Finally, **plausibility**: Given
+your data and model assumptions, does this make biological sense?
+Sometimes you get a technically valid result that's biologically
+nonsensical.
+
+### Visualizing Partial Effects
+
+If graphs help you, here's a direct way to see partial effects.
+
+Let's use a stripped-down teaching model with just two predictors:
+rainfall and organic matter.
+
+$$
+\text{corn} = \beta_0 + \beta_{ppt}\,\text{ppt} + \beta_{om}\,\text{om} + \varepsilon
+$$
+
+This makes the partial-effect idea easier to see without extra moving
+parts. In this setup, $\beta_{om}$ is the change in predicted yield for
+a one-unit increase in OM **after accounting for rainfall**.
+
+```{r, include=FALSE}
+om_levels <- quantile(model_data$om, probs = c(0.1, 0.9), na.rm = TRUE)
+
+pred_grid <- expand.grid(
+  ppt = seq(min(model_data$ppt), max(model_data$ppt), length.out = 200),
+  om = as.numeric(om_levels)
+)
+
+pred_grid$om_group <- factor(
+  pred_grid$om,
+  levels = as.numeric(om_levels),
+  labels = c("Lower OM (10th percentile)", "Higher OM (90th percentile)")
+)
+
+pred_grid$corn_pred <- predict(model_simple, newdata = pred_grid)
+
+# anchor the annotation at the midpoint of the ppt range
+arrow_x    <- median(model_data$ppt, na.rm = TRUE)
+arrow_ppt  <- data.frame(ppt = arrow_x, om = as.numeric(om_levels))
+arrow_y    <- predict(model_simple, newdata = arrow_ppt)
+arrow_ylo  <- arrow_y[1]
+arrow_yhi  <- arrow_y[2]
+arrow_ymid <- mean(c(arrow_ylo, arrow_yhi))
+
+partial_effect_plot <- ggplot() +
+  geom_point(
+    data = model_data,
+    aes(x = ppt, y = corn),
+    color = "gray65",
+    alpha = 0.35,
+    size = 1.7
+  ) +
+  geom_line(
+    data = pred_grid,
+    aes(x = ppt, y = corn_pred, color = om_group),
+    linewidth = 1.25
+  ) +
+  # double-headed arrow spanning the gap between lines
+  annotate(
+    "segment",
+    x = arrow_x, xend = arrow_x,
+    y = arrow_ylo, yend = arrow_yhi,
+    arrow = arrow(ends = "both", length = unit(0.18, "cm"), type = "closed"),
+    color = "gray30", linewidth = 0.7
+  ) +
+  # label in the middle of the arrow
+  annotate(
+    "text",
+    x = arrow_x + 19, y = arrow_ymid,
+    label = 'OM effect',
+    size = 3.8, label.size = 0, fill = "white", color = "gray20"
+  ) +
+  scale_color_manual(values = c("#1b9e77", "#d95f02")) +
+  labs(
+    title = "Partial Effects with a Two-Predictor Model",
+    subtitle = "Predicted lines from corn ~ ppt + om",
+    x = "Rainfall (ppt)",
+    y = "Predicted corn yield",
+    color = "Organic matter"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+```{r, echo=FALSE}
+partial_effect_plot
+```
+
+How to read it quickly:
+
+-   At any fixed rainfall, the vertical gap between the two lines is the
+    OM partial effect.
+-   The lines are parallel because there is no interaction term
+    (`ppt:om`). That means the OM effect is constant across rainfall
+    values in this model.
+
+**Pause and reflect:** If two counties have the same rainfall but
+different OM, the model-predicted yield gap between those counties is
+the partial OM effect.
+
+### Expand to the Full Model
+
+Once that logic is clear, we can expand to the full model with
+additional predictors:
+
+```{r, echo=TRUE}
+model_full <- lm(corn ~ ppt + sand + clay + om + sph, data = model_data)
+summary(model_full)
+```
+
+This is the same idea as before, just with more variables being adjusted
+for at the same time. You're not changing the logic, only increasing
+realism.
+
+## Check Assumptions
+
+Just like in Module 10, we need to look at the diagnostics. Here's what
+these four plots are actually telling you:
+
+```{r, echo=TRUE}
+par(mfrow = c(1, 2))
+plot(model_full, which = 1:2)
+par(mfrow = c(1, 1))
+```
+
+**Residuals vs Fitted**: You want to see a random cloud centered around
+zero. No patterns. If it fans out (wider at high values than low),
+that's heteroscedasticity—your model loses confidence at some
+predictions. If you see a U-shape or wave, the model is systematically
+biased.
+
+**Normal Q-Q**: Points should track the diagonal line. Small wiggles at
+the tails are usually fine in large samples, but a systematic S-shape
+means residuals aren't normally distributed. That's worth noting. In
+larger samples, this is usually more about inference precision (p-values
+and intervals) than mean-prediction quality.
+
+**Quick check:** If at least one diagnostic shows a clear pattern, pause
+before interpreting coefficients as if everything is fine.
+
+### What's Going On When Coefficients Change?
+
+Suppose you fit a model with both sand and clay. You get a negative
+coefficient on sand. Then you remove clay from the model and refit. Now
+sand has a positive coefficient. Something flipped.
+
+Your first thought might be: "That's weird. Did I make a mistake?"
+
+**Not necessarily.** This is actually a prediction.
+
+Here's what's happening:
+
+Sand and clay are correlated in most cases (areas with more sand have
+less clay). When clay is in the model, the model is extracting the
+partial effect of sand **after already accounting for clay**. When you
+remove clay, sand's job changes. Now sand has to explain more variation
+because clay isn't there to help. So the sign can flip.
+
+**What's the lesson here?** This is a consequence of
+**multicollinearity**—when predictors are correlated, they can share or
+reallocate explained variation among themselves. It's one reason why you
+have to be careful when interpreting individual coefficients.
+
+## Diagnose Multicollinearity
+
+Here's the problem: If two predictors are highly correlated, their
+partial effects become **unstable**. A small change in the data can flip
+the sign or magnitude of one of the coefficients. This is bad because
+you can't trust what the coefficient is telling you.
+
+The correlation matrix is a good first check:
+
+```{r, echo=TRUE}
+predictor_cor <- cor(model_data[, c("ppt", "sand", "clay", "om", "sph")])
+round(predictor_cor, 2)
+```
+
+Look for pairs of predictors with correlations near 0.7 or higher (in
+absolute value). **This is not an absolute cutoff** but it's a good
+indication that standard errors could increase, which typically leads to
+larger p-values and wider confidence intervals. That makes real effects
+harder to detect as predictors compete for the same variation.
+
+**Pause and reflect:** if your goal is prediction, correlated predictors
+can still help. If your goal is interpretation, correlation becomes a
+much bigger problem.
+
+Does that automatically mean you need to remove a predictor? Not
+necessarily. But it absolutely means you need to interpret carefully.
+Not all multicollinearity is fatal, but you have to know when you're
+dealing with it.
+
+### Worked Example: Variance Inflation Factor (VIF)
+
+The correlation matrix is useful, but here's an even more direct
+measure: the **Variance Inflation Factor**. It tells you how much the
+uncertainty of a coefficient is inflated due to correlations with other
+predictors.
+
+Here's the idea: Imagine you regressed one predictor (say, sand) on all
+the other predictors. If you can predict sand really well from the other
+variables, that means sand is redundant. This is because it's explaining
+variation that's already covered. In that case, sand's coefficient will
+be uncertain, and its standard error will increase, which usually pushes
+p-values upward.
+
+The math is:
+
+$$
+VIF_j = \frac{1}{1 - R_j^2}
+$$
+
+where $R_j^2$ comes from regressing $X_j$ on the other predictors.
+
+Here's how to interpret VIF: values around 1 mean minimal
+collinearity—the predictor is doing its own thing. Values above about 5
+suggest meaningful collinearity and loss of precision. Values above
+about 10 are often considered problematic. These are heuristics, not
+hard rules, so context still matters.
+
+**Watch out for compositional variables.** Soil texture is the classic
+trap: sand, silt, and clay must sum to 100% by definition. That's not
+collinearity—that's *perfect* linear dependence. Your VIF will be
+infinite. This is a special case that requires special handling.
+
+Here's how it plays out with a worked example:
+
+```{r, include=FALSE}
+vif_manual <- function(df) {
+  out <- sapply(names(df), function(var) {
+    others <- setdiff(names(df), var)
+    form <- as.formula(paste(var, "~", paste(others, collapse = " + ")))
+    r2 <- summary(lm(form, data = df))$r.squared
+    if (isTRUE(all.equal(r2, 1, tolerance = 1e-10))) {
+      Inf
+    } else {
+      1 / (1 - r2)
+    }
+  })
+  round(out, 2)
+}
+```
+
+Let's run VIF on two scenarios:
+
+Let's include all three soil texture classes as predictors in a model
+along with organic matter, and let's take a look at the summary of this
+model.
+
+```{r, echo=TRUE}
+model_inflated <- lm(corn ~ sand + silt + clay + om, data = counties_mn_wi)
+summary(model_inflated)
+```
+
+Estimates and standard errors for all three predictors seem to be
+inflated, right? Let's take a look at the VIF for these predictors. We
+will use the `vif()` function in the library called `car`, which stands
+for *Companion to Applied Regression*.
+
+```{r, echo=TRUE}
+library(car)
+vif(model_inflated)
+```
+
+We were talking about rules of thumb and saying that values above 10
+were problematic... Those values are pretty extreme.
+
+Let's get rid of one of the soil texture classes, look at the summary
+and compute the VIF again.
+
+```{r, echo=TRUE}
+model_adjusted <- lm(corn ~ sand + clay + om, data = counties_mn_wi)
+summary(model_adjusted)
+```
+
+The estimates for the effects of sand and clay seem a little more
+plausible, also, the standard error of the effect of these two
+predictors seems way less inflated. Let's compute the VIF to check.
+
+```{r, echo=TRUE}
+vif(model_adjusted)
+```
+
+The VIF looks more under control now, indicating that keeping sand and
+clay as predictors could work.
+
+**What's happening here?**
+
+In the first case, we included all three texture fractions—sand, silt,
+and clay. The VIF values are huge for the texture variables. Why?
+Because they're compositional: they sum to 100% by definition. This
+means if you know sand and clay, you automatically know silt (it's 100%
+minus the others). So the model can't distinguish between their effects.
+This is **perfect linear dependence**.
+
+In the second case, we dropped one texture variable (silt). Now the VIF
+values are finite and interpretable: sand ≈ 3.5, clay ≈ 3.3, OM ≈ 1.1.
+
+With compositional data, you have to drop one category to avoid perfect
+collinearity. Once you do that, you can estimate the partial effects
+properly.
+
+## Keep It as Simple as Possible (But Not Simpler)
+
+Here's a temptation: the more predictors you add to a model, the higher
+$R^2$ gets. It always does. So why not just throw everything in?
+
+Because **more is not always better.**
+
+A simpler model is easier to interpret, easier to communicate to
+stakeholders, and less prone to overfitting. So the real question is: Do
+the extra predictors earn their place?
+
+This is a decision step, not a math contest.
+
+Let's compare a full model (all five predictors) with a reduced model
+(dropping clay):
+
+```{r, echo=TRUE}
+model_reduced <- lm(corn ~ ppt + sand + om + sph, data = model_data)
+
+summary(model_reduced)
+anova(model_reduced, model_full)
+AIC(model_reduced, model_full)
+```
+
+Now look at the results together. Here's what each number is telling
+you:
+
+**ANOVA p-value**: If this is large (\> 0.05), it says "clay doesn't add
+much once you've already got the other variables." The reduced model
+explains essentially the same variation.
+
+(This comparison assumes the models are nested and fit on the same
+dataset with identical observations.)
+
+**AIC (Akaike Information Criterion)**: Lower is better. But AIC
+penalizes complexity, so a simpler model can have lower AIC even if
+$R^2$ is slightly smaller. Think of it as "How much better would I have
+to get if I'm going to justify adding more complexity?"
+
+**Adjusted** $R^2$: This penalizes unnecessary predictors. Compare this
+between models, not the raw $R^2$.
+
+So how do you decide in practice?
+
+-   ANOVA p-value is large (the dropped predictor adds little)
+-   AIC is similar or lower for the reduced model
+
+**Lesson:** model selection is a biological and statistical decision,
+not a race for the highest $R^2$.
+
+# Part 2: Nonlinear Relationships
+
+Straight lines are convenient for teaching but biology rarely
+cooperates.
+
+So here's the transition from Part 1: once a linear model starts missing
+structure, we need a model that matches biology better.
+
+Think about nitrogen response in corn. At low N rates, each additional
+kg gives a big yield bump. But keep adding N and the returns shrink.
+Eventually more N does nothing. That's not a straight line—it's curved.
+
+Or think about plant growth over time. Early on, growth is slow. Then it
+accelerates. Then it slows again as the plant matures. That's an
+S-curve, not a line.
+
+When you fit a straight line to curved data, your residuals will show
+systematic patterns. That's your signal: **It's time to move beyond
+linear.**
+
+Here's the diagnostic approach—and notice it's the same habit from
+Module 10:
+
+**Look at the residuals.**
+
+Nonlinear modeling isn't a different workflow. It's what you do *after*
+the linear model shows clear problems in the data.
+
+When does a linear model genuinely fail? Here are the warning signs:
+
+1.  **Residual plots show systematic curvature**. Not random scatter,
+    but a U-shape or wave pattern. The model over-predicts at low values
+    and under-predicts at high values (or vice versa). That's your
+    signal that the true relationship is curved.
+
+2.  **Predictions become biologically nonsensical**. A linear model for
+    plant growth might predict negative biomass at early time points. A
+    nitrogen response model might predict infinite yield at very high N
+    rates. That's not realistic, and it signals that curvature matters.
+
+3.  **You know the mechanism is curved**. Sometimes domain knowledge
+    tells you the relationship must follow an S-curve (logistic growth)
+    or a linear-plateau (nutrient saturation). Don't ignore that
+    knowledge just because a line "fits."
+
+Now comes the choice:
+
+There are two main strategies, and they're useful in different
+situations:
+
+-   **Strategy 1**: Stay in a linear framework but add polynomial terms
+    (quadratic, cubic, etc.). This keeps fitting simple.
+-   **Strategy 2**: Fit a nonlinear model directly with a biological
+    curve shape built in. This requires more care and can extrapolate
+    more sensibly when the chosen form matches the underlying mechanism.
+
+**Pause and reflect:** if you care most about a quick local fit, start
+with polynomial terms. If you care most about biologically meaningful
+parameters and realistic extrapolation, go nonlinear.
+
+## Strategy 1: Polynomial Regression in a Linear Framework
+
+### When to use polynomials
+
+Polynomials (squared terms, cubic terms, etc.) are attractive because:
+
+-   They stay in the linear regression framework, so all the tools you
+    know work
+-   They're easy to fit
+-   You can use all the diagnostics from Module 10
+
+They work well when you need to capture curvature but don't have strong
+prior knowledge about what that curve should look like.
+
+### Example: Nitrogen Response with Curvature
+
+Look at a simple linear fit to nitrogen response:
+
+```{r, echo=TRUE}
+corn_n <- read.csv("data/corn_nrate_mono.csv")
+
+ggplot(corn_n, aes(x = n_rate, y = yield)) +
+  geom_point(pch = 21, size = 2) +
+  geom_smooth(method = "lm", se = FALSE, color = "tomato") +
+  labs(x = "N rate", y = "Yield") +
+  theme_bw()
+```
+
+The straight line captures the general trend, but the response is
+clearly curved. It's steep at low N and flattens out at high N. Adding a
+squared term captures this bend:
+
+```{r, echo=TRUE}
+model_poly <- lm(yield ~ n_rate + I(n_rate^2), data = corn_n)
+summary(model_poly)
+```
+
+The model is:
+
+$$
+Y = \beta_0 + \beta_1 X + \beta_2 X^2 + \varepsilon
+$$
+
+When $\beta_2$ is negative (like here), the curve bends downward and
+represents **diminishing returns**—each additional unit of N produces
+less gain.
+
+Here's the crucial part: **Don't interpret** $\beta_1$ alone. When a
+squared term is present, the effect of $X$ depends on both $\beta_1$ and
+$\beta_2$. The marginal effect of $X$ is $\beta_1
++ 2\beta_2 X$, so it depends on the value of $X$ (i.e., the slope
+changes along the curve).
+
+**Quick check:** at low N and high N, does the model imply the same
+slope? If not, that's exactly why curvature matters.
+
+The best way to understand the effect? Make a prediction plot:
+
+```{r, echo=FALSE}
+grid_poly <- data.frame(n_rate = seq(min(corn_n$n_rate), max(corn_n$n_rate), length.out = 200))
+grid_poly$pred <- predict(model_poly, newdata = grid_poly)
+
+ggplot(corn_n, aes(x = n_rate, y = yield)) +
+  geom_point(pch = 21, size = 2) +
+  geom_line(data = grid_poly, aes(y = pred), color = "steelblue", linewidth = 1) +
+  labs(x = "N rate", y = "Yield") +
+  theme_bw()
+```
+
+The curve shows what's actually happening: steep initial response, then
+flattening. That's what matters. That's more meaningful than any
+coefficient you could report.
+
+## Strategy 2: Fit Nonlinear Directly with nls()
+
+### When to use nonlinear models
+
+Nonlinear models are powerful when:
+
+-   You understand the mechanism and can describe the curve shape
+    (monomolecular, logistic, etc.)
+-   Parameter values have biological meaning and you want to report them
+-   You need more control over extrapolation (a line predicts infinite
+    growth; a plateau model doesn't)
+
+The tradeoff is complexity. Nonlinear models require careful fitting,
+diagnostics, and validation.
+
+### Example: Nutrient Response with a Plateau
+
+At low N rates, yield jumps with each additional kilogram. But
+eventually, adding more N doesn't help—the yield plateaus.
+
+A straight line would predict infinite yield at extreme N rates. That's
+nonsense. What we need is a model that rises linearly at first, then
+levels off. That's exactly what the **linear-plateau** model does.
+
+For this, we will use the `nlraa` library, which stands for *Nonlinear
+Regression for Agricultural Applications*. If you want to know more
+about this, I highly recommend the manuscript [Nonlinear Regression
+Models and Applications in Agricultural
+Research](https://doi.org/10.2134/agronj2012.0506), written by Sotirios
+Archontoulis and Fernando Miguez.
+
+```{r, echo=TRUE}
+library(nlraa)
+corn_n <- read.csv("data/corn_nrate_mono.csv")
+
+ggplot(corn_n, aes(x = n_rate, y = yield)) +
+  geom_point(pch = 21, size = 2) +
+  labs(x = "N rate", y = "Yield") +
+  theme_bw()
+```
+
+Now fit the linear-plateau model:
+
+```{r, echo=TRUE}
+model_linp <- nls(yield ~ SSlinp(n_rate, a, b, xs), data = corn_n)
+summary(model_linp)
+```
+
+What do these parameters mean? **This is the kind of thing that makes
+nonlinear models powerful**:
+
+-   **a**: The intercept—predicted yield at zero N.
+-   **b**: The slope in the linear phase—each additional kg of N adds
+    this much yield, up to the join point.
+-   **xs**: The join point—the N rate at which the yield stops
+    responding and plateaus. This is often close to the agronomic
+    optimum and can inform economic decisions, but the true economic
+    optimum depends on crop price, fertilizer cost, and risk.
+
+The fitted curve:
+
+```{r}
+grid_n <- data.frame(n_rate = seq(min(corn_n$n_rate), max(corn_n$n_rate), length.out = 200))
+grid_n$pred <- predict(model_linp, newdata = grid_n)
+
+ggplot(corn_n, aes(x = n_rate, y = yield)) +
+  geom_point(pch = 21, size = 2) +
+  geom_line(data = grid_n, aes(y = pred), color = "steelblue", linewidth = 1) +
+  labs(x = "N rate", y = "Yield") +
+  theme_bw()
+```
+
+See how the curve rises steeply then flattens sharply at the join point?
+The `xs` parameter tells you exactly where that happens. That's the kind
+of number you can hand to a farmer.
+
+**Lesson:** polynomial models can describe shape, but mechanistic
+nonlinear models often give you parameters you can act on.
+
+### Example: Plant Growth Following an S-Curve
+
+Now a different scenario: a crop physiologist tracking soybean biomass
+from emergence to maturity.
+
+Early on, growth is slow (small plant, limited leaf area). Then it
+accelerates—the plant has more leaves photosynthesizing, growth
+compounds. Finally, it slows again as the plant matures and stops
+investing in biomass accumulation.
+
+That pattern is an **S-curve** (sigmoidal). It's not a line, and a
+polynomial might fit it, but an S-curve model will tell you when growth
+is fastest (the inflection point), which is biologically interesting.
+
+```{r}
+soy_tdm <- read.csv("data/soybean_dae_tdm_logis.csv")
+
+ggplot(soy_tdm, aes(x = dae, y = tdm)) +
+  geom_point(pch = 21, size = 2) +
+  labs(x = "Days after emergence", y = "Total dry matter") +
+  theme_bw()
+```
+
+Fit a logistic (S-curve) model:
+
+```{r, echo=TRUE}
+model_logis <- nls(tdm ~ SSlogis(dae, Asym, xmid, scal), data = soy_tdm)
+summary(model_logis)
+```
+
+Again, notice the parameters have meaning:
+
+-   **Asym**: Maximum biomass the plant ever reaches
+-   **xmid**: The day when growth is fastest (inflection point of the
+    S-curve)
+-   **scal**: How steeply the curve rises. Bigger value = sharper
+    transition
+
+For a crop physiologist, xmid tells you when the plant is at peak growth
+rate. Asym tells you about ultimate biomass potential. These are
+actionable biological insights.
+
+```{r}
+grid_dae <- data.frame(dae = seq(min(soy_tdm$dae), max(soy_tdm$dae), length.out = 200))
+grid_dae$pred <- predict(model_logis, newdata = grid_dae)
+
+ggplot(soy_tdm, aes(x = dae, y = tdm)) +
+  geom_point(pch = 21, size = 2) +
+  geom_line(data = grid_dae, aes(y = pred), color = "darkgreen", linewidth = 1) +
+  labs(x = "Days after emergence", y = "Total dry matter") +
+  theme_bw()
+```
+
+## Polynomial vs Nonlinear: Which One Should You Use?
+
+Use this decision rule:
+
+-   If you need a quick flexible fit and a familiar workflow, start with
+    polynomial terms.
+-   If you need interpretable biological parameters (like join point or
+    asymptote) and realistic extrapolation, use nonlinear models.
+
+Neither is always best. The right choice depends on your question, your
+data range, and whether you need explanation, prediction, or both.
+
+# Common Pitfalls and How to Avoid Them
+
+Let me call out the errors that tend to trap people:
+
+**1. Confusing correlation with causation.**
+
+Multiple regression finds patterns. It doesn't prove causation. A model
+predicting yield from soil properties might just be picking up
+confounding relationships. Domain knowledge and careful reasoning still
+matter. Statistics is a tool, not a truth machine.
+
+**2. Trusting** $R^2$ too much.
+
+A model can explain 95% of variation in your training data and still
+fail badly on new observations. That's overfitting. Always evaluate
+likely performance on future or held-out data.
+
+**3. Misinterpreting coefficients when multicollinearity is present.**
+
+Correlated predictors make individual coefficients unstable. Check the
+correlation matrix and VIF. If you see red flags, focus on what the
+model actually predicts, not what individual coefficients say.
+
+**4. Ignoring curved residuals.**
+
+If your residual plot shows systematic curvature instead of random
+scatter, the model is biased. Fix it with polynomial terms or nonlinear
+models.
+
+**5. Fitting a fancy nonlinear model without validation.**
+
+Just because you can fit an S-curve doesn't mean you should. Check
+whether the algorithm converged, whether parameter values make sense,
+and whether different starting values give the same answer. If something
+looks off, it probably is.
+
+# Summary: What Changes and What Doesn't
+
+Module 11 builds on Module 10. You're using more complex models, sure.
+But the core thinking stays the same. And I want to emphasize this
+because it's the real lesson: **The tools change. The reasoning
+doesn't.**
+
+Here's what every analysis should look like:
+
+**1. Start with a biological question, not a dataset.**
+
+There's a difference between "What variables predict yield?" and "I have
+this dataset, let me analyze it." The first is research. The second is
+busywork.
+
+**2. Plot the data before fitting anything.**
+
+No exceptions. Scatterplot matrices, histograms, everything. Your eyes
+catch patterns that tests miss.
+
+**3. Check assumptions.**
+
+Residual plots, normality checks, heteroscedasticity. Are they perfect?
+No. But do they tell a coherent story about what's working and what's
+not? They should.
+
+**4. Compare alternatives using statistics AND biology.**
+
+AIC is useful. But also ask: "Does this make biological sense?" Both
+matter equally.
+
+**5. Pick the simplest model that's honest.**
+
+Not the fanciest. Not the highest $R^2$. The simplest one that does real
+work.
+
+The core thinking is simple: **Think like a biologist first. Use
+statistics to check whether your reasoning holds up, not as a substitute
+for thinking.**
+
+That's the part that actually matters.

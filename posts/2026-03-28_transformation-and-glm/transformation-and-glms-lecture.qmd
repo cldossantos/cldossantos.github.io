@@ -5,7 +5,7 @@ date: "2026-03-29"
 author: "Caio dos Santos"
 categories: [statistics]
 ---
-  
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```

@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Caio dos Santos">
+<meta name="dcterms.date" content="2026-04-12">
+
+<title>Multiple Linear and Nonlinear Regression</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-c89800f59a5657e0c177b73a5ff15e5b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-d250243be6510f45ae5a7bad6a98d8fc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-c89800f59a5657e0c177b73a5ff15e5b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-XRSH8JDS68"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XRSH8JDS68', { 'anonymize_ip': true});
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../"> 
+<span class="menu-text">Posts</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../cv.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Multiple Linear and Nonlinear Regression</h1>
+            <p class="subtitle lead">Module 11</p>
+                                <div class="quarto-categories">
+                <div class="quarto-category">statistics</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Caio dos Santos </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">April 12, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>In Module 10, we kept things simple by design: one predictor, one response, and a straight line. That simplicity was intentional. It let us focus on the core habits that actually matter: starting with a biological question, checking whether the model shape makes sense, and separating statistical significance from practical reality.</p>
+<p>But real agronomy is seldom that simple.</p>
+<p>Think about corn yield for a moment. How much does it depend on rainfall alone? Maybe some. But yield also responds to many factors, like soil texture, organic matter, pH, temperature, and management choices. All of these act together.</p>
+<p>And here’s the thing: many of those relationships are not straight lines. They curve. They plateau. They follow S-shaped patterns.</p>
+<p>So Module 11 takes the habits from Module 10 and extends them to handle two real-world challenges:</p>
+<ul>
+<li><strong>Multiple regression</strong>: When you have several predictors, not just one</li>
+<li><strong>Nonlinear modeling</strong>: When the relationship is curved, not straight</li>
+</ul>
+<p>The core question doesn’t change:</p>
+<blockquote class="blockquote">
+<p>What model structure gives interpretable, biologically reasonable, and practically useful predictions?</p>
+</blockquote>
+<p>We’re just using better tools to answer it.</p>
+</section>
+<section id="part-1-multiple-linear-regression" class="level1">
+<h1>Part 1: Multiple Linear Regression</h1>
+<section id="the-model-from-one-predictor-to-many" class="level2">
+<h2 class="anchored" data-anchor-id="the-model-from-one-predictor-to-many">The Model: From One Predictor to Many</h2>
+<p><strong>Here’s the key idea</strong>: We’re going to keep the same basic model structure, but expand it from one predictor to many.</p>
+<p>In Module 10, we looked at this simple model:</p>
+<p><span class="math display">\[Y = \beta_0 + \beta_1 X + \varepsilon\]</span></p>
+<p>Now we add more predictors:</p>
+<p><span class="math display">\[
+Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p + \varepsilon
+\]</span></p>
+<p>The algebra looks the same. But here’s where things get interesting: the interpretation changes fundamentally.</p>
+<p><strong>In simple regression</strong>, <span class="math inline">\(\beta_1\)</span> is straightforward:</p>
+<blockquote class="blockquote">
+<p>“For every one-unit increase in <span class="math inline">\(X\)</span>, <span class="math inline">\(Y\)</span> changes by <span class="math inline">\(\beta_1\)</span> units”</p>
+</blockquote>
+<p><strong>In multiple regression</strong>, each coefficient tells a different story:</p>
+<blockquote class="blockquote">
+<p>“For every one-unit increase in <span class="math inline">\(X_j\)</span>, <span class="math inline">\(Y\)</span> changes by <span class="math inline">\(\beta_j\)</span> units <em>after accounting for all the other predictors.</em>”</p>
+</blockquote>
+<p>Let me say that again because it’s crucial: <strong>after accounting for all the other predictors.</strong> This is what makes multiple regression powerful and also what makes it tricky to interpret.</p>
+<p>When you have multiple predictors, each coefficient is what we call a <strong>partial effect</strong>. It’s the association between one predictor and the response after adjusting for the other predictors in the model.</p>
+<p>This is a conditional association, not automatically a causal effect.</p>
+<p>Here is a concrete illustration to make this real:</p>
+<p>Suppose two counties in Minnesota receive exactly the same amount of rainfall. But one has higher organic matter in its soil than the other. If the model gives <span class="math inline">\(\beta_{om} = 0.8\)</span>, here’s what that means:</p>
+<blockquote class="blockquote">
+<p>Holding rainfall (and all other variables) constant, yield increases by 0.8 units for each one-unit increase in OM</p>
+</blockquote>
+<p>Notice what we’re doing here: we’re comparing two counties that are <strong>similar in everything except organic matter</strong>.</p>
+<p>We’re not comparing “all high-OM counties” vs “all low-OM counties” (because those would differ in rainfall too, and a thousand other things).</p>
+<p>That’s the whole point. This is what makes it a <strong>partial</strong> effect.</p>
+<p><strong>This does NOT mean</strong>: We have created a controlled experiment. We didn’t go out and manipulate organic matter while holding rainfall steady. We’re just using the model to statistically adjust for the differences.</p>
+<p>This adjusted interpretation is why multiple regression matters. Without it, the key question can’t be answered: “Is this factor actually important, or is it just correlated with something else that matters?”</p>
+</section>
+<section id="case-study-which-soil-and-climate-factors-actually-drive-corn-yield" class="level2">
+<h2 class="anchored" data-anchor-id="case-study-which-soil-and-climate-factors-actually-drive-corn-yield">Case Study: Which Soil and Climate Factors Actually Drive Corn Yield?</h2>
+<p>Here’s a concrete scenario that makes this necessary. Imagine you’re a soil scientist working with a cooperative extension office. A farmer walks in and asks:</p>
+<blockquote class="blockquote">
+<p>“I know rainfall matters for yield, but in this region, which soil properties matter most? Is it organic matter? Texture? pH?”</p>
+</blockquote>
+<p>That’s a great question. But here’s why you can’t just run three separate regressions:</p>
+<p>Across counties, rainfall, organic matter, and soil texture are all correlated. Areas with high organic matter typically also have better rainfall. If you regressed yield on OM alone, you’d see a big positive effect. But is that really because of OM, or is it just because those counties happen to have better rainfall too?</p>
+<p><strong>This is where multiple regression helps.</strong> Instead of asking “Does OM matter?” ask the real question: “After accounting for rainfall, does OM still explain variation in yield?”</p>
+<p>Let’s work through it with county-level data from Minnesota and Wisconsin.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>     county state  stco      ppt      whc     sand     silt      clay        om
+1 Abbeville    SC 45001 562.2991 22.94693 39.26054 21.38839 39.351063  36.92471
+2    Acadia    LA 22001 751.1478 37.83115 12.82896 54.19231 32.978734 105.79133
+3  Accomack    VA 51001 584.6807 18.56290 74.82042 16.82072  8.358863 103.11425
+4       Ada    ID 16001 124.9502 15.54825 44.49350 40.48000 15.026510  77.61499
+5     Adair    IA 19001 598.4478 28.91851 17.82011 48.44056 33.739326 259.53255
+6     Adair    KY 21001 698.6234 20.87349 15.66781 48.16733 36.164866  73.05356
+   kwfactor  kffactor      sph    slope  tfactor      corn  soybean  cotton
+1 0.2045719 0.2044325 5.413008 42.59177 4.666834  57.75000 16.75385 525.500
+2 0.4432803 0.4431914 6.370533 34.92266 4.855202  92.42500 28.72857      NA
+3 0.2044544 0.2044544 5.166446       NA 4.011007 116.99714 30.44857 575.125
+4 0.4106704 0.4198545 7.648190       NA 2.853957 145.74138       NA      NA
+5 0.3541369 0.3541369 6.215139 55.24201 4.691089 133.02571 41.70857      NA
+6 0.3166089 0.3725781 5.351832 37.65075 4.119289  95.76765 37.50000      NA
+     wheat
+1 30.17500
+2 38.11000
+3 56.07407
+4 97.26296
+5 34.04000
+6 37.42105</code></pre>
+</div>
+</div>
+<p>For this example, the analysis focuses on Minnesota and Wisconsin.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 156   6</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      corn             ppt             sand            clay       
+ Min.   : 56.83   Min.   :379.8   Min.   :10.16   Min.   : 1.241  
+ 1st Qu.:102.43   1st Qu.:469.7   1st Qu.:33.42   1st Qu.:13.164  
+ Median :122.47   Median :514.1   Median :40.46   Median :21.139  
+ Mean   :118.29   Mean   :506.9   Mean   :44.43   Mean   :20.045  
+ 3rd Qu.:134.35   3rd Qu.:548.5   3rd Qu.:54.77   3rd Qu.:26.117  
+ Max.   :152.65   Max.   :598.6   Max.   :93.37   Max.   :53.693  
+       om              sph       
+ Min.   : 101.4   Min.   :5.394  
+ 1st Qu.: 269.3   1st Qu.:6.184  
+ Median : 359.8   Median :6.953  
+ Mean   : 455.2   Mean   :6.803  
+ 3rd Qu.: 560.6   3rd Qu.:7.428  
+ Max.   :2021.0   Max.   :7.815  </code></pre>
+</div>
+</div>
+</section>
+<section id="plot-the-data-first" class="level2">
+<h2 class="anchored" data-anchor-id="plot-the-data-first">Plot the Data First</h2>
+<p>Before fitting anything, inspect the data. No exceptions.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple_linear_and_nonlinear_regression_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A scatterplot matrix isn’t pretty, but it’s honest. You’ll see which variables move together, which relationships look straight or curved, and how much your predictors are correlating with each other. Your eyes will catch patterns that a test will miss.</p>
+</section>
+<section id="start-with-a-simple-model-two-predictors" class="level2">
+<h2 class="anchored" data-anchor-id="start-with-a-simple-model-two-predictors">Start with a Simple Model (Two Predictors)</h2>
+<p>Let’s start with a simple model using only rainfall and organic matter to predict corn yield. This might feel like a stripped-down model, but that’s exactly the point. Simplicity helps us see the core logic before we add complexity.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>model_simple <span class="ot">&lt;-</span> <span class="fu">lm</span>(corn <span class="sc">~</span> ppt <span class="sc">+</span> om, <span class="at">data =</span> model_data)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_simple)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = corn ~ ppt + om, data = model_data)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-43.252 -11.079  -0.541  12.149  30.401 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -5.284728  12.638306  -0.418 0.676423    
+ppt          0.257903   0.024659  10.459  &lt; 2e-16 ***
+om          -0.015734   0.004223  -3.726 0.000273 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 16.22 on 153 degrees of freedom
+Multiple R-squared:  0.4403,    Adjusted R-squared:  0.433 
+F-statistic: 60.19 on 2 and 153 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>So you’ve got the output. Now what? Here’s what NOT to do: don’t just scan for low p-values and move on.</p>
+<p>Instead, scrutinize each coefficient carefully. First, the <strong>sign</strong>: does it match biology? Does more rainfall increase yield? That makes sense. If rainfall decreases yield, that’s a red flag unless we’re talking about poorly drained soils.</p>
+<p>Then check <strong>uncertainty</strong>. Is the p-value small, and do the confidence intervals exclude zero? Wide confidence intervals mean the model doesn’t really know where the effect lives. Finally, <strong>plausibility</strong>: Given your data and model assumptions, does this make biological sense? Sometimes you get a technically valid result that’s biologically nonsensical.</p>
+<section id="visualizing-partial-effects" class="level3">
+<h3 class="anchored" data-anchor-id="visualizing-partial-effects">Visualizing Partial Effects</h3>
+<p>If graphs help you, here’s a direct way to see partial effects.</p>
+<p>Let’s use a stripped-down teaching model with just two predictors: rainfall and organic matter.</p>
+<p><span class="math display">\[
+\text{corn} = \beta_0 + \beta_{ppt}\,\text{ppt} + \beta_{om}\,\text{om} + \varepsilon
+\]</span></p>
+<p>This makes the partial-effect idea easier to see without extra moving parts. In this setup, <span class="math inline">\(\beta_{om}\)</span> is the change in predicted yield for a one-unit increase in OM <strong>after accounting for rainfall</strong>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple_linear_and_nonlinear_regression_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>How to read it quickly:</p>
+<ul>
+<li>At any fixed rainfall, the vertical gap between the two lines is the OM partial effect.</li>
+<li>The lines are parallel because there is no interaction term (<code>ppt:om</code>). That means the OM effect is constant across rainfall values in this model.</li>
+</ul>
+<p><strong>Pause and reflect:</strong> If two counties have the same rainfall but different OM, the model-predicted yield gap between those counties is the partial OM effect.</p>
+</section>
+<section id="expand-to-the-full-model" class="level3">
+<h3 class="anchored" data-anchor-id="expand-to-the-full-model">Expand to the Full Model</h3>
+<p>Once that logic is clear, we can expand to the full model with additional predictors:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>model_full <span class="ot">&lt;-</span> <span class="fu">lm</span>(corn <span class="sc">~</span> ppt <span class="sc">+</span> sand <span class="sc">+</span> clay <span class="sc">+</span> om <span class="sc">+</span> sph, <span class="at">data =</span> model_data)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = corn ~ ppt + sand + clay + om + sph, data = model_data)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-42.432  -4.342   1.108   7.035  23.278 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -189.02125   22.76727  -8.302 5.52e-14 ***
+ppt            0.37140    0.02165  17.159  &lt; 2e-16 ***
+sand          -0.33075    0.10746  -3.078  0.00248 ** 
+clay          -1.16506    0.24579  -4.740 4.92e-06 ***
+om            -0.01679    0.00307  -5.469 1.85e-07 ***
+sph           24.21303    2.02991  11.928  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 10.61 on 150 degrees of freedom
+Multiple R-squared:  0.7651,    Adjusted R-squared:  0.7573 
+F-statistic: 97.71 on 5 and 150 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>This is the same idea as before, just with more variables being adjusted for at the same time. You’re not changing the logic, only increasing realism.</p>
+</section>
+</section>
+<section id="check-assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="check-assumptions">Check Assumptions</h2>
+<p>Just like in Module 10, we need to look at the diagnostics. Here’s what these four plots are actually telling you:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(model_full, <span class="at">which =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple_linear_and_nonlinear_regression_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Residuals vs Fitted</strong>: You want to see a random cloud centered around zero. No patterns. If it fans out (wider at high values than low), that’s heteroscedasticity—your model loses confidence at some predictions. If you see a U-shape or wave, the model is systematically biased.</p>
+<p><strong>Normal Q-Q</strong>: Points should track the diagonal line. Small wiggles at the tails are usually fine in large samples, but a systematic S-shape means residuals aren’t normally distributed. That’s worth noting. In larger samples, this is usually more about inference precision (p-values and intervals) than mean-prediction quality.</p>
+<p><strong>Quick check:</strong> If at least one diagnostic shows a clear pattern, pause before interpreting coefficients as if everything is fine.</p>
+<section id="whats-going-on-when-coefficients-change" class="level3">
+<h3 class="anchored" data-anchor-id="whats-going-on-when-coefficients-change">What’s Going On When Coefficients Change?</h3>
+<p>Suppose you fit a model with both sand and clay. You get a negative coefficient on sand. Then you remove clay from the model and refit. Now sand has a positive coefficient. Something flipped.</p>
+<p>Your first thought might be: “That’s weird. Did I make a mistake?”</p>
+<p><strong>Not necessarily.</strong> This is actually a prediction.</p>
+<p>Here’s what’s happening:</p>
+<p>Sand and clay are correlated in most cases (areas with more sand have less clay). When clay is in the model, the model is extracting the partial effect of sand <strong>after already accounting for clay</strong>. When you remove clay, sand’s job changes. Now sand has to explain more variation because clay isn’t there to help. So the sign can flip.</p>
+<p><strong>What’s the lesson here?</strong> This is a consequence of <strong>multicollinearity</strong>—when predictors are correlated, they can share or reallocate explained variation among themselves. It’s one reason why you have to be careful when interpreting individual coefficients.</p>
+</section>
+</section>
+<section id="diagnose-multicollinearity" class="level2">
+<h2 class="anchored" data-anchor-id="diagnose-multicollinearity">Diagnose Multicollinearity</h2>
+<p>Here’s the problem: If two predictors are highly correlated, their partial effects become <strong>unstable</strong>. A small change in the data can flip the sign or magnitude of one of the coefficients. This is bad because you can’t trust what the coefficient is telling you.</p>
+<p>The correlation matrix is a good first check:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>predictor_cor <span class="ot">&lt;-</span> <span class="fu">cor</span>(model_data[, <span class="fu">c</span>(<span class="st">"ppt"</span>, <span class="st">"sand"</span>, <span class="st">"clay"</span>, <span class="st">"om"</span>, <span class="st">"sph"</span>)])</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(predictor_cor, <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       ppt  sand  clay    om   sph
+ppt   1.00 -0.19 -0.09  0.04 -0.46
+sand -0.19  1.00 -0.84  0.34 -0.43
+clay -0.09 -0.84  1.00 -0.28  0.67
+om    0.04  0.34 -0.28  1.00 -0.04
+sph  -0.46 -0.43  0.67 -0.04  1.00</code></pre>
+</div>
+</div>
+<p>Look for pairs of predictors with correlations near 0.7 or higher (in absolute value). <strong>This is not an absolute cutoff</strong> but it’s a good indication that standard errors could increase, which typically leads to larger p-values and wider confidence intervals. That makes real effects harder to detect as predictors compete for the same variation.</p>
+<p><strong>Pause and reflect:</strong> if your goal is prediction, correlated predictors can still help. If your goal is interpretation, correlation becomes a much bigger problem.</p>
+<p>Does that automatically mean you need to remove a predictor? Not necessarily. But it absolutely means you need to interpret carefully. Not all multicollinearity is fatal, but you have to know when you’re dealing with it.</p>
+<section id="worked-example-variance-inflation-factor-vif" class="level3">
+<h3 class="anchored" data-anchor-id="worked-example-variance-inflation-factor-vif">Worked Example: Variance Inflation Factor (VIF)</h3>
+<p>The correlation matrix is useful, but here’s an even more direct measure: the <strong>Variance Inflation Factor</strong>. It tells you how much the uncertainty of a coefficient is inflated due to correlations with other predictors.</p>
+<p>Here’s the idea: Imagine you regressed one predictor (say, sand) on all the other predictors. If you can predict sand really well from the other variables, that means sand is redundant. This is because it’s explaining variation that’s already covered. In that case, sand’s coefficient will be uncertain, and its standard error will increase, which usually pushes p-values upward.</p>
+<p>The math is:</p>
+<p><span class="math display">\[
+VIF_j = \frac{1}{1 - R_j^2}
+\]</span></p>
+<p>where <span class="math inline">\(R_j^2\)</span> comes from regressing <span class="math inline">\(X_j\)</span> on the other predictors.</p>
+<p>Here’s how to interpret VIF: values around 1 mean minimal collinearity—the predictor is doing its own thing. Values above about 5 suggest meaningful collinearity and loss of precision. Values above about 10 are often considered problematic. These are heuristics, not hard rules, so context still matters.</p>
+<p><strong>Watch out for compositional variables.</strong> Soil texture is the classic trap: sand, silt, and clay must sum to 100% by definition. That’s not collinearity—that’s <em>perfect</em> linear dependence. Your VIF will be infinite. This is a special case that requires special handling.</p>
+<p>Here’s how it plays out with a worked example:</p>
+<p>Let’s run VIF on two scenarios:</p>
+<p>Let’s include all three soil texture classes as predictors in a model along with organic matter, and let’s take a look at the summary of this model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>model_inflated <span class="ot">&lt;-</span> <span class="fu">lm</span>(corn <span class="sc">~</span> sand <span class="sc">+</span> silt <span class="sc">+</span> clay <span class="sc">+</span> om, <span class="at">data =</span> counties_mn_wi)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_inflated)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = corn ~ sand + silt + clay + om, data = counties_mn_wi)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-57.877 -11.757   1.916  11.088  32.694 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)
+(Intercept) -5.072e+07  3.825e+07  -1.326    0.187
+sand         5.072e+05  3.825e+05   1.326    0.187
+silt         5.072e+05  3.825e+05   1.326    0.187
+clay         5.072e+05  3.825e+05   1.326    0.187
+om          -1.669e-03  5.111e-03  -0.327    0.744
+
+Residual standard error: 18.38 on 151 degrees of freedom
+  (3 observations deleted due to missingness)
+Multiple R-squared:  0.2907,    Adjusted R-squared:  0.272 
+F-statistic: 15.47 on 4 and 151 DF,  p-value: 1.249e-10</code></pre>
+</div>
+</div>
+<p>Estimates and standard errors for all three predictors seem to be inflated, right? Let’s take a look at the VIF for these predictors. We will use the <code>vif()</code> function in the library called <code>car</code>, which stands for <em>Companion to Applied Regression</em>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(car)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">vif</span>(model_inflated)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        sand         silt         clay           om 
+1.983537e+13 8.446109e+12 4.548837e+12 1.143113e+00 </code></pre>
+</div>
+</div>
+<p>We were talking about rules of thumb and saying that values above 10 were problematic… Those values are pretty extreme.</p>
+<p>Let’s get rid of one of the soil texture classes, look at the summary and compute the VIF again.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>model_adjusted <span class="ot">&lt;-</span> <span class="fu">lm</span>(corn <span class="sc">~</span> sand <span class="sc">+</span> clay <span class="sc">+</span> om, <span class="at">data =</span> counties_mn_wi)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_adjusted)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = corn ~ sand + clay + om, data = counties_mn_wi)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-57.741 -11.886   1.901  11.373  32.935 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) 184.200776  13.190346  13.965  &lt; 2e-16 ***
+sand         -1.003902   0.162054  -6.195 5.21e-09 ***
+clay         -1.013062   0.330605  -3.064  0.00258 ** 
+om           -0.002201   0.005108  -0.431  0.66709    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 18.42 on 152 degrees of freedom
+  (3 observations deleted due to missingness)
+Multiple R-squared:  0.2825,    Adjusted R-squared:  0.2683 
+F-statistic: 19.95 on 3 and 152 DF,  p-value: 5.898e-11</code></pre>
+</div>
+</div>
+<p>The estimates for the effects of sand and clay seem a little more plausible, also, the standard error of the effect of these two predictors seems way less inflated. Let’s compute the VIF to check.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">vif</span>(model_adjusted)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    sand     clay       om 
+3.533378 3.371310 1.135529 </code></pre>
+</div>
+</div>
+<p>The VIF looks more under control now, indicating that keeping sand and clay as predictors could work.</p>
+<p><strong>What’s happening here?</strong></p>
+<p>In the first case, we included all three texture fractions—sand, silt, and clay. The VIF values are huge for the texture variables. Why? Because they’re compositional: they sum to 100% by definition. This means if you know sand and clay, you automatically know silt (it’s 100% minus the others). So the model can’t distinguish between their effects. This is <strong>perfect linear dependence</strong>.</p>
+<p>In the second case, we dropped one texture variable (silt). Now the VIF values are finite and interpretable: sand ≈ 3.5, clay ≈ 3.3, OM ≈ 1.1.</p>
+<p>With compositional data, you have to drop one category to avoid perfect collinearity. Once you do that, you can estimate the partial effects properly.</p>
+</section>
+</section>
+<section id="keep-it-as-simple-as-possible-but-not-simpler" class="level2">
+<h2 class="anchored" data-anchor-id="keep-it-as-simple-as-possible-but-not-simpler">Keep It as Simple as Possible (But Not Simpler)</h2>
+<p>Here’s a temptation: the more predictors you add to a model, the higher <span class="math inline">\(R^2\)</span> gets. It always does. So why not just throw everything in?</p>
+<p>Because <strong>more is not always better.</strong></p>
+<p>A simpler model is easier to interpret, easier to communicate to stakeholders, and less prone to overfitting. So the real question is: Do the extra predictors earn their place?</p>
+<p>This is a decision step, not a math contest.</p>
+<p>Let’s compare a full model (all five predictors) with a reduced model (dropping clay):</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>model_reduced <span class="ot">&lt;-</span> <span class="fu">lm</span>(corn <span class="sc">~</span> ppt <span class="sc">+</span> sand <span class="sc">+</span> om <span class="sc">+</span> sph, <span class="at">data =</span> model_data)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_reduced)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = corn ~ ppt + sand + om + sph, data = model_data)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-50.342  -5.438   1.410   7.135  22.276 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -2.031e+02  2.412e+01  -8.421 2.69e-14 ***
+ppt          3.815e-01  2.302e-02  16.575  &lt; 2e-16 ***
+sand         5.577e-02  7.479e-02   0.746    0.457    
+om          -1.607e-02  3.277e-03  -4.903 2.41e-06 ***
+sph          1.953e+01  1.895e+00  10.306  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 11.34 on 151 degrees of freedom
+Multiple R-squared:  0.7299,    Adjusted R-squared:  0.7227 
+F-statistic:   102 on 4 and 151 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(model_reduced, model_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analysis of Variance Table
+
+Model 1: corn ~ ppt + sand + om + sph
+Model 2: corn ~ ppt + sand + clay + om + sph
+  Res.Df   RSS Df Sum of Sq      F    Pr(&gt;F)    
+1    151 19423                                  
+2    150 16893  1    2530.3 22.468 4.922e-06 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(model_reduced, model_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              df      AIC
+model_reduced  6 1207.310
+model_full     7 1187.536</code></pre>
+</div>
+</div>
+<p>Now look at the results together. Here’s what each number is telling you:</p>
+<p><strong>ANOVA p-value</strong>: If this is large (&gt; 0.05), it says “clay doesn’t add much once you’ve already got the other variables.” The reduced model explains essentially the same variation.</p>
+<p>(This comparison assumes the models are nested and fit on the same dataset with identical observations.)</p>
+<p><strong>AIC (Akaike Information Criterion)</strong>: Lower is better. But AIC penalizes complexity, so a simpler model can have lower AIC even if <span class="math inline">\(R^2\)</span> is slightly smaller. Think of it as “How much better would I have to get if I’m going to justify adding more complexity?”</p>
+<p><strong>Adjusted</strong> <span class="math inline">\(R^2\)</span>: This penalizes unnecessary predictors. Compare this between models, not the raw <span class="math inline">\(R^2\)</span>.</p>
+<p>So how do you decide in practice?</p>
+<ul>
+<li>ANOVA p-value is large (the dropped predictor adds little)</li>
+<li>AIC is similar or lower for the reduced model</li>
+</ul>
+<p><strong>Lesson:</strong> model selection is a biological and statistical decision, not a race for the highest <span class="math inline">\(R^2\)</span>.</p>
+</section>
+</section>
+<section id="part-2-nonlinear-relationships" class="level1">
+<h1>Part 2: Nonlinear Relationships</h1>
+<p>Straight lines are convenient for teaching but biology rarely cooperates.</p>
+<p>So here’s the transition from Part 1: once a linear model starts missing structure, we need a model that matches biology better.</p>
+<p>Think about nitrogen response in corn. At low N rates, each additional kg gives a big yield bump. But keep adding N and the returns shrink. Eventually more N does nothing. That’s not a straight line—it’s curved.</p>
+<p>Or think about plant growth over time. Early on, growth is slow. Then it accelerates. Then it slows again as the plant matures. That’s an S-curve, not a line.</p>
+<p>When you fit a straight line to curved data, your residuals will show systematic patterns. That’s your signal: <strong>It’s time to move beyond linear.</strong></p>
+<p>Here’s the diagnostic approach—and notice it’s the same habit from Module 10:</p>
+<p><strong>Look at the residuals.</strong></p>
+<p>Nonlinear modeling isn’t a different workflow. It’s what you do <em>after</em> the linear model shows clear problems in the data.</p>
+<p>When does a linear model genuinely fail? Here are the warning signs:</p>
+<ol type="1">
+<li><p><strong>Residual plots show systematic curvature</strong>. Not random scatter, but a U-shape or wave pattern. The model over-predicts at low values and under-predicts at high values (or vice versa). That’s your signal that the true relationship is curved.</p></li>
+<li><p><strong>Predictions become biologically nonsensical</strong>. A linear model for plant growth might predict negative biomass at early time points. A nitrogen response model might predict infinite yield at very high N rates. That’s not realistic, and it signals that curvature matters.</p></li>
+<li><p><strong>You know the mechanism is curved</strong>. Sometimes domain knowledge tells you the relationship must follow an S-curve (logistic growth) or a linear-plateau (nutrient saturation). Don’t ignore that knowledge just because a line “fits.”</p></li>
+</ol>
+<p>Now comes the choice:</p>
+<p>There are two main strategies, and they’re useful in different situations:</p>
+<ul>
+<li><strong>Strategy 1</strong>: Stay in a linear framework but add polynomial terms (quadratic, cubic, etc.). This keeps fitting simple.</li>
+<li><strong>Strategy 2</strong>: Fit a nonlinear model directly with a biological curve shape built in. This requires more care and can extrapolate more sensibly when the chosen form matches the underlying mechanism.</li>
+</ul>
+<p><strong>Pause and reflect:</strong> if you care most about a quick local fit, start with polynomial terms. If you care most about biologically meaningful parameters and realistic extrapolation, go nonlinear.</p>
+<section id="strategy-1-polynomial-regression-in-a-linear-framework" class="level2">
+<h2 class="anchored" data-anchor-id="strategy-1-polynomial-regression-in-a-linear-framework">Strategy 1: Polynomial Regression in a Linear Framework</h2>
+<section id="when-to-use-polynomials" class="level3">
+<h3 class="anchored" data-anchor-id="when-to-use-polynomials">When to use polynomials</h3>
+<p>Polynomials (squared terms, cubic terms, etc.) are attractive because:</p>
+<ul>
+<li>They stay in the linear regression framework, so all the tools you know work</li>
+<li>They’re easy to fit</li>
+<li>You can use all the diagnostics from Module 10</li>
+</ul>
+<p>They work well when you need to capture curvature but don’t have strong prior knowledge about what that curve should look like.</p>
+</section>
+<section id="example-nitrogen-response-with-curvature" class="level3">
+<h3 class="anchored" data-anchor-id="example-nitrogen-response-with-curvature">Example: Nitrogen Response with Curvature</h3>
+<p>Look at a simple linear fit to nitrogen response:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>corn_n <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/corn_nrate_mono.csv"</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(corn_n, <span class="fu">aes</span>(<span class="at">x =</span> n_rate, <span class="at">y =</span> yield)) <span class="sc">+</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">pch =</span> <span class="dv">21</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">color =</span> <span class="st">"tomato"</span>) <span class="sc">+</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"N rate"</span>, <span class="at">y =</span> <span class="st">"Yield"</span>) <span class="sc">+</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple_linear_and_nonlinear_regression_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The straight line captures the general trend, but the response is clearly curved. It’s steep at low N and flattens out at high N. Adding a squared term captures this bend:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>model_poly <span class="ot">&lt;-</span> <span class="fu">lm</span>(yield <span class="sc">~</span> n_rate <span class="sc">+</span> <span class="fu">I</span>(n_rate<span class="sc">^</span><span class="dv">2</span>), <span class="at">data =</span> corn_n)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_poly)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = yield ~ n_rate + I(n_rate^2), data = corn_n)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-17.3977  -4.2973   0.8189   5.9189  15.1804 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) 97.417690   4.341903  22.437 8.86e-12 ***
+n_rate       0.622452   0.087159   7.142 7.57e-06 ***
+I(n_rate^2) -0.001557   0.000348  -4.474 0.000626 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 8.909 on 13 degrees of freedom
+Multiple R-squared:  0.9021,    Adjusted R-squared:  0.887 
+F-statistic: 59.89 on 2 and 13 DF,  p-value: 2.755e-07</code></pre>
+</div>
+</div>
+<p>The model is:</p>
+<p><span class="math display">\[
+Y = \beta_0 + \beta_1 X + \beta_2 X^2 + \varepsilon
+\]</span></p>
+<p>When <span class="math inline">\(\beta_2\)</span> is negative (like here), the curve bends downward and represents <strong>diminishing returns</strong>—each additional unit of N produces less gain.</p>
+<p>Here’s the crucial part: <strong>Don’t interpret</strong> <span class="math inline">\(\beta_1\)</span> alone. When a squared term is present, the effect of <span class="math inline">\(X\)</span> depends on both <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_2\)</span>. The marginal effect of <span class="math inline">\(X\)</span> is <span class="math inline">\(\beta_1
++ 2\beta_2 X\)</span>, so it depends on the value of <span class="math inline">\(X\)</span> (i.e., the slope changes along the curve).</p>
+<p><strong>Quick check:</strong> at low N and high N, does the model imply the same slope? If not, that’s exactly why curvature matters.</p>
+<p>The best way to understand the effect? Make a prediction plot:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple_linear_and_nonlinear_regression_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The curve shows what’s actually happening: steep initial response, then flattening. That’s what matters. That’s more meaningful than any coefficient you could report.</p>
+</section>
+</section>
+<section id="strategy-2-fit-nonlinear-directly-with-nls" class="level2">
+<h2 class="anchored" data-anchor-id="strategy-2-fit-nonlinear-directly-with-nls">Strategy 2: Fit Nonlinear Directly with nls()</h2>
+<section id="when-to-use-nonlinear-models" class="level3">
+<h3 class="anchored" data-anchor-id="when-to-use-nonlinear-models">When to use nonlinear models</h3>
+<p>Nonlinear models are powerful when:</p>
+<ul>
+<li>You understand the mechanism and can describe the curve shape (monomolecular, logistic, etc.)</li>
+<li>Parameter values have biological meaning and you want to report them</li>
+<li>You need more control over extrapolation (a line predicts infinite growth; a plateau model doesn’t)</li>
+</ul>
+<p>The tradeoff is complexity. Nonlinear models require careful fitting, diagnostics, and validation.</p>
+</section>
+<section id="example-nutrient-response-with-a-plateau" class="level3">
+<h3 class="anchored" data-anchor-id="example-nutrient-response-with-a-plateau">Example: Nutrient Response with a Plateau</h3>
+<p>At low N rates, yield jumps with each additional kilogram. But eventually, adding more N doesn’t help—the yield plateaus.</p>
+<p>A straight line would predict infinite yield at extreme N rates. That’s nonsense. What we need is a model that rises linearly at first, then levels off. That’s exactly what the <strong>linear-plateau</strong> model does.</p>
+<p>For this, we will use the <code>nlraa</code> library, which stands for <em>Nonlinear Regression for Agricultural Applications</em>. If you want to know more about this, I highly recommend the manuscript <a href="https://doi.org/10.2134/agronj2012.0506">Nonlinear Regression Models and Applications in Agricultural Research</a>, written by Sotirios Archontoulis and Fernando Miguez.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlraa)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>corn_n <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/corn_nrate_mono.csv"</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(corn_n, <span class="fu">aes</span>(<span class="at">x =</span> n_rate, <span class="at">y =</span> yield)) <span class="sc">+</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">pch =</span> <span class="dv">21</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"N rate"</span>, <span class="at">y =</span> <span class="st">"Yield"</span>) <span class="sc">+</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple_linear_and_nonlinear_regression_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now fit the linear-plateau model:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>model_linp <span class="ot">&lt;-</span> <span class="fu">nls</span>(yield <span class="sc">~</span> <span class="fu">SSlinp</span>(n_rate, a, b, xs), <span class="at">data =</span> corn_n)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_linp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Formula: yield ~ SSlinp(n_rate, a, b, xs)
+
+Parameters:
+    Estimate Std. Error t value Pr(&gt;|t|)    
+a   96.69732    4.39980  21.978 1.15e-11 ***
+b    0.53390    0.07778   6.864 1.15e-05 ***
+xs 111.84420   13.32118   8.396 1.31e-06 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 8.8 on 13 degrees of freedom
+
+Number of iterations to convergence: 1 
+Achieved convergence tolerance: 1.826e-11</code></pre>
+</div>
+</div>
+<p>What do these parameters mean? <strong>This is the kind of thing that makes nonlinear models powerful</strong>:</p>
+<ul>
+<li><strong>a</strong>: The intercept—predicted yield at zero N.</li>
+<li><strong>b</strong>: The slope in the linear phase—each additional kg of N adds this much yield, up to the join point.</li>
+<li><strong>xs</strong>: The join point—the N rate at which the yield stops responding and plateaus. This is often close to the agronomic optimum and can inform economic decisions, but the true economic optimum depends on crop price, fertilizer cost, and risk.</li>
+</ul>
+<p>The fitted curve:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple_linear_and_nonlinear_regression_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>See how the curve rises steeply then flattens sharply at the join point? The <code>xs</code> parameter tells you exactly where that happens. That’s the kind of number you can hand to a farmer.</p>
+<p><strong>Lesson:</strong> polynomial models can describe shape, but mechanistic nonlinear models often give you parameters you can act on.</p>
+</section>
+<section id="example-plant-growth-following-an-s-curve" class="level3">
+<h3 class="anchored" data-anchor-id="example-plant-growth-following-an-s-curve">Example: Plant Growth Following an S-Curve</h3>
+<p>Now a different scenario: a crop physiologist tracking soybean biomass from emergence to maturity.</p>
+<p>Early on, growth is slow (small plant, limited leaf area). Then it accelerates—the plant has more leaves photosynthesizing, growth compounds. Finally, it slows again as the plant matures and stops investing in biomass accumulation.</p>
+<p>That pattern is an <strong>S-curve</strong> (sigmoidal). It’s not a line, and a polynomial might fit it, but an S-curve model will tell you when growth is fastest (the inflection point), which is biologically interesting.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple_linear_and_nonlinear_regression_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Fit a logistic (S-curve) model:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>model_logis <span class="ot">&lt;-</span> <span class="fu">nls</span>(tdm <span class="sc">~</span> <span class="fu">SSlogis</span>(dae, Asym, xmid, scal), <span class="at">data =</span> soy_tdm)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_logis)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Formula: tdm ~ SSlogis(dae, Asym, xmid, scal)
+
+Parameters:
+     Estimate Std. Error t value Pr(&gt;|t|)    
+Asym 857.5043    11.7558   72.94 2.12e-07 ***
+xmid  59.7606     0.7525   79.42 1.51e-07 ***
+scal  10.8261     0.6574   16.47 7.96e-05 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 14.64 on 4 degrees of freedom
+
+Number of iterations to convergence: 0 
+Achieved convergence tolerance: 3.018e-06</code></pre>
+</div>
+</div>
+<p>Again, notice the parameters have meaning:</p>
+<ul>
+<li><strong>Asym</strong>: Maximum biomass the plant ever reaches</li>
+<li><strong>xmid</strong>: The day when growth is fastest (inflection point of the S-curve)</li>
+<li><strong>scal</strong>: How steeply the curve rises. Bigger value = sharper transition</li>
+</ul>
+<p>For a crop physiologist, xmid tells you when the plant is at peak growth rate. Asym tells you about ultimate biomass potential. These are actionable biological insights.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="multiple_linear_and_nonlinear_regression_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="polynomial-vs-nonlinear-which-one-should-you-use" class="level2">
+<h2 class="anchored" data-anchor-id="polynomial-vs-nonlinear-which-one-should-you-use">Polynomial vs Nonlinear: Which One Should You Use?</h2>
+<p>Use this decision rule:</p>
+<ul>
+<li>If you need a quick flexible fit and a familiar workflow, start with polynomial terms.</li>
+<li>If you need interpretable biological parameters (like join point or asymptote) and realistic extrapolation, use nonlinear models.</li>
+</ul>
+<p>Neither is always best. The right choice depends on your question, your data range, and whether you need explanation, prediction, or both.</p>
+</section>
+</section>
+<section id="common-pitfalls-and-how-to-avoid-them" class="level1">
+<h1>Common Pitfalls and How to Avoid Them</h1>
+<p>Let me call out the errors that tend to trap people:</p>
+<p><strong>1. Confusing correlation with causation.</strong></p>
+<p>Multiple regression finds patterns. It doesn’t prove causation. A model predicting yield from soil properties might just be picking up confounding relationships. Domain knowledge and careful reasoning still matter. Statistics is a tool, not a truth machine.</p>
+<p><strong>2. Trusting</strong> <span class="math inline">\(R^2\)</span> too much.</p>
+<p>A model can explain 95% of variation in your training data and still fail badly on new observations. That’s overfitting. Always evaluate likely performance on future or held-out data.</p>
+<p><strong>3. Misinterpreting coefficients when multicollinearity is present.</strong></p>
+<p>Correlated predictors make individual coefficients unstable. Check the correlation matrix and VIF. If you see red flags, focus on what the model actually predicts, not what individual coefficients say.</p>
+<p><strong>4. Ignoring curved residuals.</strong></p>
+<p>If your residual plot shows systematic curvature instead of random scatter, the model is biased. Fix it with polynomial terms or nonlinear models.</p>
+<p><strong>5. Fitting a fancy nonlinear model without validation.</strong></p>
+<p>Just because you can fit an S-curve doesn’t mean you should. Check whether the algorithm converged, whether parameter values make sense, and whether different starting values give the same answer. If something looks off, it probably is.</p>
+</section>
+<section id="summary-what-changes-and-what-doesnt" class="level1">
+<h1>Summary: What Changes and What Doesn’t</h1>
+<p>Module 11 builds on Module 10. You’re using more complex models, sure. But the core thinking stays the same. And I want to emphasize this because it’s the real lesson: <strong>The tools change. The reasoning doesn’t.</strong></p>
+<p>Here’s what every analysis should look like:</p>
+<p><strong>1. Start with a biological question, not a dataset.</strong></p>
+<p>There’s a difference between “What variables predict yield?” and “I have this dataset, let me analyze it.” The first is research. The second is busywork.</p>
+<p><strong>2. Plot the data before fitting anything.</strong></p>
+<p>No exceptions. Scatterplot matrices, histograms, everything. Your eyes catch patterns that tests miss.</p>
+<p><strong>3. Check assumptions.</strong></p>
+<p>Residual plots, normality checks, heteroscedasticity. Are they perfect? No.&nbsp;But do they tell a coherent story about what’s working and what’s not? They should.</p>
+<p><strong>4. Compare alternatives using statistics AND biology.</strong></p>
+<p>AIC is useful. But also ask: “Does this make biological sense?” Both matter equally.</p>
+<p><strong>5. Pick the simplest model that’s honest.</strong></p>
+<p>Not the fanciest. Not the highest <span class="math inline">\(R^2\)</span>. The simplest one that does real work.</p>
+<p>The core thinking is simple: <strong>Think like a biologist first. Use statistics to check whether your reasoning holds up, not as a substitute for thinking.</strong></p>
+<p>That’s the part that actually matters.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
