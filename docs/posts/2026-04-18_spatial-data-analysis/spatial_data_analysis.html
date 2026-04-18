@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Caio dos Santos">
+<meta name="dcterms.date" content="2026-04-17">
+
+<title>Spatial Data Analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-c89800f59a5657e0c177b73a5ff15e5b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-d250243be6510f45ae5a7bad6a98d8fc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-c89800f59a5657e0c177b73a5ff15e5b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-XRSH8JDS68"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XRSH8JDS68', { 'anonymize_ip': true});
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../"> 
+<span class="menu-text">Posts</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../cv.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Spatial Data Analysis</h1>
+            <p class="subtitle lead">Module 12</p>
+                                <div class="quarto-categories">
+                <div class="quarto-category">statistics</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Caio dos Santos </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">April 17, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Up to this point, most of our questions have been about how much. How much yield changes with rainfall. How much disease severity changes with treatment. How much biomass changes with nitrogen.</p>
+<p>This module adds a question that shows up everywhere in agronomy:</p>
+<blockquote class="blockquote">
+<p>Where?</p>
+</blockquote>
+<p>Where in the field are the low-testing areas? Where do soils change? Where do yields drop off? Where should a recommendation change across the landscape instead of staying constant?</p>
+<p>In spatial data, observations are often not independent. Values that are close together tend to be more similar than values far apart. This idea is called spatial dependence, and it is the reason maps and interpolation work at all.</p>
+<p>That is what spatial statistics is really about. It is not just about making pretty maps. It is about making sure location is treated as part of the data-generating process.</p>
+<p>And, as usual, the flashy part is rarely the hard part. The hard part is making sure the geometry, units, and scale all make sense before you start interpreting patterns.</p>
+<p>So in this lecture we are going to work through three ideas that show up again and again in real agronomic work:</p>
+<ul>
+<li><strong>Projection and coordinate systems</strong>: how spatial data locate objects on the earth</li>
+<li><strong>Vector data and shapefiles</strong>: points, lines, and polygons that represent things like yield points and field boundaries</li>
+<li><strong>Rasters and interpolation</strong>: grids of predicted values used to summarize spatial trends and build management maps</li>
+</ul>
+<p>The goal is not for you to memorize every spatial package in R. The goal is for you to become hard to fool. If a map looks impressive but the coordinate system is wrong, I want you to notice. If two layers do not line up, I want you to ask why. If someone hands you a variable-rate map, I want you to understand the basic logic behind how that map was produced.</p>
+</section>
+<section id="part-1-projection-and-coordinate-systems" class="level1">
+<h1>Part 1: Projection and Coordinate Systems</h1>
+<section id="why-projection-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-projection-matters">Why Projection Matters</h2>
+<p>Projection is the part of spatial analysis that most people try to ignore until it breaks something.</p>
+<p>Here is the underlying problem: the earth is not flat, but our maps are.</p>
+<p>So any time we put locations from the earth onto a flat display or into a flat analysis system, we have to decide how that translation will happen. That translation is what a projection does.</p>
+<p>A coordinate reference system (CRS) includes the coordinate system and, if needed, the projection used to flatten the Earth.</p>
+<p><img src="images/projections.png" class="img-fluid"></p>
+<p>Every projection is a compromise. Some preserve shape better. Some preserve area better. Some are better for measuring local distances. Some are mainly convenient because mapping software uses them by default.</p>
+<p>For example, if you are comparing the total area of management zones across a field or region, using a non-equal-area projection can bias those calculations.</p>
+<p>At field scale, several projections may look similar to your eye. That is exactly why this can be dangerous. A map can look fine and still be the wrong system for calculating area, joining layers, or measuring distance.</p>
+<p>So here is the habit I want us to build:</p>
+<blockquote class="blockquote">
+<p>Before trusting any map, check the coordinate reference system.</p>
+</blockquote>
+<p>That one habit will save you a surprising amount of pain.</p>
+<p>Before doing anything spatial, use this quick checklist:</p>
+<ul>
+<li>What is the CRS?</li>
+<li>What is the geometry type?</li>
+<li>What are the units?</li>
+<li>What is the grain (point, polygon, or raster)?</li>
+</ul>
+</section>
+<section id="wgs-84-the-familiar-one" class="level2">
+<h2 class="anchored" data-anchor-id="wgs-84-the-familiar-one">WGS 84: The Familiar One</h2>
+<p>The most familiar system is <strong>WGS 84</strong>, identified by EPSG 4326.</p>
+<p>This is the latitude-longitude system most of us recognize from GPS coordinates. It uses angular units, not distance units. So when you see values like <span class="math inline">\(-93.2\)</span> and <span class="math inline">\(44.9\)</span>, you are looking at longitude and latitude in degrees.</p>
+<p>A key consequence of this is that you cannot treat differences in longitude and latitude as simple distance changes. A one-degree change in longitude does not correspond to the same distance everywhere on Earth. It shrinks as you move toward the poles.</p>
+<p>WGS 84 is excellent for storing locations and for displaying points on the globe. It is often the first system you encounter when working with field boundaries, sampling points, or online map data.</p>
+<p>In practice, distance calculations in WGS84 require geodesic methods; for most workflows, it is simpler and safer to transform to a projected CRS.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This is the version of the United States that most people have in their head. But notice the key point: those coordinates are in <strong>degrees</strong>, not meters. Let’s take a look at the first few rows of the data frame to check the coordinates.</p>
+<p>Coordinates are meaningless unless you know the CRS attached to them.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 6 features and 1 field
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: -104.0532 ymin: 37.91685 xmax: -74.69491 ymax: 43.50088
+Geodetic CRS:  WGS 84
+    state_name                       geometry
+1     Maryland MULTIPOLYGON (((-76.04621 3...
+2         Iowa MULTIPOLYGON (((-96.62187 4...
+3     Delaware MULTIPOLYGON (((-75.77379 3...
+4         Ohio MULTIPOLYGON (((-82.86334 4...
+5 Pennsylvania MULTIPOLYGON (((-80.51989 4...
+6     Nebraska MULTIPOLYGON (((-104.0531 4...</code></pre>
+</div>
+</div>
+<p>Let us isolate Iowa and look at its border points.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If we check the coordinates of the first few rows, you will see the coordinates are longitudes and latitudes. For the Upper Midwest, longitude is negative and latitude is positive because we are west of the Prime Meridian and north of the Equator.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 6 features and 1 field
+Geometry type: POINT
+Dimension:     XY
+Bounding box:  xmin: -96.62187 ymin: 42.77926 xmax: -96.50031 ymax: 42.95939
+Geodetic CRS:  WGS 84
+    state_name                   geometry
+2         Iowa POINT (-96.62187 42.77925)
+2.1       Iowa POINT (-96.57794 42.82764)
+2.2       Iowa POINT (-96.53785 42.87847)
+2.3       Iowa  POINT (-96.54047 42.9086)
+2.4       Iowa POINT (-96.54169 42.92258)
+2.5       Iowa POINT (-96.50031 42.95939)</code></pre>
+</div>
+</div>
+<p>That is fine for locating things. It is not ideal for all measurements.</p>
+</section>
+<section id="web-mercator-convenient-not-sacred" class="level2">
+<h2 class="anchored" data-anchor-id="web-mercator-convenient-not-sacred">Web Mercator: Convenient, Not Sacred</h2>
+<p>Another common system is <strong>Web Mercator</strong>, identified by EPSG 3857.</p>
+<p>This is widely used by web maps. It is convenient. It is familiar. It is also not magical. It is just one projection among many.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now the coordinates are no longer in degrees. They are expressed in projected units, often meters (but always check).</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 6 features and 1 field
+Geometry type: POINT
+Dimension:     XY
+Bounding box:  xmin: -10755900 ymin: 5278432 xmax: -10742370 ymax: 5305793
+Projected CRS: WGS 84 / Pseudo-Mercator
+    state_name                  geometry
+2         Iowa POINT (-10755898 5278432)
+2.1       Iowa POINT (-10751007 5285774)
+2.2       Iowa POINT (-10746544 5293493)
+2.3       Iowa POINT (-10746836 5298070)
+2.4       Iowa POINT (-10746972 5300195)
+2.5       Iowa POINT (-10742365 5305793)</code></pre>
+</div>
+</div>
+<p>This projection is useful because many mapping tools expect it. But if your job is to compute area accurately, or to perform field-scale analysis, do not assume the default web map system is the best analytical choice.</p>
+<p>A useful rule of thumb:</p>
+<ul>
+<li>Some coordinate systems are mainly for display.</li>
+<li>Others are better suited for analysis.</li>
+</ul>
+<p>Web Mercator is excellent for visualization but often a poor choice for measurement.</p>
+</section>
+<section id="equal-area-projections-better-for-area-questions" class="level2">
+<h2 class="anchored" data-anchor-id="equal-area-projections-better-for-area-questions">Equal-Area Projections: Better for Area Questions</h2>
+<p>If the question is about <strong>area</strong>, then an equal-area projection is often the better choice.</p>
+<p>Here is the U.S. National Atlas Equal Area system, EPSG 2163.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The map looks a little different because the distortion has been redistributed. That is the point. We are trading off shape so that area is represented more faithfully.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 6 features and 1 field
+Geometry type: POINT
+Dimension:     XY
+Bounding box:  xmin: 275683.8 ymin: -241224.8 xmax: 284755.3 ymax: -220794
+Projected CRS: NAD27 / US National Atlas Equal Area
+    state_name                   geometry
+2         Iowa POINT (275683.8 -241224.8)
+2.1       Iowa POINT (279045.8 -235699.3)
+2.2       Iowa POINT (282077.1 -229914.3)
+2.3       Iowa POINT (281724.7 -226576.8)
+2.4       Iowa POINT (281561.2 -225027.7)
+2.5       Iowa   POINT (284755.3 -220794)</code></pre>
+</div>
+</div>
+<p>Notice that the numbers changed again. Same state. Same border. Different coordinate system. That is why coordinates are meaningless unless you know the CRS attached to them.</p>
+</section>
+<section id="utm-often-useful-for-local-work" class="level2">
+<h2 class="anchored" data-anchor-id="utm-often-useful-for-local-work">UTM: Often Useful for Local Work</h2>
+<p>For local and regional work, a projected UTM system is often a sensible choice because it uses distance-based units and behaves well over a more limited geographic area.</p>
+<p>UTM divides the Earth into zones, each with its own local projection. That helps reduce distortion within a zone.</p>
+<p>The main idea is not that you memorize zone numbers. The main idea is that local projected systems are often more appropriate for field-scale operations than latitude-longitude coordinates.</p>
+<p>A simple rule is to use the UTM zone that covers your study area, or use software defaults when transforming to UTM.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 6 features and 1 field
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: -430361.5 ymin: 4302650 xmax: 2071922 ymax: 4822687
+Projected CRS: WGS 84 / UTM zone 15N
+    state_name                       geometry
+1     Maryland MULTIPOLYGON (((1993054 434...
+2         Iowa MULTIPOLYGON (((203716.8 47...
+3     Delaware MULTIPOLYGON (((1980236 454...
+4         Ohio MULTIPOLYGON (((1344005 466...
+5 Pennsylvania MULTIPOLYGON (((1552225 460...
+6     Nebraska MULTIPOLYGON (((-428738.2 4...</code></pre>
+</div>
+</div>
+<p>And here again are Iowa border coordinates in that projected system.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 6 features and 1 field
+Geometry type: POINT
+Dimension:     XY
+Bounding box:  xmin: 203716.8 ymin: 4742667 xmax: 214495 ymax: 4762252
+Projected CRS: WGS 84 / UTM zone 15N
+    state_name                 geometry
+2         Iowa POINT (203716.8 4742667)
+2.1       Iowa POINT (207539.8 4747887)
+2.2       Iowa POINT (211054.1 4753394)
+2.3       Iowa POINT (210980.9 4756748)
+2.4       Iowa   POINT (210947 4758305)
+2.5       Iowa   POINT (214495 4762252)</code></pre>
+</div>
+</div>
+</section>
+<section id="projection-summary" class="level2">
+<h2 class="anchored" data-anchor-id="projection-summary">Projection Summary</h2>
+<p>Here is the practical version of all of that:</p>
+<ul>
+<li>WGS 84 is common for storing locations and GPS-style coordinates</li>
+<li>Web Mercator is common for web maps</li>
+<li>Equal-area systems are better when area is central to the question</li>
+<li>Local projected systems are often better for measuring distance or doing field-scale spatial operations</li>
+</ul>
+<p>If you remember only one thing from this section, remember this:</p>
+<blockquote class="blockquote">
+<p>Two layers that look like maps are not ready to analyze together until their coordinate systems are compatible.</p>
+</blockquote>
+<p>One of the easiest ways to see why this matters is to look at the same data in two different projections side by side.</p>
+<p>Below, the left panel shows the contiguous United States in WGS84 (EPSG 4326). This is the geographic coordinate system, latitude and longitude as plain degrees. I also drew a regular red grid on top of the map. In WGS84, that grid looks like a simple set of square cells.</p>
+<p>The right panel shows the exact same data reprojected to the US National Atlas Equal Area system (EPSG 2163). The state boundaries still describe the same country, but the red grid now bends and stretches. That is the key visual idea: when you change projections, you are changing how the curved Earth is laid onto a flat map.</p>
+<p>Neither version is wrong. They describe the same Earth. But they make different trade-offs, and they cannot be analyzed together without first choosing one and transforming both layers to it.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="part-2-vector-data-and-shapefiles" class="level1">
+<h1>Part 2: Vector Data and Shapefiles</h1>
+<section id="case-study-a-yield-map" class="level2">
+<h2 class="anchored" data-anchor-id="case-study-a-yield-map">Case Study: A Yield Map</h2>
+<p>Now let us move from general map concepts into an actual agronomic example.</p>
+<p>We will start with a yield map from a field in Iowa.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Yield monitor points with per-location yield values.</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>corn_yield <span class="ot">&lt;-</span> <span class="fu">st_read</span>(</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"data/example-field/example-field.shp"</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">quiet =</span> <span class="cn">TRUE</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Printing the object tells us a lot.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 6 features and 12 fields
+Geometry type: POINT
+Dimension:     XY
+Bounding box:  xmin: -93.15033 ymin: 41.66641 xmax: -93.15026 ymax: 41.66644
+Geodetic CRS:  WGS 84
+   DISTANCE SWATHWIDTH VRYIELDVOL Crop  WetMass Moisture                 Time
+1 0.9202733          5   57.38461  174 3443.652     0.00 9/19/2016 4:45:46 PM
+2 2.6919269          5   55.88097  174 3353.411     0.00 9/19/2016 4:45:48 PM
+3 2.6263101          5   80.83788  174 4851.075     0.00 9/19/2016 4:45:49 PM
+4 2.7575437          5   71.76773  174 4306.777     6.22 9/19/2016 4:45:51 PM
+5 2.3966513          5   91.03274  174 5462.851    12.22 9/19/2016 4:45:54 PM
+6 3.1840529          5   65.59037  174 3951.056    13.33 9/19/2016 4:45:55 PM
+   Heading VARIETY Elevation                  IsoTime yield_bu
+1 300.1584   23A42  786.8470 2016-09-19T16:45:46.001Z 88.00674
+2 303.6084   23A42  786.6140 2016-09-19T16:45:48.004Z 88.30063
+3 304.3084   23A42  786.1416 2016-09-19T16:45:49.007Z 88.51525
+4 306.2084   23A42  785.7381 2016-09-19T16:45:51.002Z 88.93883
+5 309.2284   23A42  785.5937 2016-09-19T16:45:54.002Z 89.68208
+6 309.7584   23A42  785.7512 2016-09-19T16:45:55.005Z 90.06548
+                    geometry
+1 POINT (-93.15026 41.66641)
+2 POINT (-93.15028 41.66641)
+3 POINT (-93.15028 41.66642)
+4  POINT (-93.1503 41.66642)
+5 POINT (-93.15032 41.66644)
+6 POINT (-93.15033 41.66644)</code></pre>
+</div>
+</div>
+<p>This is an <code>sf</code> object, and that is one of the most convenient formats in R for spatial work.</p>
+<p>It behaves a lot like a data frame, but one column contains geometry. That geometry column stores the spatial object associated with each row.</p>
+<p>Before doing anything fancy, read the metadata at the top.</p>
+<ul>
+<li>What kind of geometry is this: points, lines, or polygons?</li>
+<li>What CRS is attached to it?</li>
+<li>How many features are there?</li>
+</ul>
+<p>Those are not trivial details. They determine what you can meaningfully do next.</p>
+<p>In this case, the geometry type is <code>POINT</code>, which means each row corresponds to a location where a yield value was recorded.</p>
+</section>
+<section id="plot-the-yield-points" class="level2">
+<h2 class="anchored" data-anchor-id="plot-the-yield-points">Plot the Yield Points</h2>
+<p>A map is a good first look because it lets us see both the geometry and the data values.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This is already useful. You can see where the high and low yielding areas tend to cluster.</p>
+<p>And that should immediately raise a question:</p>
+<blockquote class="blockquote">
+<p>If management was mostly constant across the field, why did yield vary so much by location?</p>
+</blockquote>
+<p>Many factors could be involved: subtle elevation changes, drainage, compaction, pest pressure, historical management, and soil differences.</p>
+<p>Soil is not the only explanation, but it is often one of the most plausible and testable first hypotheses. That is why the next step is to bring in a soil layer.</p>
+</section>
+<section id="adding-ssurgo-soil-data" class="level2">
+<h2 class="anchored" data-anchor-id="adding-ssurgo-soil-data">Adding SSURGO Soil Data</h2>
+<p>The Soil Survey Geographic Database, or <strong>SSURGO</strong>, is one of the most useful resources you can bring into agronomic spatial analysis.</p>
+<p>It contains map units and soil attributes that can help explain why some parts of a field behave differently from others.</p>
+<p><strong>Two important caveats before we use it:</strong></p>
+<ul>
+<li>SSURGO is not perfect, and map units are generalized.</li>
+<li>SSURGO was not originally designed to resolve every sub-field pattern at yield-monitor resolution.</li>
+</ul>
+<p>SSURGO map units are often much coarser than yield monitor data, so they may explain broad trends but miss within-field variability.</p>
+<p>So we should treat SSURGO as a strong contextual layer, not as ground truth for every point in the field.</p>
+<p>First, we create a field polygon from the outer boundary of the yield points.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>field_poly <span class="ot">&lt;-</span> <span class="fu">st_convex_hull</span>(<span class="fu">st_union</span>(corn_yield))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(field_poly)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now we request SSURGO data using <code>get_ssurgo_tables()</code> from the <code>apsimx</code> package.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(apsimx)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>soil_tables <span class="ot">&lt;-</span> <span class="fu">get_ssurgo_tables</span>(<span class="at">aoi =</span> field_poly)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For this lecture, we are not going to walk through all SSURGO table operations in class.</p>
+<p>During the exercises, you will manipulate SSURGO tables directly. Here, we focus on connecting yield and soil datasets.</p>
+<p>From SSURGO, we will use two attributes: organic matter (<code>om.r</code>) and clay content (<code>claytotal.r</code>).</p>
+<p>Here is a map of SSURGO organic matter.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>And here is the same idea for clay content.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="joining-yield-and-soil" class="level2">
+<h2 class="anchored" data-anchor-id="joining-yield-and-soil">Joining Yield and Soil</h2>
+<p>Now we can do what really matters: relate soil and yield.</p>
+<p>Before joining, both layers must share the same CRS. Then <code>st_join()</code> assigns soil attributes to each yield point based on which SSURGO map unit contains it.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>complete_soil_data <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(complete_soil_data, <span class="fu">st_crs</span>(corn_yield))</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>yield_and_soil <span class="ot">&lt;-</span> <span class="fu">st_join</span>(corn_yield, complete_soil_data)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>yield_and_soil <span class="ot">&lt;-</span> yield_and_soil[, <span class="fu">c</span>(<span class="st">"yield_bu"</span>, <span class="st">"muname"</span>, <span class="st">"om.r"</span>, <span class="st">"claytotal.r"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Once every yield point carries the soil attributes from its map unit, we can ask spatial and agronomic questions at the same time.</p>
+<p><strong>Average yield by soil map unit.</strong> We aggregate yield observations within each map unit and color the polygons accordingly. Map units that support higher yields stand out immediately.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Yield and organic matter.</strong> Higher OM is generally associated with better water-holding capacity and nutrient cycling. Each point is one yield observation; the trend line summarizes the overall relationship.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Yield and clay content.</strong> Clay affects drainage and compaction. Moderate clay can be beneficial, but very high clay often restricts root development and drainage, showing up as a negative or non-linear yield response.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Notice what happened. We started with a map, but the scientific question quickly became familiar:</p>
+<blockquote class="blockquote">
+<p>Which soil characteristics are associated with better or worse performance?</p>
+</blockquote>
+<p>As you can tell, we cannot infer much from this analysis. We are unable to allocate much of the variability in yield data to the soil characteristics. There could be other factors at play that we not exploring in this analysis.</p>
+</section>
+<section id="spatial-operations-with-shapes" class="level2">
+<h2 class="anchored" data-anchor-id="spatial-operations-with-shapes">Spatial Operations with Shapes</h2>
+<p>Sometimes you do not just want to overlay two existing layers. Sometimes you want to define a new area and ask what happens inside it, outside it, or across several treatment zones combined.</p>
+<p>That is where operations like <code>st_intersection()</code>, <code>st_difference()</code>, and <code>st_union()</code> become useful.</p>
+<section id="intersection" class="level3">
+<h3 class="anchored" data-anchor-id="intersection">Intersection</h3>
+<p>Suppose a foliar treatment was applied to a specific part of the field.</p>
+<p>Core pattern:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>yield_inside_aoi <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(yield_map, area_of_interest)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If you want only the yield points inside that treatment area, use an intersection.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="difference" class="level3">
+<h3 class="anchored" data-anchor-id="difference">Difference</h3>
+<p>If you want the points outside that area instead, use a difference operation.</p>
+<p>Core pattern:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>yield_outside_aoi <span class="ot">&lt;-</span> <span class="fu">st_difference</span>(yield_map, area_of_interest)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="union" class="level3">
+<h3 class="anchored" data-anchor-id="union">Union</h3>
+<p>If you have multiple polygons and want to analyze them as one combined region, use a union.</p>
+<p>Core pattern:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>combined_area <span class="ot">&lt;-</span> <span class="fu">st_union</span>(area_1, area_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-33-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>These operations are conceptually simple, but they are powerful. They let you ask treatment questions with spatial data instead of only staring at the map and guessing.</p>
+<p>These are examples, not the full toolbox. There are many other topological operations in spatial analysis, and we will explore additional ones in the exercises.</p>
+</section>
+</section>
+</section>
+<section id="part-3-rasters" class="level1">
+<h1>Part 3: Rasters</h1>
+<section id="raster-intuition-a-quick-ndvi-example" class="level2">
+<h2 class="anchored" data-anchor-id="raster-intuition-a-quick-ndvi-example">Raster Intuition: A Quick NDVI Example</h2>
+<p>So far, we’ve treated space as discrete objects (points and polygons). Rasters take a different view: space as a continuous surface.</p>
+<p>Think about <strong>NDVI</strong> maps. NDVI is commonly used as a quick proxy for crop vigor, where higher values often indicate greener, more active vegetation.</p>
+<p>The key point is not the specific index formula. The key point is structure:</p>
+<ul>
+<li>a raster is a grid of cells</li>
+<li>each cell stores one value</li>
+<li>neighboring cells let us see spatial patterns</li>
+</ul>
+<p>A raster is not just a data format. It is an assumption that the variable we care about exists everywhere in space, even where we did not measure it.</p>
+<p>So when you look at an NDVI map, you are already thinking in raster logic.</p>
+<p>This NDVI example is from the same field as the yield map, so we can use it to connect raster and vector thinking.</p>
+<p>First, let us inspect raster structure: bounding box (spatial extent) and resolution (cell size).</p>
+<p>For that, we can use the <code>stars</code> package, which provides a convenient way to read and work with raster data in R. There are other packages as well, like <code>terra</code> and <code>raster</code>, but <code>stars</code> is a good choice for this example.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stars)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>ndvi <span class="ot">&lt;-</span> <span class="fu">read_stars</span>(<span class="st">"data/example_ndvi.tif"</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>ndvi</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>stars object with 2 dimensions and 1 attribute
+attribute(s):
+                       Min.   1st Qu.    Median      Mean   3rd Qu.      Max.
+example_ndvi.tif  0.3816743 0.5375135 0.5492938 0.5459545 0.5602355 0.5785804
+                  NA's
+example_ndvi.tif   469
+dimension(s):
+  from to  offset delta                refsys point x/y
+x    1 39  487110    10 WGS 84 / UTM zone 15N FALSE [x]
+y    1 37 4613090   -10 WGS 84 / UTM zone 15N FALSE [y]</code></pre>
+</div>
+</div>
+<p>When we print the <code>ndvi</code> object, we can see the three things that define a raster: its extent, its resolution, and its coordinate reference system (CRS).</p>
+<p>The extent tells us where the raster exists in space, the resolution tells us how big each cell is, and the CRS tells us how the raster is positioned on Earth.</p>
+<p>Resolution controls what patterns you can see. A 10 m raster can capture within-field variation. A 1 km raster cannot.</p>
+<p>Changing resolution changes the question you are asking.</p>
+<p>For this lecture note, I have extracted the NDVI raster using the <code>pacu</code> package. I will not go into much detail about it here, but if you are interested, you can check out <a href="https://cldossantos.github.io/posts/2025-05-13_vegetation-indices/">this blog post</a> about <code>pacu</code> for more information on how to access and process satellite data in R.</p>
+<p>Now, we can plot the NDVI raster to visualize the spatial patterns of vegetation vigor across the field.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(ndvi, </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="at">main =</span> <span class="st">"NDVI Map"</span>, </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="at">col =</span> <span class="fu">hcl.colors</span>(<span class="dv">6</span>, <span class="at">palette =</span> <span class="st">"RdYlGn"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-35-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now let us focus on a small part of this raster and explore it both as an image and as a matrix. Let us subset only the first 5 rows and columns.</p>
+<p>This makes the grid structure concrete. <code>NA</code> values are unfilled in the map, while valid values are colored based on where they fall in the value range.</p>
+<p>This matrix is the raster with its spatial context removed. A raster is just a matrix plus information about where that matrix sits on Earth.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>tl.corner <span class="ot">&lt;-</span> ndvi[<span class="dv">1</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(tl.corner,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="at">main =</span> <span class="st">"Focusing on the topleft corner"</span>, </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="at">col =</span> <span class="fu">hcl.colors</span>(<span class="dv">6</span>, <span class="at">palette =</span> <span class="st">"RdYlGn"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-36-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">t</span>(<span class="fu">as.matrix</span>(tl.corner[[<span class="dv">1</span>]]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1]      [,2]      [,3]      [,4]      [,5]
+[1,]   NA        NA 0.4683706 0.5176690 0.5477387
+[2,]   NA        NA 0.4770957 0.5436720 0.5659866
+[3,]   NA 0.4205244 0.4947885 0.5520468 0.5738078
+[4,]   NA 0.3816743 0.4815275 0.5489536 0.5586801
+[5,]   NA 0.4334736 0.5112736 0.5592239 0.5541475</code></pre>
+</div>
+</div>
+<p>In practice, we interpret low, medium, and high NDVI zones, then ask what might be driving those differences: stand count, moisture, nutrient stress, compaction, disease pressure, or something else.</p>
+<p>Notice something important: NDVI already gives us a complete surface. Every cell has a value.</p>
+<p>Some rasters come directly from sensors, like NDVI. Others are built from models, like interpolated soil maps. The difference matters.</p>
+<p>With NDVI, every location already has a value. With soil samples, most locations have no value at all.</p>
+<p>If we want a raster map, we have to create those missing values.</p>
+</section>
+<section id="from-points-to-surfaces" class="level2">
+<h2 class="anchored" data-anchor-id="from-points-to-surfaces">From Points to Surfaces</h2>
+<p>In the NDVI example, we started with a complete raster surface. Now we switch to the opposite workflow: we start with point observations and build a raster surface from them.</p>
+<p>Let us build that idea with a field example.</p>
+</section>
+<section id="the-observed-soil-samples" class="level2">
+<h2 class="anchored" data-anchor-id="the-observed-soil-samples">The Observed Soil Samples</h2>
+<p>Now let us map the sampled soil P values.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here is the field with the empty grid overlaid.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-40-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Each cell is just a spatial container waiting for a value.</p>
+<p>A raster map can look smooth and convincing, but it is still a model. Values in unsampled locations are estimates, not observations.</p>
+<p>A smooth raster can look more certain than the data justify. Two different interpolation methods, or even small changes in parameters, can produce noticeably different maps from the same points.</p>
+<p>And here is the same field with the grid overlay.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-41-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now the limitation becomes unavoidable: most cells have no data, but every cell needs a value.</p>
+<p>That means we need to <strong>interpolate</strong>.</p>
+<p>Interpolation is not just about filling gaps. It is about using the sampled data to estimate quantities of interest at locations we never sampled.</p>
+</section>
+</section>
+<section id="part-4-interpolation" class="level1">
+<h1>Part 4: Interpolation</h1>
+<section id="interpolation-intuition-start-simple" class="level2">
+<h2 class="anchored" data-anchor-id="interpolation-intuition-start-simple">Interpolation Intuition: Start Simple</h2>
+<p>Interpolation means estimating values at unsampled locations using the values measured at nearby locations.</p>
+<p>The most intuitive principle is simple:</p>
+<blockquote class="blockquote">
+<p>Things that are close together tend to be more similar than things that are far apart.</p>
+</blockquote>
+<p>Let us make that idea concrete with a small toy example.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-42-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Suppose the center cell is missing. A basic idea would be to estimate it using the surrounding cells.</p>
+<p>That leads to <strong>inverse distance weighting</strong>, or IDW. This is a weighted average where each nearby point gets more influence and each distant point gets less.</p>
+<p>A common choice is inverse distance squared, which uses weights proportional to</p>
+<p><span class="math display">\[
+w_i \propto \frac{1}{d_i^2}
+\]</span></p>
+<p>More generally, IDW often uses</p>
+<p><span class="math display">\[
+w_i \propto \frac{1}{d_i^p}
+\]</span></p>
+<p>where <span class="math inline">\(p = 2\)</span> is a common default.</p>
+<p>For the nearest ring of surrounding cells, a plain average would be:</p>
+<p><span class="math display">\[
+\text{cell value} = \text{mean}(16.6, 17.9, 13.1, 19.1, 11.6, 11.1, 16.2, 16.2) = 16.6
+\]</span></p>
+<p>But we can improve on that by allowing farther cells to contribute less to the estimate.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-43-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The weighted mean is</p>
+<p><span class="math display">\[
+\text{weighted mean} = \frac{\sum \text{weighted value}}{\sum \text{weight}}
+\]</span></p>
+<p>In this example, the estimate is about 15.7.</p>
+<p>That is the basic logic of IDW.</p>
+<p>This same idea applies to field data: each soil sample influences nearby locations, but we rarely know the exact shape of that influence.</p>
+</section>
+<section id="kriging" class="level2">
+<h2 class="anchored" data-anchor-id="kriging">Kriging</h2>
+<p>IDW is useful, but it is still fairly crude. It assumes the influence of neighboring observations falls off with distance in a simple way.</p>
+<p>You can think of kriging as a smarter version of IDW that learns the weighting rule from the data instead of assuming one.</p>
+<p><strong>Kriging</strong> goes a step further. Instead of using a fixed weighting rule, it models how similarity between observations changes with distance.</p>
+<p>That relationship is summarized in a <strong>semivariogram</strong>.</p>
+<p>The semivariogram measures how different values are, on average, as a function of distance.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/range_sill_nugget.gif" class="img-fluid figure-img"></p>
+<figcaption>from “How Kriging Works” (https://pro.arcgis.com/en/pro-app/tool-reference/3d-analyst/how-kriging-works.htm)</figcaption>
+</figure>
+</div>
+<p>The basic idea is this:</p>
+<ul>
+<li>pairs of points that are close together tend to have smaller differences than points that are farther apart</li>
+<li>pairs that are farther apart tend to have larger differences</li>
+<li>the semivariogram quantifies that pattern</li>
+</ul>
+<p>The semivariogram also tells us:</p>
+<ul>
+<li>how quickly similarity breaks down with distance (the range)</li>
+<li>how much variability exists overall (the sill)</li>
+<li>how much noise or measurement error exists (the nugget)</li>
+</ul>
+<p>Once we estimate that relationship, kriging uses it to decide how much weight to give each nearby observation when predicting unsampled locations.</p>
+<p>Compared to IDW:</p>
+<ul>
+<li>IDW assumes a fixed distance-based rule</li>
+<li>kriging learns how fast similarity decays from the data</li>
+<li>this lets kriging adapt to different spatial patterns instead of imposing one rule everywhere</li>
+</ul>
+<p>One important advantage of kriging is that it does not only predict values, it can also estimate prediction uncertainty. Areas far from sampled points typically have higher uncertainty, even if the map looks smooth.</p>
+<p>Kriging assumes the spatial structure you estimate continues across the field. If that assumption is wrong, for example because of abrupt management zones, sharp soil boundaries, or sampling errors, predictions can be misleading.</p>
+<p>In other words, kriging assumes the spatial relationship estimated from the variogram is consistent across the field.</p>
+<p>I do not need you to become geostatisticians in one lecture. What I do need is for you to understand why kriging often outperforms a rougher method: it learns the spatial structure from the data.</p>
+<p>Kriging tends to outperform simpler methods when there is a clear spatial pattern in the data. When data are sparse or highly irregular, the advantage over simpler methods may be smaller.</p>
+<p>Now let us see how that idea turns into an actual workflow in R.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-46-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In this plot, each point summarizes how different pairs of observations are at a given distance. The fitted curve is the model kriging uses to assign weights. As semivariance increases with distance, nearby points get more influence than distant points.</p>
+<p>The semivariance is used to determine the Kriging weights. Although I do not expect you to learn how these weights are computed in this short lecture, I think it is useful to look at a spatial representation of how distance affects the Kriging weights when interpolating values in this field.</p>
+<p>Unlike IDW, distance alone does not determine kriging weights. The variogram controls how quickly similarity decays, so points at similar distances can still have different influence.</p>
+<p>Let’s imagine we are predicting soil P at the location marked by the red triangle. The figure on the left shows how far each sampled location is from the prediction point.</p>
+<p>The image on the right shows the computed Kriging weights. This shows that points that are closer to the location for which we want to make a prediction are more influential. Also, since the semivariance stabilizes after <span class="math inline">\(\approx\)</span> 110 m, we can see that points beyond that range have very little influence because the model treats them as effectively uncorrelated with the prediction location.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-47-1.png" class="img-fluid figure-img" style="width:50.0%"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-47-2.png" class="img-fluid figure-img" style="width:50.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here is the interpolated soil P surface.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-48-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>And here is the kriging prediction variance (uncertainty) surface.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="spatial_data_analysis_files/figure-html/unnamed-chunk-49-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Notice that uncertainty is usually higher farther from sampled points. A smooth prediction map does not mean equal confidence everywhere.</p>
+<p>This map is smoother than the raw grid example because kriging is filling in the surface between measured points using the estimated spatial correlation structure.</p>
+</section>
+</section>
+<section id="wrap-up" class="level1">
+<h1>Wrap-Up</h1>
+<p>Analyzing spatial data can look intimidating because the code is a little heavier and the objects are less familiar. But the logic is not exotic.</p>
+<p>We worked through four core ideas:</p>
+<ul>
+<li><strong>Projection</strong> tells us how locations are represented and whether measurements like area or distance make sense.</li>
+<li><strong>Vector data</strong> let us store and analyze points and polygons such as yield monitor records, field boundaries, and soil map units.</li>
+<li><strong>Raster data</strong> let us represent spatial surfaces as grids of cells, each with a value.</li>
+<li><strong>Interpolation</strong> lets us move from scattered observations to continuous prediction surfaces and eventually to recommendation maps.</li>
+</ul>
+<p>If there is one theme running through this lecture, it is this:</p>
+<blockquote class="blockquote">
+<p>A spatial analysis is only as trustworthy as its geometry, units, and assumptions.</p>
+</blockquote>
+<p>Do not let a nice-looking map do all the thinking for you.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
