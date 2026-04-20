@@ -175,6 +175,11 @@ One of the ways I have seen researchers deal with this problem in the analysis i
 
 I will show here what I mean by this, **but I am not recommending this to anyone**.
 
+::: {.callout-warning}
+## Anti-Pattern
+The next code chunk intentionally demonstrates a flawed analysis strategy (copying control observations across treatments). This violates independence assumptions and should not be used in real analyses.
+:::
+
 ```{r}
 experimental.structure3 <- experimental.structure2
 control.indices <- which(experimental.structure3$source == 'control')

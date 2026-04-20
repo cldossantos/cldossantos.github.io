@@ -98,7 +98,7 @@ plot(density(yield.data$yield), main = '')
 
 ## Considerations about cleaning the data
 
-This kind of variability can be dealt with a variety of approaches. There are researchers who have proposed that we can remove anything that falls outside of 2 or 3 standard deviations from the mean. This is an empirical rule based on the assumption that the yield data follows a normal distribution. These thresholds represent $\approx95.0\%$ and $\approx99.7\%$ of the probability mass function of a normal distribution, respectively. However, this is based on two assumptions that are violated from the beginning:
+This kind of variability can be dealt with a variety of approaches. There are researchers who have proposed that we can remove anything that falls outside of 2 or 3 standard deviations from the mean. This is an empirical rule based on the assumption that the yield data follows a normal distribution. For a normal distribution, these thresholds represent approximately $95.45\%$ and $99.73\%$ of the probability mass, respectively. However, this is based on two assumptions that are violated from the beginning:
 
 1.  *Independent samples*: these are correlated in space
 2.  *Normal distribution*: there is no guarantee this data will follow a normal distribution. These data are bound to be greater than zero.

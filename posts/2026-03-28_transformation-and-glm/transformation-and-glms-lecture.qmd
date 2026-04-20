@@ -359,7 +359,7 @@ means_log_counts <- emmeans(mod_log_counts, ~treatment)
 means_log_counts
 ```
 
-Oh, that's right, the means are at the log scale too! We now need to back-transform the mean. Strictly speaking, exponentiating the mean on the log scale gives something closer to a median on the original scale... but for now, we’ll focus on interpretation. Let's extract the values in the log scale first.
+Oh, that's right, the means are at the log scale too! We now need to back-transform the mean. Exponentiating treatment means and differences on the log scale gives multiplicative effects on the original scale (often interpreted as geometric-mean ratios under this model). Let's extract the values in the log scale first.
 
 ```{r, echo=TRUE}
 log_df <- data.frame(means_log_counts)
@@ -381,7 +381,7 @@ exp(log_means[3] - log_means[1])
 
 The key interpretation detail when looking at difference at the log scale, is that those differences represent ratios in the data scale.
 
-The value of $\approx$ 0.20 that we got above is the ratio of the medians of treatments `I2` and `Control`. Which means that treatment `I2` presented an $\approx$ 80% reduction in the number of caterpillars compared to the control.
+The value of $\approx$ 0.20 that we got above is the multiplicative ratio between treatments `I2` and `Control` on the original scale under this log model. Which means that treatment `I2` is estimated to have about an $\approx$ 80% lower expected count of caterpillars than the control.
 
 **note**: I will call is ds_means for `data scale means`.
 
@@ -390,7 +390,7 @@ ds_means <- exp(log_means)
 ds_means
 ```
 
-To show that, we can take the ratio between the two medians.
+To show that, we can take the ratio between the two back-transformed treatment means.
 
 ```{r,echo=TRUE}
 ds_means[3] / ds_means[1]
