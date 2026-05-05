@@ -1,0 +1,791 @@
+---
+title: "Introduction to Machine Learning"
+subtitle: "Module 13"
+author: "Caio dos Santos"
+date: "2026-04-20"
+categories: [statistics]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+# Introduction
+
+I don't want to try and teach you all about machine learning because it's a field that is under rapid evolution and we have limited time. Instead, I want to show you some applications of machine learning and important considerations about machine learning models. By the end of this lecture, you should have a sense of what these models do, when they might help, and what can go wrong.
+
+# Estimating Canopy Coverage
+
+Here is a question that comes up constantly in applied crop science:
+
+> If I fly a drone over a field early in the season, can I estimate which experimental units are developing well?
+
+Canopy coverage is one metric. It tells you how much of the incident radiation is being intercepted by leaves. If you can estimate canopy coverage from drone images, you can rank which plots are doing well and which are lagging behind.
+
+But there is a practical problem. A drone image is millions of pixels, and each pixel is either canopy or not canopy. To get a plot-level estimate, you need a pixel-level decision rule.
+
+So: **How do you automatically decide what is canopy and what is soil?**
+
+This is not a question about statistics or machine learning yet. This is a question about **how to write a rule for a computer**. Machine learning enters when you realize your hand-written rule does not work well enough.
+
+The images used in this lecture were provided by Fernando Marcos and Natan Seraglio from the Remote Sensing and [Imaging Lab at Iowa State University](https://rsil.agron.iastate.edu/).
+
+Let's take a look at the first flight image and see what we are working with.
+
+```{r first-flight-image, eval=TRUE, echo=FALSE, fig.width=7, fig.height=5}
+library(stars)
+library(ggplot2)
+
+img_first <- read_stars("data/2023-07-06_resampled.tif")
+img_rgb <- st_rgb(img_first[,,,c(3,2,1)],
+                  stretch = TRUE)
+plot(img_rgb, main = "First Flight Image (RGB)")
+```
+
+# A Simple Rule: ExG Thresholding
+
+Let's think like an engineer. We need a decision rule: canopy or soil?
+
+The insight is simple: canopy is green. Soil is not. So we can compute a greenness index from the red, green, and blue bands. If greenness is high enough, call it canopy. If not, call it soil.
+
+This is called **Excess Green** (ExG), and it looks like this:
+
+$$
+\text{ExG} = 2G - R - B
+$$
+
+This index emphasizes the green band relative to red and blue. If ExG is high, it is likely canopy. If ExG is low, it is likely soil.
+
+Let's take a look at the at the structure of the raster data and see how to apply this equation to all pixels. In the previous modules, we looked at the structure of raster data.
+
+These images were collected with a multispectral camera, which contains red, green, and blue (RGB) bands, but also contain near infra-red (NIR) and red edge bands. Below, we use the `st_dimensions` function from the `stars` library to inspect which are the dimensions of these data.
+
+```{r}
+st_dimensions(img_first)
+```
+
+The data contains `x` and `y` dimensions, which correspond to longitude and latitude, respectively. Also, there is a third dimension to this data set, which correspond to the the different bands. Something else that is clear, is that the resolution of the pixels is 8 cm (indicated by the column `delta`). The dataset was originally at 1 cm resolution, which made the files large and computation slow. For this
+
+```{r}
+plot(img_first)
+```
+
+Now, let's apply the ExG equation to every pixel. We will take advantage of some functions in the `stars` package. One of them is, `st_apply`, which applies a function at different margins of a matrix.
+
+In our case, we want to use the different bands to compute ExG, so we will apply a function over `x` and `y`.
+
+Here is what the ExG surface looks like across the field, and how the values are distributed:
+
+```{r exg-threshold-hidden, echo=TRUE}
+exg <- st_apply(img_first,
+  MARGIN = c("x", "y"),
+  FUN = function(bands) {
+    bands[2] * 2 - bands[1] - bands[3] # excess green function
+  })
+
+
+plot(exg,
+     main = "Excess Green (ExG) across the field",
+     col = function(n) hcl.colors(n, 'Greens', rev = TRUE))
+```
+
+Now, we need to pick a value of ExG above which we consider a pixel to be **canopy** and below which we consider a pixel to be **soil**. This is often done by eyeballing the threshold value.
+
+Here, we will look at a histogram of the values and try to pick a threshold that distinguishes well between the two classes. Let's pick 0.035.
+
+```{r exg-histogram, eval=TRUE, echo=FALSE, fig.width=7, fig.height=4}
+exg_vals <- as.vector(exg[[1]])
+exg_vals <- exg_vals[!is.na(exg_vals)]
+hist(exg_vals,
+  breaks = 80,
+  col = "darkgreen",
+  border = "white",
+  main = "Distribution of ExG Values",
+  xlab = "ExG Value")
+```
+
+Let's apply the threshold and check whether the pixels that were classified as soil or canopy.
+
+```{r, echo=TRUE}
+binary <- st_apply(exg, 
+                   MARGIN = c('x', 'y'),
+                   function(x){
+                     if(x >= 0.035)
+                       return(1)
+                     else
+                       return(0)
+                   })
+```
+
+```{r exg-mask-setup, include=FALSE, echo=FALSE}
+# Convert 1/0 labels to a logical canopy mask
+canopy_mask <- binary == "1"
+
+# Apply mask to RGB image (soil pixels become black)
+masked_rgb <- img_first
+mask_mat <- canopy_mask[[1]]
+for (k in seq_len(dim(masked_rgb[[1]])[3])) {
+  band_k <- masked_rgb[[1]][,,k]
+  band_k[!mask_mat] <- 0
+  masked_rgb[[1]][,,k] <- band_k
+}
+
+```
+
+```{r exg-mask-preview, eval=TRUE, echo=FALSE, fig.width=10, fig.height=5}
+masked_rgb_vis <- st_rgb(masked_rgb[,,,c(3,2,1)],
+                         stretch = TRUE)
+plot(masked_rgb_vis, main = "Canopy Pixels After Binary Mask")
+```
+
+Now, let's bring in the geometries that delimit the experimental units and extract the number of pixels that are considered green inside of each experimental unit. This will give us the fraction of green coverage inside of every experimental unit.
+
+```{r, echo=TRUE}
+library(sf)
+eus <- st_read("data/experimental-units.shp", quiet = TRUE)
+st_crs(eus) <- st_crs(img_first)
+
+green_coverage <- st_extract(binary,
+                             eus,
+                             FUN = function(x){
+                               pixels <- as.numeric(x)
+                               canopy_coverage = sum(pixels)/length(pixels) ## green pixels over total pixels
+                               return(canopy_coverage)
+                             })
+```
+
+Below, we show the canopy coverage value for each one of the experimental units in this data set. Extracting canopy coverage in this way is really useful for phenotyping.
+
+```{r}
+library(ggplot2)
+
+
+names(green_coverage) <- 'canopy_coverage'
+ggplot()+
+  geom_stars(data = img_rgb)+
+  geom_sf(data  = eus, fill = 'transparent', col = 'red')+
+  geom_sf_label(data = st_as_sf(green_coverage),
+                aes(label = round(canopy_coverage, 2)),
+               nudge_x = -6.5)+
+  theme_void()
+```
+
+Let's take a look at one experimental unit. It seems like this simple rule works really well for this case!
+
+```{r masked-unit1-detail, eval=TRUE, echo=FALSE, fig.width=7, fig.height=5}
+library(sf)
+
+unit1_bbox <- st_bbox(eus[1, ])
+masked_unit1 <- st_crop(masked_rgb, unit1_bbox)
+
+masked_unit1_rgb <- st_rgb(masked_unit1[,,,c(3,2,1)],
+                           stretch = TRUE)
+plot(masked_unit1_rgb,
+  main = "Looking only at one experimental unit")
+plot(st_geometry(eus[1, ]), add = TRUE, border = "red", lwd = 2)
+```
+
+# Challenges of generalizing this approach
+
+Lighting changes across the field. Shadows darken canopy. Some soil is already dark. Early-season soybean is sparse: single pixels contain both leaves and exposed soil. The greenness value sits somewhere in between.
+
+Moreover, **soil is not uniform**. Darker soils, wetter soils, sandy soils, clay soils, they all have different colors. And different growth stages within a plot can look different.
+
+So a threshold that works in one part of the image fails in another. A threshold that works on one date fails when you use it two weeks later.
+
+To illustrate this, let's apply the same ExG threshold to a different date and see how it performs.
+
+Below, is an image that was taken about 20 days later.
+
+```{r exg-second-flight-generalization}
+# Load second flight image and test points
+img_test <- read_stars("data/2023-07-24_resampled.tif")
+img_rgb <- st_rgb(img_test[,,,1:3],
+                  stretch = TRUE)
+ggplot()+
+geom_stars(data = img_rgb)+
+  #coord_sf(xlim = st_bbox(eus[8,])[c(1,3)],
+   #        ylim = st_bbox(eus[8, ])[c(2,4)])+
+  theme_void()
+
+```
+
+We will apply the same threshold as the previous image, and to evaluate them, we will compare the prediction to these points that I (very tediously) hand annotated. These will serve as our ground truth to which we will compare model predictions. There are 400 points of each class (soil and canopy).
+
+```{r}
+
+test_pts <- st_read("data/2023-07-24_testing-set.geoJSON", quiet = TRUE)
+test_pts$class <- factor(test_pts$class, levels = c("0", "1"))
+
+ggplot()+
+geom_stars(data = img_rgb)+
+geom_sf(data = test_pts, aes(col = class))+
+  #coord_sf(xlim = st_bbox(eus[8,])[c(1,3)],
+   #        ylim = st_bbox(eus[8, ])[c(2,4)])+
+  theme_void()
+
+```
+
+After we compute the ExG for the second image and apply the threshold, we can compare our predictions to the ground truth data.
+
+The image below shows a comparison between the ground truth data and the predictions. The colors show whether there's agreement betwen the predictions and the ground truth data. Points shown in orange were incorrectly labeled by our simple rule.
+
+```{r}
+# Compute ExG for second flight
+exg_test <- st_apply(img_test,
+  MARGIN = c("x", "y"),
+  FUN = function(bands) bands[2] * 2 - bands[1] - bands[3]
+)
+
+# Apply threshold (same as first flight)
+binary_test_numeric <- as.numeric(exg_test[[1]] > 0.035)
+pred_exg_test_raster <- st_as_stars(matrix(binary_test_numeric,
+  nrow = dim(exg_test)[1], ncol = dim(exg_test)[2]))
+st_dimensions(pred_exg_test_raster) <- st_dimensions(exg_test)[1:2]
+st_crs(pred_exg_test_raster) <- st_crs(exg_test)
+
+# Extract predictions at test points
+pred_exg_test_extract <- st_extract(pred_exg_test_raster, at = test_pts)
+pred_exg_test_factor <- factor(
+  ifelse(as.vector(pred_exg_test_extract[[1]]) == 1, "1", "0"),
+  levels = c("0", "1")
+)
+
+
+exg_test_pts <- test_pts
+exg_test_pts$prediction <- pred_exg_test_factor
+exg_test_pts$agree <- exg_test_pts$class == exg_test_pts$prediction
+
+
+ggplot()+
+geom_stars(data = img_rgb)+
+geom_sf(data = exg_test_pts, aes(col = agree))+
+  labs(col = 'Agreement?')+
+#  coord_sf(xlim = st_bbox(eus[1,])[c(1,3)],
+#           ylim = st_bbox(eus[1, ])[c(2,4)])+
+  theme_void()
+
+```
+
+A different way of organizing this information is to show a matrix. The rows are the model's predictions (0 = soil, 1 = canopy). The columns are the true labels. The diagonal entries are correct classifications, and the off-diagonal entries are mistakes. This is commonly called a confusion matrix.
+
+Our confusion matrix shows that there are 80 pixels that should have been classified as `canopy` and were classified as `soil` using the ExG threshold. This indicates that the threshold value we chose for the first flight might not work too well for this flight.
+
+```{r}
+
+tab_exg_second <- table(Predicted = pred_exg_test_factor,
+                        Observed  = test_pts$class)
+cat("ExG Threshold — Confusion Matrix (Second Flight):\n")
+print(tab_exg_second)
+```
+
+## How can we solve this?
+
+Do we hand-tune the threshold? Try one value, look at the map, adjust, try again? But then which value do you use for the next date? And the next field?
+
+Or do you search for more indices? Maybe combine ExG with other indices? Add more hand-crafted rules? "If ExG is high, predict canopy. If ExG is low and NDVI is high, predict canopy anyway. If..."
+
+You can keep building rules, but at some point you stop calling this a *rule* and start calling it a *model*. And once you are fitting a model to data, you might as well let the model learn what matters instead of guessing.
+
+# Classification Trees: Learning the Rule
+
+Instead of hand-tuning a threshold, what if you gave the algorithm labeled examples and let it build the rule?
+
+Give it pixels where you know the ground truth (surveyed by hand). Show it pixels that are canopy and pixels that are soil. Let it find which combinations of band values reliably separate them.
+
+A **classification tree** is one way to do this. A tree learns a sequence of binary questions:
+
+-   Is Band 3 above 0.4?
+-   If no, is Band 2 above 0.3?
+-   If yes, is Band 1 below 0.2?
+
+Each question is just a threshold, but the tree asks *different* questions in different parts of the data. It adapts.
+
+## Why Trees Are Interpretable
+
+A tree has one big advantage: you can follow the logic. If the model predicts canopy, you can trace back through the tree and see which band values triggered that decision. That interpretability is valuable. It lets you check if the logic makes sense.
+
+But a tree has one big disadvantage: it is unstable. Train a tree on one set of labeled pixels, get one set of splits. Train it on a slightly different set of labeled pixels, get different splits. Small changes in the training data can lead to big changes in the learned rule.
+
+This is called **overfitting to the training data**. The tree is fitting noise, not learning a principle.
+
+```{r tree-logic-diagram, eval=TRUE, echo=FALSE, fig.width=8, fig.height=4}
+op <- par(mar = c(0, 0, 2, 0))
+plot.new()
+plot.window(xlim = c(0, 1), ylim = c(0, 1))
+
+rect(0.38, 0.78, 0.62, 0.92, col = "#F5F5F5", border = "#333333")
+text(0.50, 0.85, "Band 3 > 0.42?")
+
+rect(0.10, 0.43, 0.34, 0.57, col = "#FFF7E6", border = "#333333")
+text(0.22, 0.50, "No")
+rect(0.66, 0.43, 0.90, 0.57, col = "#E8F4FF", border = "#333333")
+text(0.78, 0.50, "Yes")
+
+rect(0.06, 0.08, 0.38, 0.24, col = "#FDECEC", border = "#333333")
+text(0.22, 0.16, "Predict: Soil")
+rect(0.62, 0.08, 0.94, 0.24, col = "#EAF7EA", border = "#333333")
+text(0.78, 0.16, "Predict: Canopy")
+
+arrows(0.46, 0.78, 0.26, 0.57, length = 0.08)
+arrows(0.54, 0.78, 0.74, 0.57, length = 0.08)
+arrows(0.22, 0.43, 0.22, 0.24, length = 0.08)
+arrows(0.78, 0.43, 0.78, 0.24, length = 0.08)
+
+title("One Classification Tree: Sequence of Decisions")
+par(op)
+```
+
+# Random Forest: Averaging Out Instability
+
+Here is a practical solution: instead of building one tree, build many trees. Train each tree on a slightly different subset of the labeled pixels. Each tree will learn somewhat different splits, but they will all point in roughly the same direction.
+
+Then, for each pixel, ask all the trees to vote. If 250 out of 300 trees say canopy, predict canopy. If 150 out of 300 say canopy, it is close and the pixel is probably a boundary.
+
+This is **random forest**. The forest averages out the instability of any single tree. Because many unstable estimates, when averaged, become stable.
+
+**Why 300 trees?** Think back to sampling: a single sample gives you one estimate, but that estimate has variance. Take many samples and average them, and the variance shrinks. The same logic applies here. Each tree is trained on a different random subset of resampled data, so each tree is like one sample from the data. One tree gives an unstable estimate; 300 trees averaged together give a much more stable one. Often, at 300 trees, adding more stops helping much, enough to get stability, not so many that you are wasting computation. **But this is not a universal rule. It should be evaluated with your data set**.
+
+```{r forest-vote-diagram, eval=TRUE, echo=FALSE, fig.width=8, fig.height=4}
+op <- par(mar = c(0, 0, 2, 0))
+plot.new()
+plot.window(xlim = c(0, 1), ylim = c(0, 1))
+
+rect(0.05, 0.35, 0.23, 0.65, col = "#F5F5F5", border = "#333333")
+text(0.14, 0.50, "Pixel")
+
+rect(0.34, 0.72, 0.52, 0.90, col = "#EAF7EA", border = "#333333")
+text(0.43, 0.81, "Tree 1\nCanopy")
+rect(0.34, 0.43, 0.52, 0.61, col = "#EAF7EA", border = "#333333")
+text(0.43, 0.52, "Tree 2\nCanopy")
+rect(0.34, 0.14, 0.52, 0.32, col = "#FDECEC", border = "#333333")
+text(0.43, 0.23, "Tree 3\nSoil")
+
+rect(0.70, 0.35, 0.95, 0.65, col = "#EAF7EA", border = "#333333")
+text(0.825, 0.56, "Majority Vote")
+text(0.825, 0.45, "Final: Canopy")
+
+arrows(0.23, 0.50, 0.34, 0.81, length = 0.08)
+arrows(0.23, 0.50, 0.34, 0.52, length = 0.08)
+arrows(0.23, 0.50, 0.34, 0.23, length = 0.08)
+arrows(0.52, 0.81, 0.70, 0.56, length = 0.08)
+arrows(0.52, 0.52, 0.70, 0.50, length = 0.08)
+arrows(0.52, 0.23, 0.70, 0.44, length = 0.08)
+
+title("Random Forest: Many Trees, One Vote")
+par(op)
+```
+
+# RGB-Only Random Forest: First Attempt
+
+Now, let's train a random forest model on our labeled data. We will use hand-labeled pixels from the first flight that tell us which pixels are canopy and which are soil. Let's take a look at these points.
+
+Like before, a value of 0 represents soil and a value of 1 represents canopy.
+
+```{r}
+img_first <- read_stars("data/2023-07-06_resampled.tif")
+img_rgb <- st_rgb(img_first[,,,c(3,2,1)],
+                  stretch = TRUE)
+train_pts <- st_read("data/2023-07-06_training-set.geoJSON", quiet = TRUE)
+
+ggplot()+
+  geom_stars(data = img_rgb)+
+  geom_sf(data = train_pts,
+          aes(fill = class), pch = 21)+
+  labs(fill = 'Class')+
+  theme_void()
+```
+
+We will fit a random forest model using the `randomForest` library. We will start with only the three visible bands: red, green, and blue.
+
+```{r train-rf-rgb-exec, include=FALSE, echo=FALSE}
+library(randomForest)
+
+img_train <- read_stars("data/2023-07-06_resampled.tif")
+eu <- st_read("data/experimental-units.shp", quiet = TRUE)
+
+## converting the classes to factors
+train_pts$class <- factor(train_pts$class, levels = c("0", "1"))
+
+# Extract all bands at training points
+train_x <- st_extract(img_train, at = train_pts)
+# Convert stars object to data frame
+train_vals <- as.data.frame(train_x[[1]])
+# Rename columns to band names
+names(train_vals) <- paste0("2023-07-06_resampled.tif.", 1:6)
+train_df <- cbind(st_drop_geometry(train_pts), train_vals)
+train_df <- train_df[complete.cases(train_df), ]
+
+# Select only visible bands (1=Blue, 2=Green, 3=Red)
+x_cols_rgb <- c("2023-07-06_resampled.tif.1", "2023-07-06_resampled.tif.2", "2023-07-06_resampled.tif.3")
+rf_fit_rgb <- randomForest(
+  x = train_df[, x_cols_rgb],
+  y = train_df$class,
+  ntree = 300
+)
+```
+
+The code to fit a random forest model in R looks like this:
+
+```{r,echo=TRUE,eval=FALSE}
+
+rf_fit_rgb <- randomForest(
+  x = PREDICTORS #RGB Bands in this case,
+  y = DEPENDENT VARIABLE #Canopy/Soil in this case,
+  ntree = 300
+)
+rf_fit_rgb
+```
+
+This is the output of the model:
+
+```{r}
+rf_fit_rgb
+```
+
+We can apply the trained model to the rest of the pixels in the image. This generate a new raster in which every pixel takes the value of either soil or canopy.
+
+```{r predict-train-rgb-exec, include=FALSE, echo=FALSE}
+# Extract RGB bands as matrix for prediction
+rgb_data <- img_train[,,,1:3]
+# Get dimensions
+dims <- dim(rgb_data)
+# Reshape to matrix: each row is a pixel, each column is a band
+pixel_matrix <- matrix(NA, nrow = dims[1] * dims[2], ncol = 3)
+pixel_matrix[, 1] <- as.vector(rgb_data[[1]][,,1])
+pixel_matrix[, 2] <- as.vector(rgb_data[[1]][,,2])
+pixel_matrix[, 3] <- as.vector(rgb_data[[1]][,,3])
+
+# Predict
+pred_vec <- predict(rf_fit_rgb, pixel_matrix, type = "response")
+# Convert factor to numeric (canopy = 1, soil = 0)
+pred_numeric <- as.numeric(pred_vec == "1")
+# Reshape back to raster
+pred_matrix <- matrix(pred_numeric, nrow = dims[1], ncol = dims[2])
+
+# Convert to stars
+pred_train_rgb <- st_as_stars(pred_matrix)
+st_dimensions(pred_train_rgb) <- st_dimensions(rgb_data)[1:2]
+st_crs(pred_train_rgb) <- st_crs(rgb_data)
+```
+
+```{r show-train-prediction-rgb, eval=TRUE, echo=FALSE, fig.width=8, fig.height=6}
+plot(pred_train_rgb, main = "RGB-Only RF Prediction (Training Date)",
+     col = c("chocolate4", "darkgreen"), breaks = c(-0.5, 0.5, 1.5))
+```
+
+It looks like it is doing a good job on the training data! **But a prediction map on the training date only tells us that the model memorized the labeled pixels**, it doesn't tell us how well it generalizes.
+
+Let's use a a separate test set from the same flight: labeled pixels that the model never saw during training. Let's evaluate on those.
+
+Here's the training set:
+
+```{r}
+test_pts_first <- st_read("data/2023-07-06_testing-set.geoJSON", quiet = TRUE)
+ggplot()+
+  geom_stars(data = img_rgb)+
+  geom_sf(data = test_pts_first,
+          aes(fill = class), pch = 21)+
+  labs(fill = 'Class')+
+  theme_void()
+```
+
+```{r eval-first-rgb-exec, include=FALSE, echo=FALSE}
+test_pts_first$class <- factor(test_pts_first$class, levels = c("0", "1"))
+
+pred_extract_first <- st_extract(pred_train_rgb, at = test_pts_first)
+pred_values_first <- as.vector(pred_extract_first[[1]])
+pred_factor_first <- factor(ifelse(pred_values_first == 1, "1", "0"), levels = c("0", "1"))
+
+tab_first <- table(Predicted = pred_factor_first, Observed = test_pts_first$class)
+```
+
+```{r eval-first-rgb-results, eval=TRUE, echo=FALSE}
+cat("\nRGB-Only Model — Confusion Matrix (First Flight Test Set):\n")
+print(tab_first)
+```
+
+The rows are the model's predictions (0 = soil, 1 = canopy). The columns are the true labels. The diagonal entries are correct classifications; the off-diagonal entries are mistakes. This gives us a baseline: how well does the model do on held-out pixels from the same date it was trained on?
+
+Now, let's ask a harder question: does it still work on a different date, on a completely different flight? We trained it on the July 6th image. Now we will apply it to the July 24th image.
+
+## Testing on the Second Flight
+
+Before applying the model, let's look at the second flight image itself.
+
+```{r third-flight-preview, eval=TRUE, echo=FALSE, fig.width=8, fig.height=6}
+img_test_preview <- read_stars("data/2023-07-24_resampled.tif")
+img_test_preview_rgb <- st_rgb(img_test_preview[,,,c(3,2,1)], stretch = TRUE)
+plot(img_test_preview_rgb, main = "Second Flight Image (2023-07-24)")
+```
+
+```{r predict-second-rgb-exec, include=FALSE, echo=FALSE}
+img_test <- read_stars("data/2023-07-24_resampled.tif")
+
+# Extract RGB bands as matrix for prediction
+rgb_data_test <- img_test[,,,1:3]
+dims_test <- dim(rgb_data_test)
+pixel_matrix_test <- matrix(NA, nrow = dims_test[1] * dims_test[2], ncol = 3)
+pixel_matrix_test[, 1] <- as.vector(rgb_data_test[[1]][,,1])
+pixel_matrix_test[, 2] <- as.vector(rgb_data_test[[1]][,,2])
+pixel_matrix_test[, 3] <- as.vector(rgb_data_test[[1]][,,3])
+
+# Predict
+pred_vec_test <- predict(rf_fit_rgb, pixel_matrix_test, type = "response")
+# Convert factor to numeric
+pred_numeric_test <- as.numeric(pred_vec_test == "1")
+pred_matrix_test <- matrix(pred_numeric_test, nrow = dims_test[1], ncol = dims_test[2])
+
+# Convert to stars
+pred_test_rgb <- st_as_stars(pred_matrix_test)
+st_dimensions(pred_test_rgb) <- st_dimensions(rgb_data_test)[1:2]
+st_crs(pred_test_rgb) <- st_crs(rgb_data_test)
+```
+
+Here's the model prediction for second flight:
+
+```{r show-test-prediction-rgb, eval=TRUE, echo=FALSE, fig.width=8, fig.height=6}
+plot(pred_test_rgb, main = "RGB-Only RF Prediction (Test Date)",
+     col = c("chocolate4", "darkgreen"), breaks = c(-0.5, 0.5, 1.5))
+```
+
+Let's look at the confusion matrix to see how well the model performed.
+
+```{r eval-second-rgb-exec, include=FALSE, echo=FALSE}
+test_pts <- st_read("data/2023-07-24_testing-set.geoJSON", quiet = TRUE)
+test_pts$class <- factor(test_pts$class, levels = c("0", "1"))
+
+# Extract predictions at test points
+pred_extract <- st_extract(pred_test_rgb, at = test_pts)
+pred_values <- as.vector(pred_extract[[1]])
+pred_factor_rgb <- factor(ifelse(pred_values == 1, "1", "0"), levels = c("0", "1"))
+
+test_df_rgb <- data.frame(class = test_pts$class, predicted = pred_factor_rgb)
+
+tab_rgb <- table(Predicted = test_df_rgb$predicted, Observed = test_df_rgb$class)
+```
+
+```{r eval-rgb-results, eval=TRUE, echo=FALSE}
+cat("\nRGB-Only Model — Confusion Matrix (Test Date):\n")
+print(tab_rgb)
+```
+
+The rows are what the model predicted (0 = soil, 1 = canopy). The columns are the true labels. The diagonal entries are correct predictions. The off-diagonal entries are mistakes: pixels the model called canopy that were actually soil, and pixels it called soil that were actually canopy.
+
+This model did well but it did not do much better than the simple thresholding rules we were using before. Let's see if we can improve the model.
+
+# What Other Information Can We Use?
+
+The RGB model works reasonably well. But the drone image contains more information than just the three visible bands:
+
+-   **Blue (Band 1)**, **Green (Band 2)**, **Red (Band 3)**: Visible light.
+-   **Red Edge (Band 4)**: Between red and near-infrared. Vegetation has a sharp reflectance change here.
+-   **Near-Infrared (Band 5)**: Beyond visible light. From plant physiology, we know that healthy vegetation reflects strongly in NIR. Plants absorb visible light for photosynthesis but reflect infrared to avoid overheating.
+
+So in principle, adding these bands should help. But before we assume that, let's check whether the expected pattern actually shows up in our data. Below, we compute the mean band values for soil (class 0) and canopy (class 1) pixels in the training set.
+
+```{r band-means, eval=TRUE, echo=FALSE}
+band_cols <- paste0("2023-07-06_resampled.tif.", 1:5)
+train_band_means <- aggregate(
+  train_df[, band_cols],
+  by = list(class = train_df$class),
+  FUN = mean
+)
+names(train_band_means) <- c("class", "Blue", "Green", "Red", "RedEdge", "NIR")
+train_band_means[, -1] <- round(train_band_means[, -1], 4)
+print(train_band_means)
+```
+
+Is canopy actually brighter in NIR than soil here? Let's train a model with all five bands and see whether it changes anything.
+
+# Multiband Random Forest
+
+Now we train on all bands: visible light (R, G, B), red edge, and near-infrared.
+
+```{r train-rf-multiband-exec, include=FALSE, echo=FALSE}
+train_df_multi <- train_df[complete.cases(train_df), ]
+
+# Use all bands: 1, 2, 3, 4, 5
+x_cols_multi <- c(
+  "2023-07-06_resampled.tif.1", 
+  "2023-07-06_resampled.tif.2", 
+  "2023-07-06_resampled.tif.3",
+  "2023-07-06_resampled.tif.4",
+  "2023-07-06_resampled.tif.5"
+)
+
+rf_fit_multi <- randomForest(
+  x = train_df_multi[, x_cols_multi],
+  y = train_df_multi$class,
+  ntree = 300,
+  importance = TRUE
+)
+```
+
+The code to fit the model now looks very similar to the model we fit before, except that now we are including the NIR and Red Edge bands as well.
+
+```{r,echo=TRUE,eval=FALSE}
+
+rf_fit_multi <- randomForest(
+  x = PREDICTORS #RGB Bands + NIR + Red Edge,
+  y = DEPENDENT VARIABLE #Canopy/Soil in this case,
+  ntree = 300
+)
+rf_fit_multi
+```
+
+This is what we see when we print the model:
+
+```{r}
+rf_fit_multi
+```
+
+Just like with the RGB model, let's first evaluate the multiband model on the first flight test set before applying it to the second flight.
+
+```{r eval-first-multi-exec, include=FALSE, echo=FALSE}
+# Predict multiband model on the first flight image
+multi_data_train <- img_train[,,,1:5]
+dims_multi_train <- dim(multi_data_train)
+pixel_matrix_multi_train <- matrix(NA, nrow = dims_multi_train[1] * dims_multi_train[2], ncol = 5)
+for (i in 1:5) {
+  pixel_matrix_multi_train[, i] <- as.vector(multi_data_train[[1]][,,i])
+}
+
+pred_vec_multi_train <- predict(rf_fit_multi, pixel_matrix_multi_train, type = "response")
+pred_numeric_multi_train <- as.numeric(pred_vec_multi_train == "1")
+pred_matrix_multi_train <- matrix(pred_numeric_multi_train, nrow = dims_multi_train[1], ncol = dims_multi_train[2])
+
+pred_train_multi <- st_as_stars(pred_matrix_multi_train)
+st_dimensions(pred_train_multi) <- st_dimensions(multi_data_train)[1:2]
+st_crs(pred_train_multi) <- st_crs(multi_data_train)
+
+# Evaluate on first flight test set
+pred_extract_first_multi <- st_extract(pred_train_multi, at = test_pts_first)
+pred_values_first_multi <- as.vector(pred_extract_first_multi[[1]])
+pred_factor_first_multi <- factor(ifelse(pred_values_first_multi == 1, "1", "0"), levels = c("0", "1"))
+
+tab_first_multi <- table(Predicted = pred_factor_first_multi, Observed = test_pts_first$class)
+```
+
+```{r eval-first-multi-results, eval=TRUE, echo=FALSE}
+cat("\nMultiband Model — Confusion Matrix (First Flight Test Set):\n")
+print(tab_first_multi)
+```
+
+## Testing on the Second Flight (Multiband)
+
+Now, let's see how the model does on the second flight.
+
+```{r predict-second-multi-exec, include=FALSE, echo=FALSE}
+# Extract all 5 bands (RGB + Red Edge + NIR) as matrix for prediction
+multi_data_test <- img_test[,,,1:5]
+dims_multi <- dim(multi_data_test)
+pixel_matrix_multi <- matrix(NA, nrow = dims_multi[1] * dims_multi[2], ncol = 5)
+pixel_matrix_multi[, 1] <- as.vector(multi_data_test[[1]][,,1])
+pixel_matrix_multi[, 2] <- as.vector(multi_data_test[[1]][,,2])
+pixel_matrix_multi[, 3] <- as.vector(multi_data_test[[1]][,,3])
+pixel_matrix_multi[, 4] <- as.vector(multi_data_test[[1]][,,4])
+pixel_matrix_multi[, 5] <- as.vector(multi_data_test[[1]][,,5])
+
+# Predict
+pred_vec_multi <- predict(rf_fit_multi, pixel_matrix_multi, type = "response")
+# Convert factor to numeric
+pred_numeric_multi <- as.numeric(pred_vec_multi == "1")
+pred_matrix_multi <- matrix(pred_numeric_multi, nrow = dims_multi[1], ncol = dims_multi[2])
+
+# Convert to stars
+pred_test_multi <- st_as_stars(pred_matrix_multi)
+st_dimensions(pred_test_multi) <- st_dimensions(multi_data_test)[1:2]
+st_crs(pred_test_multi) <- st_crs(multi_data_test)
+```
+
+```{r show-test-prediction-multi, eval=TRUE, echo=FALSE, fig.width=8, fig.height=6}
+plot(pred_test_multi, main = "Multiband RF Prediction (Test Date)",
+     col = c("chocolate4", "darkgreen"), breaks = c(-0.5, 0.5, 1.5))
+```
+
+```{r eval-second-multi-exec, include=FALSE, echo=FALSE}
+# Extract predictions at test points
+pred_extract_multi <- st_extract(pred_test_multi, at = test_pts)
+pred_values_multi <- as.vector(pred_extract_multi[[1]])
+pred_factor_multi <- factor(ifelse(pred_values_multi == 1, "1", "0"), levels = c("0", "1"))
+
+test_df_multi <- data.frame(class = test_pts$class, predicted = pred_factor_multi)
+
+tab_multi <- table(Predicted = test_df_multi$predicted, Observed = test_df_multi$class)
+```
+
+```{r eval-multi-results, eval=TRUE, echo=FALSE}
+cat("\nMultiband Model — Confusion Matrix (Test Date):\n")
+print(tab_multi)
+```
+
+We can see that simply adding more bands to the model did not improve the accuracy and precision of the pixel classification. If we compare the three confusion matrices of the second flight, we can notice that we got almost the same number of misclassified pixels. One big difference was that the ExG rule-based approach made the same mistake in all of them, while the random forest model presented misclassifications on both sides.
+
+## Comparing the three approaches
+
+Let's compare the three approaches
+
+```{r}
+cat("ExG Threshold:\n")
+print(tab_exg_second)
+cat("\nRGB-Only Model:\n")
+print(tab_rgb)
+cat("\nMultiband Model:\n")
+print(tab_multi)
+```
+
+## What Happened?
+
+Use the confusion matrices to decide whether the multiband model improved over RGB-only on this later flight date.
+
+Go back to the band means table. NIR (band 5) shows canopy values *lower* than soil — the opposite of what plant physiology predicts. Variable importance confirms this: NIR contributes almost nothing. Red and Blue do most of the work.
+
+There are a few possible explanations:
+
+-   The canopy is sparse early in the season. Many pixels are mixed — part leaf, part soil — so the NIR signal gets diluted.
+-   We don't know the details of the image processing pipeline. Reflectance calibration and atmospheric correction could affect the values in ways we cannot verify without metadata.
+-   This sensor's NIR band may not cover the reflectance peak around 800 nm that NDVI-based reasoning relies on.
+
+This is an important reminder: **domain knowledge is a starting point, not a guarantee**. Always check your assumptions against the data. Variable importance is a useful tool for this — if a band you expected to matter contributes almost nothing, that is worth investigating.
+
+# Practical Limits of This Approach
+
+Before wrapping up, it is worth thinking about the limitations of this workflow.
+
+## How much labeled data did we use?
+
+We trained on hand-labeled pixels from one experimental unit at one date. That is a small sample. If your field or your crops look different, the model may not transfer well.
+
+## What about boundary pixels?
+
+Most classification errors happen at boundaries between canopy and soil. These mixed pixels are inherently ambiguous. A high-confidence map can hide the fact that accuracy at the edges is actually low.
+
+## Does accuracy matter equally everywhere?
+
+If you care about plot-level canopy coverage, a few misclassified boundary pixels may not change your estimate much. But if you care about individual pixel accuracy — for example, for prescriptive mapping — those errors matter more.
+
+## Are errors spatially clustered?
+
+Look at your error map. Do errors occur randomly, or are they clustered in certain parts of the field? Clustered errors suggest the model has missed something systematic about that area — shade, soil type, crop stress. That is worth investigating.
+
+# Conclusion
+
+We started with a simple engineering question: *how do we turn pixels into decisions?*
+
+A hand-crafted rule like ExG gives you a clear, intuitive starting point. It forces you to think about what distinguishes canopy from soil and how that translates into a computable rule. But it also exposes the limits of fixed thresholds. The moment conditions change, whether due to lighting, soil background, or growth stage, the rule begins to break.
+
+Machine learning does not solve a different problem. It solves the same problem of writing a decision rule, but in a different way. Instead of specifying the rule yourself, you provide examples and let the model learn which patterns are useful.
+
+That flexibility is powerful, but it comes with trade-offs. A model that fits your training data well may not generalize. Adding more variables does not guarantee improvement. Even domain knowledge, such as expecting NIR to separate vegetation, can fail when the data do not behave as expected.
+
+So the goal is not to replace simple rules with complex models. The goal is to understand when each approach is appropriate and to evaluate them critically.
+
+As you move forward, keep a few guiding questions in mind:
+
+-   What exactly is the decision rule being applied?
+-   What assumptions does this rule rely on?
+-   Where is the model likely to fail?
+-   Does performance hold when conditions change?
+
+If you can answer these questions, you are not just applying machine learning. You are reasoning about it.

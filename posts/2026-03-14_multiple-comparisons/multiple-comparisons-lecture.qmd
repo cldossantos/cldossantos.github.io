@@ -49,14 +49,14 @@ ggplot()+
 
 Before separating means, we fit the ANOVA model:
 
-$$Y_{ij} = \mu + b_i + T_j + \varepsilon_{ij}$$ $$b_i \sim N(0, \sigma^2_{block})$$
+$$Y_{ij} = \mu + b_i + \tau_j + \varepsilon_{ij}$$ $$b_i \sim N(0, \sigma^2_{block})$$
 
 Where:
 
 -   $Y_{ij}$ is observed corn yield
 -   $\mu$ is the overall mean
 -   $b_i$ is the block random effect
--   $T_j$ is the fungicide treatment effect
+-   $\tau_j$ is the fungicide treatment effect
 -   $\varepsilon_{ij}$ is the residual error term
 
 Below, we fit the model represented by our linear additive model above. In this case, I chose to fit block as a random effect, partly because we are not interested in the effect of block itself. Block was included here to account for the systematic source of variability that it represents.
@@ -69,7 +69,7 @@ model1 <- lme(yield ~ trt,
 anova(model1)
 ```
 
-Our analysis of variance tells us that there is strong evidence that at least one treatment effect ($T_j$) is different from zero. So, next, we will proceed with what's called a means-separation test.
+Our analysis of variance tells us that there is strong evidence that at least one treatment effect ($\tau_j$) is different from zero. So, next, we will proceed with what's called a means-separation test.
 
 # Fisher's Least Significant Difference
 
@@ -247,9 +247,9 @@ $$\alpha_E \approx 1 - (1 - \alpha_C)^M$$
 
 For $K$ treatment means there are $M = K(K-1)/2$ possible pairs. With $K = 6$ treatments ($M = 15$ pairs) running each at $\alpha_C = 0.05$:
 
-$$\alpha_E \approx 1 - (0.95)^{15} \approx 0.53$$
+$$\alpha_E \approx 1 - (0.95)^{15} \approx 0.54$$
 
-That is a 53% chance of at least one false positive across the experiment. Conversely, if we fix $\alpha_E = 0.05$ for the same 15 comparisons, the per-comparison error drops to roughly $\alpha_C \approx 0.003$, making it very difficult to detect modest but real differences.
+That is a 54% chance of at least one false positive across the experiment. Conversely, if we fix $\alpha_E = 0.05$ for the same 15 comparisons, the per-comparison error drops to roughly $\alpha_C \approx 0.003$, making it very difficult to detect modest but real differences.
 
 No procedure can keep both error rates small simultaneously at a fixed sample size. The choice of procedure depends on which error matters more in your specific research context.
 
@@ -262,8 +262,10 @@ Tukey HSD is similar in structure to LSD, but it uses the **studentized range di
 -   number of treatments
 
 $$
-\text{HSD} =q_{\alpha, K, df}\times SE
+\text{HSD} = q_{\alpha, K, df} \times SE_{\bar{Y}}
 $$
+
+where $SE_{\bar{Y}} = \sqrt{MSE/n}$ is the standard error of a single treatment mean (note: this differs from the $SE$ of a difference used in the LSD formula above by a factor of $\sqrt{2}$).
 
 $q$ is the critical value of the studentized range distribution based on $\alpha$, the number of treatments $K$, and the residual degrees of freedom.
 
@@ -303,7 +305,7 @@ $$
 
 Let's compute the Bonferroni-adjusted critical difference for our experiment.
 
-$$LSD_{\text{bonferroni}} = t_{\frac{0.05}{2\times 15},20} \times 5.44 = t_{0.0016,20} \times 5.44$$ $$LSD_{\text{bonferroni}} = 3.35 \times 5.44 = 18.21$$
+$$LSD_{\text{bonferroni}} = t_{\frac{0.05}{2\times 15},20} \times 5.44 = t_{0.0017,20} \times 5.44$$ $$LSD_{\text{bonferroni}} = 3.33 \times 5.44 = 18.12$$
 
 As when using Tukey's HSD, when we want to use Bonferroni's adjustment, we can simply ask the `cld()` function to adjust for it.
 
