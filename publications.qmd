@@ -17,6 +17,12 @@ title: Publications
 
 # Peer-reviewed publications
 
+### 2026
+
+<li>Marcos, F.M., dos Santos, C.L., Seraglio, N.A., & Licht, M.A. (2026). Seeding rate effects on soybean seed yield
+components and economic return. Agronomy Journal, 118, 5.
+ <a target="_blank" class="button-react" href="https://doi.org/10.1002/agj2.70534"> go to article</a></li>
+
 
 
 ### 2025
